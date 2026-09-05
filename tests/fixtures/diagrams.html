@@ -1,8 +1,107 @@
-<figure class="dg" id="dg-one">
-  <figcaption><span class="dg-t">Where the count breaks</span></figcaption>
-  <svg viewBox="0 0 100 20" role="img" aria-label="one"><rect x="0" y="0" width="10" height="10" class="box sm"/></svg>
+<style>
+  .dg{margin:0 0 3.5rem;padding:0}
+  .dg figcaption{display:block;margin:0 0 1rem;max-width:66ch}
+  .dg .dg-t{display:block;font-family:var(--display);font-size:21px;line-height:1.25;color:var(--ink)}
+  .dg .dg-w{display:block;margin-top:.4rem;font-family:var(--body);font-size:13px;color:var(--ink-soft)}
+  .dg .dg-scroll{overflow-x:auto;overflow-y:hidden}
+  .dg svg{display:block}
+  .dg .box{fill:var(--paper-2);stroke-width:1.2}
+  .dg .frame{fill:none;stroke:var(--grid);stroke-width:.5;stroke-dasharray:2 3}
+  .dg .axis{fill:none;stroke:var(--grid);stroke-width:.5}
+  .dg .edge{fill:none;stroke-width:1.2}
+  .dg .sa{stroke:var(--pen-a)} .dg .sb{stroke:var(--pen-b)}
+  .dg .fa{fill:var(--pen-a)} .dg .fb{fill:var(--pen-b)}
+  .dg .bara{fill:var(--pen-a)} .dg .barb{fill:var(--pen-b)}
+  .dg text{font-family:var(--cond)}
+  .dg .n-l{font-size:13px;font-weight:600;fill:var(--ink)}
+  .dg .n-n{font-size:11.5px;fill:var(--ink-soft)}
+  .dg .n-i{font-size:11.5px;font-weight:600;fill:var(--ink-soft)}
+  .dg .g-l{font-size:11.5px;font-weight:600;fill:var(--ink-soft);letter-spacing:.09em;text-transform:uppercase}
+  .dg .dg-key{margin:1rem 0 0;padding-left:1.4rem;max-width:66ch;font-family:var(--body);
+    font-size:13px;line-height:1.55;color:var(--ink-soft)}
+  .dg-lead{margin:0 0 2.5rem;max-width:66ch;font-family:var(--body);font-size:17px;color:var(--ink)}
+  .dg-bridge{margin:0 0 2.5rem;max-width:60ch;font-family:var(--body);font-size:15px;color:var(--ink-soft)}
+</style>
+<div class="dg-lead">Two figures, in order: the first shows where a pallet stops being
+countable, the second shows how much of that gap closes on its own.</div>
+<figure class="dg" id="dg-apron-dwell">
+  <figcaption>
+    <span class="dg-t">Where the count breaks</span>
+    <span class="dg-w">The discrepancy opens at the door, not in the racks: the scan happens
+      before anyone owns a bin, so the system holds stock the floor cannot find.</span>
+  </figcaption>
+  <div class="dg-scroll">
+    <svg viewBox="0 0 700 232" role="img" preserveAspectRatio="xMidYMid meet" style="width:100%;height:auto;min-width:660px">
+      <title>Flow of one pallet from arrival to bin assignment</title>
+      <desc>A pallet arrives at the door and is scanned by the driver. The scan and the wait
+        that follows sit inside a dashed band marked the uncounted window, which lasts between
+        ten minutes and two hours. Only after that does a bin get assigned and the pallet
+        become findable on the floor.</desc>
+      <defs>
+        <marker id="mk-apron-dwell-a" viewBox="0 0 9 9" refX="8.2" refY="4.5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path class="fb" d="M0 0 L9 4.5 L0 9 Z"/></marker>
+      </defs>
+      <rect class="frame" x="152" y="24" width="336" height="112"/>
+      <text class="g-l" x="164" y="41">Uncounted window</text>
+      <path class="edge sb" d="M136,88 L172,88" marker-end="url(#mk-apron-dwell-a)"/>
+      <path class="edge sb" d="M326,88 L362,88" marker-end="url(#mk-apron-dwell-a)"/>
+      <path class="edge sb" d="M516,88 L552,88" marker-end="url(#mk-apron-dwell-a)"/>
+      <rect class="box sb" x="16" y="56" width="120" height="64"/>
+      <text class="n-i" x="127" y="72" text-anchor="end">1</text>
+      <text class="n-l" x="27" y="86">Pallet arrives</text>
+      <text class="n-n" x="27" y="102">at the door</text>
+      <rect class="box sb" x="206" y="56" width="120" height="64"/>
+      <text class="n-i" x="317" y="72" text-anchor="end">2</text>
+      <text class="n-l" x="217" y="86">Driver scans</text>
+      <text class="n-n" x="217" y="102">stock now on the books</text>
+      <rect class="box sb" x="396" y="56" width="120" height="64"/>
+      <text class="n-i" x="507" y="72" text-anchor="end">3</text>
+      <text class="n-l" x="407" y="86">Sits on the apron</text>
+      <text class="n-n" x="407" y="102">ten minutes to two hours</text>
+      <rect class="box sb" x="552" y="56" width="120" height="64"/>
+      <text class="n-i" x="663" y="72" text-anchor="end">4</text>
+      <text class="n-l" x="563" y="86">Bin assigned</text>
+      <text class="n-n" x="563" y="102">the pallet is findable</text>
+      <path class="axis" d="M16,168 L684,168"/>
+      <text class="n-n" x="16" y="188">system says the pallet is here</text>
+      <text class="n-n" x="396" y="188">floor says it is not</text>
+    </svg>
+  </div>
+  <ol class="dg-key">
+    <li><b>Pallet arrives, driver scans</b> <span>00:00:11</span></li>
+    <li><b>A timing artefact, not shrinkage</b> <span>00:00:48</span></li>
+  </ol>
 </figure>
-<figure class="dg" id="dg-two">
-  <figcaption><span class="dg-t">Apron dwell time</span></figcaption>
-  <svg viewBox="0 0 100 20" role="img" aria-label="two"><rect x="0" y="0" width="10" height="10" class="box sd"/></svg>
+<p class="dg-bridge">If the window is the whole mechanism, the size of the problem is not the
+gap itself but the part of it that never closes.</p>
+<figure class="dg" id="dg-gap-closes">
+  <figcaption>
+    <span class="dg-t">Four fifths of the gap closes itself</span>
+    <span class="dg-w">Measured over one quarter: most of the discrepancy resolves within four
+      hours, which is why the remainder is the only part worth building for.</span>
+  </figcaption>
+  <div class="dg-scroll">
+    <svg viewBox="0 0 640 168" role="img" preserveAspectRatio="xMidYMid meet" style="width:100%;height:auto;min-width:600px">
+      <title>Share of the counting gap that resolves without intervention</title>
+      <desc>Two bars drawn to scale on the same baseline. The first, four fifths of the
+        width, is the share of the gap that closes on its own within four hours. The second,
+        one fifth, is the residue that a handheld forcing a bin assignment would address.</desc>
+      <defs>
+        <marker id="mk-gap-closes-a" viewBox="0 0 9 9" refX="8.2" refY="4.5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path class="fa" d="M0 0 L9 4.5 L0 9 Z"/></marker>
+      </defs>
+      <text class="n-l" x="16" y="32">Closes within four hours</text>
+      <text class="n-n" x="16" y="50">about four fifths of the gap</text>
+      <text class="n-l" x="624" y="32" text-anchor="end">Residue</text>
+      <text class="n-n" x="624" y="50" text-anchor="end">what a handheld would fix</text>
+      <path class="edge sa" d="M563,58 L563,68" marker-end="url(#mk-gap-closes-a)"/>
+      <rect class="barb" x="16" y="76" width="486" height="52"/>
+      <rect class="bara" x="502" y="76" width="122" height="52"/>
+      <path class="axis" d="M16,128 L624,128"/>
+      <text class="n-n" x="16" y="150">measured over one quarter</text>
+    </svg>
+  </div>
+  <ol class="dg-key">
+    <li><b>Eighty per cent closed within four hours</b> <span>00:01:02</span></li>
+    <li><b>The number to lead with</b> <span>01:04:30</span></li>
+    <li><b>Forcing a bin assignment at the apron</b> <span>01:07:15</span></li>
+  </ol>
 </figure>

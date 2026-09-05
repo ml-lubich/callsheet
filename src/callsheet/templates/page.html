@@ -192,9 +192,15 @@ a.ts:hover{color:var(--ink);border-bottom-color:currentColor}
 .thread .count{margin-top:7px;font-size:13px}
 
 /* ---------- diagrams ---------- */
+/* The fragment is an argument, not a gallery: a lead-in names the sequence and a
+   bridge carries the reader from each figure to the next. Figures bring their own
+   caption and svg styles; the page owns the connective prose. */
 .dg-wrap{display:grid;gap:34px}
 .dg-wrap figure{margin:0}
-/* diagram figures carry their own caption and svg styles inside the fragment */
+.dg-lead{max-width:66ch;font-size:18px;line-height:1.62;color:var(--ink);margin:0}
+.dg-bridge{max-width:60ch;font-size:15px;line-height:1.6;color:var(--ink-soft);margin:0 0 0 34px}
+.dg-bridge::before{content:"";display:block;width:38px;border-top:1px solid var(--grid);margin-bottom:10px}
+@media (max-width:640px){.dg-lead{font-size:17px}.dg-bridge{margin-left:0}}
 
 /* ---------- tables ---------- */
 .tscroll{overflow-x:auto}
@@ -626,8 +632,7 @@ const tech = (CONTENT.tech || []).slice().sort(function(x,y){
   return x.toLowerCase().localeCompare(y.toLowerCase());
 });
 document.getElementById("technote").textContent =
-  tech.length + " systems, products, vendors and organisations were named by one or more speakers. " +
-  "The list is what was said, not what was endorsed.";
+  tech.length + " named by one or more speakers. What was said, not what was endorsed.";
 document.getElementById("tech").innerHTML =
   tech.map(function(t){ return "<li>" + esc(t) + "</li>"; }).join("");
 
@@ -766,6 +771,13 @@ if (/^#t-\d+$/.test(location.hash)) setTimeout(function(){ jump(+location.hash.s
   </div>
 </section>
 
+<section data-needs="diagrams">
+  <div class="wrap">
+    <h2 class="sec">Diagrams</h2>
+    <div class="dg-wrap" id="diagrams"><!--__DIAGRAMS__--></div>
+  </div>
+</section>
+
 <section data-needs="actlist">
   <div class="wrap">
     <h2 class="sec">Acts</h2>
@@ -778,13 +790,6 @@ if (/^#t-\d+$/.test(location.hash)) setTimeout(function(){ jump(+location.hash.s
   <div class="wrap">
     <h2 class="sec">Threads</h2>
     <div class="threads" id="threads"></div>
-  </div>
-</section>
-
-<section data-needs="diagrams">
-  <div class="wrap">
-    <h2 class="sec">Diagrams</h2>
-    <div class="dg-wrap" id="diagrams"><!--__DIAGRAMS__--></div>
   </div>
 </section>
 
@@ -835,10 +840,8 @@ if (/^#t-\d+$/.test(location.hash)) setTimeout(function(){ jump(+location.hash.s
     <ul class="rows" id="tensions"></ul>
     <div class="dia-block" data-needs="diarization">
       <h3 class="subhead">Diarization drift</h3>
-      <p class="dia-note">Speakers were separated by voice similarity, not by authenticated identity.
-        Labels are reliable in the middle of a turn and least reliable at turn boundaries, where
-        overlap, backchannel and short interjections get attached to the wrong channel. Treat the
-        moments below as label drift rather than as anything a participant actually said.</p>
+      <p class="dia-note">Speakers were separated by voice, not by identity, and labels are least
+        reliable at turn boundaries. Read the moments below as label drift, not as things said.</p>
       <ul class="rows" id="diarization"></ul>
     </div>
   </div>

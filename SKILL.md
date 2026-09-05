@@ -1,15 +1,29 @@
 ---
 name: callsheet
-description: Turn a recording or transcript of a call, meeting or interview into one self-contained HTML document that someone who was not there can read, where every claim traces to a timestamp. Use when the user has audio, video or a transcript and wants a shareable written artifact, a briefing, a readout, or an "what happened on this call" page — including when they want it checked against someone else's write-up of the same call.
+description: Turn a recording or transcript of a call, meeting or interview into one self-contained HTML document that someone who was not there can read, where the argument is carried by figures and every claim traces to a timestamp. Use when the user has audio, video or a transcript and wants a shareable written artifact, a briefing, a readout, or an "what happened on this call" page — including when they want it checked against someone else's write-up of the same call.
 ---
 
 # callsheet
 
-Pipeline: **transcribe → parse → analyse (agents) → build → verify → hold out.**
+Pipeline: **transcribe → parse → analyse (agents) → draw → build → verify → hold out.**
 Python owns the mechanical steps. The analysis is yours; the CLI only produces the
-files you read and validates the JSON you hand back.
+files you read and validates what you hand back.
 
-Install: `pip install -e .` in the callsheet repo. Everything runs locally.
+**Pictures first.** The output is not an essay with illustrations. A one-hour call
+gets **8–12 figures** that carry the argument, and prose kept short enough that a
+reader uses it to check the figures rather than the other way round. Before writing
+any paragraph, ask whether the thing it describes has a shape — an order, a
+fan-out, a comparison, a magnitude, a position in time. If it does, draw it and
+write a caption instead.
+
+Install: `pip install -e .`. Everything runs locally. Sub-skills, each
+self-contained and meant to be run in its own context:
+
+| | |
+|---|---|
+| `skills/diagrams/SKILL.md` | authoring the figure set — the catalog, the house style, the self-check |
+| `skills/verify/SKILL.md` | the adversarial fact-check, in a fresh context |
+| `skills/holdout/SKILL.md` | sealing a reference answer and measuring independence |
 
 ## 1. Transcribe (skip if a transcript already exists)
 
@@ -47,15 +61,20 @@ Dispatch these in one batch. They do not depend on each other.
 > full transcript of your slice is below. Return JSON only, no prose, with keys:
 > `acts` (the 1–2 movements inside this slice: title, span, start_s, end_s,
 > summary, turning_point), `threads`, `evidence`, `signals`, `numbers`, `quotes`,
-> `tech`, `tensions`, `next_steps`. Every entry carries `ts` (HH:MM:SS) and `s`
-> (that timestamp in seconds). **Quote text must be an exact substring of the
-> transcript.** Do not infer anything that happened outside your slice. If you
-> are unsure a figure was actually said, omit it.
+> `tech`, `tensions`, `next_steps`, and `shapes`. Every entry carries `ts`
+> (HH:MM:SS) and `s` (that timestamp in seconds). **Quote text must be an exact
+> substring of the transcript.** `shapes` is anything in your slice with a
+> structure worth drawing — a sequence, a fan-out, a comparison, a magnitude, a
+> before/after — with the timestamps that describe each part. Do not infer
+> anything that happened outside your slice. If you are unsure a figure was
+> actually said, omit it.
 
-**Whole-call reader prompt** — the same JSON keys plus `abstract` (150–200 words)
+**Whole-call reader prompt** — the same JSON keys plus `abstract` (90–120 words)
 and `fit`, and one extra instruction: *you are the only reader who sees the whole
 call, so your job is the arc — what changed between the first ten minutes and the
-last, and what each participant wanted that they did not say directly.*
+last, and what each participant wanted that they did not say directly. In
+`shapes`, note anything described in scattered pieces that would only be visible
+assembled.*
 
 ## 4. Synthesize
 
@@ -69,21 +88,35 @@ writes `work/content.json`. Its rules:
   chunks is one thread with three `marks`.
 - Keep the earliest `ts` for any claim that appears more than once.
 - `span` strings are derived from `start_s`/`end_s`, never typed by hand.
+- **Keep the prose short.** `abstract` 90–120 words. Each act `summary` ≤ 60
+  words. Each thread's `what` and `why_it_matters` one sentence each. Anything
+  longer is a figure you have not drawn yet — hand it to step 5 instead.
+- Merge every analyst's `shapes` into one ranked list for the diagram agent, and
+  drop the ones that are only a single relationship.
 
-Validate before going further — the schema names the field that is wrong:
+Validate before going further (see **Required gates**) — the schema names the
+field that is wrong.
+
+## 5. Draw — the main event
+
+One agent, strongest model, in its own context, following
+**`skills/diagrams/SKILL.md`**. It reads `work/content.json`, `work/turns.json`
+and `work/metrics.json` and writes `out/diagrams.html`: 8–12 inline
+`<figure class="dg">` elements, hand-written SVG, coloured only through the page
+tokens `var(--ink)`, `var(--ink-soft)`, `var(--grid)`, `var(--pen-a)`,
+`var(--pen-b)`, `var(--paper)` and `var(--paper-2)`, so every figure follows the
+light and dark palettes. No libraries, no `<img>`, no raster.
+
+The sub-skill carries the catalog of twelve figure kinds, the house style, the
+composition rules (a lead-in, and a bridge between consecutive figures, so the set
+reads as one argument) and the self-check. A diagram that restates a bullet list
+is not a diagram.
+
+Gate before building:
 
 ```
-python -c "import json,sys;from callsheet.schema import validate;validate(json.load(open('work/content.json')))"
+callsheet lint-diagrams out/diagrams.html --turns work/turns.json
 ```
-
-## 5. Diagrams
-
-One agent, and only if the call actually described a mechanism worth drawing
-(a pipeline, a decision path, a before/after). It writes `out/diagrams.html`:
-inline `<figure class="dg">` elements with hand-written SVG, themed through
-`var(--ink)`, `var(--pen-a)`, `var(--pen-b)`, `var(--grid)` so they follow the
-page's light and dark palettes. No external libraries, no `<img>`, no raster.
-Two to four figures. A diagram that only restates a bullet list is not a diagram.
 
 ## 6. Build
 
@@ -99,38 +132,32 @@ external requests in the finished page. That number must be zero.
 
 ## 7. Verify — adversarial, in a fresh context
 
-One agent that has **not** seen the analysis. Give it `out/index.html` and
-`work/turns.json` and nothing else:
-
-> Every number, name, date and quoted line in this document must appear in the
-> transcript. For each one, give the timestamp that supports it, or mark it
-> UNSUPPORTED. Do not soften an unsupported figure into a vaguer one — report it
-> for deletion.
+One agent that has **not** seen the analysis, following
+**`skills/verify/SKILL.md`**. Give it `out/index.html` and `work/turns.json` and
+nothing else. It grades every defect FABRICATED / WRONG / MISATTRIBUTED /
+IMPRECISE and checks quotes, numerals, timestamps, act tiling, thread marks,
+evidence strengths, diagram nodes and edges, and speaker attribution.
 
 **Anything it cannot find is deleted, not hedged.** In the run this skill was
-generalized from, that pass caught a cost figure that no one had said out loud.
-Rebuild after the deletions and run the verifier once more.
+generalized from, that pass caught a per-case cost figure that no one had said out
+loud, sitting in a finished diagram. Rebuild after the deletions and run the
+verifier once more, in another fresh context.
 
 ## 8. Hold out (only when a reference answer exists)
 
-If someone else has already written up the same call, seal it *before* the
-analysis starts:
+If someone else has already written up the same call, follow
+**`skills/holdout/SKILL.md`**: seal it *before* the analysis starts, run the build
+inside `callsheet.holdout.sealed_guard`, and compare only after the artifact is
+frozen.
 
 ```
-callsheet seal sealed/          # read-only + sha256 in sealed.sha256
+callsheet seal sealed/                     # read-only + sha256, before step 3
+callsheet compare out/index.html sealed/   # after the artifact is final
 ```
 
-Nothing reads that directory during steps 3–7. `callsheet.holdout.sealed_guard`
-raises if anything tries. After the build is final and frozen:
-
-```
-callsheet compare out/index.html sealed/
-```
-
-It verifies the seal is intact and prints 6-gram and 10-gram overlap as a share
-of the reference. Low single digits is the expected result for two independent
-readings of the same call; it is evidence of independence, not a score to
-optimize. Nothing from this step goes back into the document.
+Near-zero 8-gram overlap is the evidence of independence; a nonzero 5- or 6-gram
+rate is expected, because both authors quote the same source. Nothing from this
+step goes back into the document.
 
 ## JSON contract
 
@@ -139,7 +166,7 @@ optimize. Nothing from this step goes back into the document.
 ```
 meta      {title, subtitle, kind, date, duration_label, duration_s, turns, words,
            extra: [[label, value]], participants: [{key, name, role}]}
-abstract  "150-200 words"
+abstract  "90-120 words"
 acts      [{n, title, span, start_s, end_s, summary, turning_point:{ts,s,text}}]
 threads   [{name, what, why_it_matters, marks:[{ts,s}]}]
 evidence  [{ts, s, claim, evidence, strength: strong|medium|weak}]
@@ -154,8 +181,17 @@ fit       {aligned_on:[], unresolved:[], risks:[{who, note}]}
 error. Every section is optional except `meta`, `abstract` and `acts`; a section
 with no data removes itself from the page rather than leaving an empty heading.
 
+## Required gates — none are advisory, each names the fault
+
+```
+python -c "import json;from callsheet.schema import validate;validate(json.load(open('work/content.json')))"
+callsheet lint-diagrams out/diagrams.html --turns work/turns.json
+callsheet build …    # reports external requests; that count must be zero
+```
+
 ## Rules that are not negotiable
 
+- If it has a shape, it is a figure. Prose is for what does not.
 - A claim without a timestamp does not go in the document.
 - Quote text is copied, never tidied.
 - The verifier runs in a fresh context, and its deletions are applied.

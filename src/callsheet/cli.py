@@ -1,4 +1,4 @@
-"""callsheet command line: transcribe / parse / chunk / build / seal / compare."""
+"""callsheet command line: transcribe / parse / chunk / build / lint-diagrams / seal / compare."""
 
 from __future__ import annotations
 
@@ -8,6 +8,12 @@ import sys
 from pathlib import Path
 
 from .build import BuildError, build, external_refs, template_path
+from .diagrams import (
+    check_svg_fragment,
+    extract_timestamps,
+    figure_ids,
+    unresolved_timestamps,
+)
 from .holdout import HoldoutError, ngram_overlap, seal, strip_html, verify
 from .parse import ParseError, chunks, metrics, parse_transcript, transcript_from_turns
 from .schema import SchemaError
@@ -70,6 +76,27 @@ def cmd_build(a) -> int:
     return 1 if refs else 0
 
 
+def cmd_lint_diagrams(a) -> int:
+    text = Path(a.fragment).read_text()
+    problems = check_svg_fragment(text)
+    unresolved = unresolved_timestamps(text, _load(a.turns)) if a.turns else []
+    for p in problems:
+        print(f"  {p}", file=sys.stderr)
+    for ts in unresolved:
+        print(f"  unresolved-timestamp: {ts} starts no turn in the transcript", file=sys.stderr)
+    if problems or unresolved:
+        n = len(problems) + len(unresolved)
+        print(f"callsheet: {n} problem(s) in {a.fragment}", file=sys.stderr)
+        return 1
+    ids = figure_ids(text)
+    checked = " checked" if a.turns else ""
+    print(
+        f"{a.fragment}: {len(ids)} figures, "
+        f"{len(extract_timestamps(text))} timestamps{checked} — {', '.join(ids)}"
+    )
+    return 0
+
+
 def cmd_seal(a) -> int:
     digests = seal(a.directory)
     print(f"sealed {len(digests)} files read-only under {a.directory}")
@@ -122,6 +149,11 @@ def build_parser() -> argparse.ArgumentParser:
     b.add_argument("--template", help="defaults to the packaged template")
     b.add_argument("-o", "--out", default="out/index.html")
     b.set_defaults(fn=cmd_build)
+
+    d = sub.add_parser("lint-diagrams", help="house-style checks on an inline SVG fragment")
+    d.add_argument("fragment")
+    d.add_argument("--turns", help="turns.json, to prove every cited timestamp was said")
+    d.set_defaults(fn=cmd_lint_diagrams)
 
     s = sub.add_parser("seal", help="make a reference answer read-only and hash it")
     s.add_argument("directory")
