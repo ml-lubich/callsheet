@@ -5,468 +5,496 @@ description: Author the figure set for a callsheet artifact — 8 to 12 publicat
 
 # Diagrams
 
-You are writing `out/diagrams.html`: a fragment of inline `<figure class="dg">`
-elements that `callsheet build` injects into the page at `<!--__DIAGRAMS__-->`.
-No `<img>`, no raster, no libraries, no external requests — hand-written SVG
-paths and one `<style>` block at the top of the fragment.
+## The glyph-first rule
 
-Read first: `work/content.json` (the analysis), `work/turns.json` (the ground
-truth), `work/metrics.json` (the duration your time axes must use).
+**The node shows the property. The label only names it.**
 
-**The target is 8–12 figures for a one-hour call.** That is not a decoration
-budget. It is the claim that most of what the call established is structural —
-an order, a fan-out, a comparison, a magnitude — and structure read as a picture
-in one pass costs the reader less than the same structure read as a paragraph.
-The prose sections exist to be checked against the figures, not the reverse.
+A box whose entire content is words is a list item wearing a border. What separates
+an amateur figure from a professional one is that in the professional one every node
+contains a miniature drawing of the thing being claimed, so the claim is visible
+before it is read. The same node, twice — label-only:
+```html
+<svg viewBox="0 0 180 60" role="img"><title>Label-only node</title>
+  <rect x="1" y="1" width="178" height="58" fill="var(--paper-2)" stroke="var(--pen-a)"/>
+  <text x="12" y="26" font-size="13" fill="var(--ink)">Lexical index</text>
+  <text x="12" y="44" font-size="10" fill="var(--ink-soft)">unbounded scores</text>
+</svg>
+```
+Glyph-first:
+```html
+<svg viewBox="0 0 180 60" role="img"><title>Glyph-first node</title>
+  <rect x="1" y="1" width="178" height="58" fill="var(--paper-2)" stroke="var(--pen-a)"/>
+  <text x="12" y="19" font-size="13" fill="var(--ink)">Lexical index</text>
+  <rect x="12" y="29" width="138" height="9" fill="var(--pen-b)"/>
+  <text x="154" y="38" font-size="12" fill="var(--pen-b)">≫</text>
+  <text x="12" y="52" font-size="10" fill="var(--ink-soft)">unbounded</text>
+</svg>
+```
+Six more units of ink, and "unbounded" is now something the reader sees before reading
+it, and can compare at a glance against the bounded index above it. Before drawing any
+node, answer: **what property of this thing is the argument, and what is the smallest
+picture of that property?** If the answer is "none, it is just a stage in a sequence",
+the node is a plain box and the sequence is the glyph. Four plain boxes in a row is a list.
+
+## What you are writing
+
+`out/diagrams.html`: a fragment of inline `<figure class="dg">` elements that `callsheet
+build` injects at the `__DIAGRAMS__` marker. No `<img>`, no raster, no libraries, no
+external requests — hand-written paths and one `<style>` block at the top of the fragment.
+Read first: `work/content.json` (the analysis), `work/turns.json` (ground truth),
+`work/metrics.json` (the duration your time axes must use). **Target 8–12 figures for a
+one-hour call.** The prose exists to be checked against the figures, not the reverse.
 
 ## When a diagram earns its place
 
-The test: **does the picture show a structure the prose cannot carry in one
-pass?** A reader holding four things in mind at once is being asked to render
-the diagram themselves. Draw it for them.
+The test: **does the picture show a structure the prose cannot carry in one pass?** A
+reader holding four things in mind at once is being asked to render the diagram themselves.
 
-Earns it:
+Earns it: something branches, fans out or rejoins; two quantities are compared and the
+*ratio* is the point; a thing has a position — in time, in a two-axis space, in a layer
+stack — that is what was argued about; two states of one object differ in several places
+and the pattern is the finding; one shape recurs across three or four cases; something
+described across four scattered stretches has never been seen whole.
 
-- Something branches, fans out, or rejoins. Prose has to say "meanwhile" and
-  hope.
-- Two or more quantities are being compared and the *ratio* is the point.
-- The thing has a position — in time, in a two-axis space, in a layer stack —
-  and the position is what the speaker was arguing about.
-- Two states of one object (before/after, theirs/ours) differ in several places
-  at once, and the pattern of differences is the finding.
-- The same shape recurs across three or four cases, and the reader should see
-  the shape is the same.
-- Something was described across four scattered stretches of the call and has
-  never been seen whole. Assembling it is the contribution.
+Does not earn it: a bulleted list with boxes round each bullet; a single relationship,
+which is a sentence; a restatement of the act structure the page already plots; anything
+whose labels do the work while the geometry is arbitrary — if the boxes could be shuffled
+without loss, it is a list; a thing mentioned rather than explained, where inventing the
+connective tissue is fabrication wearing a diagram's clothes. Under four nodes it is a
+sentence; over about sixteen the reader starts scanning — split it.
 
-Does not earn it:
+## The glyph vocabulary
 
-- A bulleted list with boxes drawn around each bullet.
-- A single relationship. "A causes B" is a sentence.
-- A restatement of the act structure — the page already plots that on its time
-  axis; a second copy is noise.
-- Anything whose labels do the work while the geometry is arbitrary. If the
-  boxes could be shuffled without loss, it is a list.
-- A picture of a thing that was mentioned rather than explained. If the
-  transcript does not say how the parts connect, you do not know, and inventing
-  the connective tissue is fabrication wearing a diagram's clothes.
+Each snippet uses only the page CSS variables. Scale the container, never the decoration.
 
-When in doubt, count the nodes. Under four and it is a sentence; over about
-sixteen and the reader stops reading and starts scanning. Split it.
-
-## The catalog
-
-Twelve shapes. Pick by the structure in the conversation, never by variety —
-if a call is genuinely four pipelines, draw four pipelines and let the bridges
-carry the difference.
-
-Every sketch below is drawn at the scale you should think in: a `viewBox` around
-`0 0 880 N`, boxes 156×72, gutters of 32–48, one text baseline every 13–17 units.
-
-### 1. Pipeline with grouped bands
-
-**Fits** a process described as a sequence where some stages belong together
-under a name the speaker used ("the retrieval side", "everything before the
-gate").
-
+### 1. Score-scale bar — bounded, unbounded, own scale
+Shows that two quantities are **not on the same scale**, before a label says so.
+```html
+<svg viewBox="0 0 120 62" role="img"><title>Three score scales</title>
+  <rect x="0" y="4" width="96" height="8" fill="var(--paper-2)" stroke="var(--grid)"/>
+  <rect x="0" y="4" width="62" height="8" fill="var(--pen-a)"/>
+  <rect x="0" y="26" width="90" height="8" fill="var(--pen-b)"/>
+  <text x="96" y="35" font-size="12" fill="var(--pen-b)">≫</text>
+  <rect x="30" y="48" width="66" height="8" fill="var(--paper-2)" stroke="var(--grid)"/>
+  <rect x="30" y="48" width="28" height="8" fill="var(--ink-soft)"/>
+</svg>
 ```
-  ┌───────┐   ┌ ─ GROUPED BAND ─ ─ ─ ─ ─ ─ ─ ─ ┐
-  │ input │──▶  ┌──────┐  ┌──────┐  ┌──────┐     ──▶ ┌────────┐
-  └───────┘   │ │ 2    │  │ 3    │  │ 4    │   │     │ output │
-              │ └──┬───┘  └──┬───┘  └──┬───┘   │     └────────┘
-              └ ─ ─┼─ ─ ─ ─ ─┼─ ─ ─ ─ ─┼─ ─ ─ ─┘
-                   └─────────┴─────────┘  join
+Bounded gets a track with both ends fixed; unbounded gets **no** track and runs into a `≫`;
+own-scale starts elsewhere. Fails when all three share a track, asserting the opposite.
+
+### 2. Record field — empty, filled, cited
+Shows a record going from unactionable to actionable, as fields not prose.
+```html
+<svg viewBox="0 0 160 56" role="img"><title>Record fields</title>
+  <text x="0" y="12" font-size="10" fill="var(--ink-soft)">source</text>
+  <rect x="48" y="4" width="104" height="9" fill="none" stroke="var(--grid)" stroke-dasharray="3 3"/>
+  <text x="0" y="32" font-size="10" fill="var(--ink)">source</text>
+  <rect x="48" y="24" width="72" height="9" fill="var(--pen-a)"/>
+  <text x="0" y="52" font-size="10" fill="var(--ink)">source</text>
+  <rect x="48" y="44" width="88" height="9" fill="var(--pen-a)"/>
+  <circle cx="146" cy="48" r="2.5" fill="var(--pen-b)"/>
+</svg>
 ```
+The dot is provenance. Fails when panels reorder or drop fields, killing the comparison.
 
-**Coordinates.** Pick a stage pitch (188 = 156 box + 32 gutter) and never
-deviate; every box lands on `x = 16 + 188k`. Bands are `<rect class="frame">`
-inset 12 outside the boxes they contain, with their label at `y = band.y + 17`.
-Edges are `<path>` with only horizontal and vertical segments — one corner per
-turn, no diagonals, no curves. A merge is two edges into a shared point, then
-one edge onward.
-
-**Failure mode.** Edges routed through boxes, or a band that hugs its contents so
-tightly it reads as a border. The tell of an amateur pipeline is diagonal
-arrows: they say the author let a layout engine decide and never looked.
-
-### 2. Economics or causal network
-
-**Fits** an argument where cost, risk or delay accumulates, and where *where a
-node sits* is the claim: causes left, consequences right, or driver above,
-absorber below.
-
+### 3. Document with text lines and a badge
+Shows an unstructured input and what had to be done to read it.
+```html
+<svg viewBox="0 0 96 78" role="img"><title>Scanned document</title>
+  <path d="M2 2h58l14 14v60H2Z" fill="var(--paper-2)" stroke="var(--ink-soft)"/>
+  <path d="M60 2v14h14" fill="none" stroke="var(--ink-soft)"/>
+  <path d="M12 32h52M12 42h52M12 52h34" stroke="var(--grid)" stroke-width="3"/>
+  <rect x="12" y="60" width="32" height="12" rx="2" fill="none" stroke="var(--pen-b)"/>
+  <text x="16" y="69" font-size="8" fill="var(--pen-b)">OCR</text>
+</svg>
 ```
-   drivers            multiplier          what it costs
-   ┌──────┐
-   │ vol. │──┐
-   └──────┘  ├──▶ ┌──────────┐ ──▶  ┌──────────────┐
-   ┌──────┐  │    │ per-unit │      │  annual load  │
-   │ rate │──┘    └──────────┘      └──────────────┘
-   └──────┘             ▲
-                   ┌────┴────┐
-                   │ the one │   ← the node the speaker disputed
-                   │ number  │
-                   └─────────┘
+Fails when every document gets the badge: it means "this one needed extra", so on all, nothing.
+
+### 4. Person
+Shows that a step is a human step. Never a photograph, never an emoji.
+```html
+<svg viewBox="0 0 40 44" role="img"><title>Person</title>
+  <circle cx="20" cy="12" r="7" fill="none" stroke="var(--pen-b)" stroke-width="1.5"/>
+  <path d="M6 40c0-9 6.3-14 14-14s14 5 14 14" fill="none" stroke="var(--pen-b)" stroke-width="1.5"/>
+</svg>
 ```
+Fails when used decoratively beside a machine step, erasing its one distinction.
 
-**Coordinates.** Three or four columns at fixed x, free y. Vertical order inside
-a column must mean something (magnitude, or who raised it) and you must say what
-in the `<desc>`. Put the disputed or load-bearing node off the main row so the
-eye lands on it.
-
-**Failure mode.** A hub-and-spoke blob where every node touches every other. If
-you cannot state the reading direction in one clause, it is not a causal diagram,
-it is a word cloud with lines.
-
-### 3. Two-column comparison with the axis of difference between
-
-**Fits** two regimes — before/after, their approach/ours, what was hired for/what
-is done — that differ along several named dimensions.
-
+### 5. Gate chain
+Shows a deterministic sequence of checks — diamonds, because each can reject.
+```html
+<svg viewBox="0 0 150 32" role="img"><title>Chain of gates</title>
+  <path d="M4 16 20 6 36 16 20 26Z M46 16 62 6 78 16 62 26Z M88 16 104 6 120 16 104 26Z"
+        fill="var(--paper-2)" stroke="var(--pen-a)"/>
+  <path d="M36 16h10M78 16h10M120 16h20" fill="none" stroke="var(--ink-soft)"/>
+  <path d="M134 12l6 4-6 4Z" fill="var(--ink-soft)"/>
+</svg>
 ```
-      TODAY                 dimension                 PROPOSED
-   ┌──────────┐        ─────────────────         ┌──────────┐
-   │ manual   │◀─────      who decides      ─────▶│ gated    │
-   └──────────┘        ─────────────────         └──────────┘
-   ┌──────────┐        ─────────────────         ┌──────────┐
-   │ 2 hours  │◀─────      how long         ─────▶│ minutes  │
-   └──────────┘        ─────────────────         └──────────┘
+Fails when drawn as rounded boxes: that reads as "steps" and loses the claim of rejection.
+
+### 6. Escalation cascade
+Shows cheap-first, expensive-last as a line stepping *down*, so cost is a direction.
+```html
+<svg viewBox="0 0 150 60" role="img"><title>Escalation cascade</title>
+  <path d="M2 10h40v18h40v18h44" fill="none" stroke="var(--pen-b)" stroke-width="1.5"/>
+  <circle cx="42" cy="10" r="2.5" fill="var(--pen-b)"/>
+  <circle cx="82" cy="28" r="2.5" fill="var(--pen-b)"/>
+  <circle cx="126" cy="46" r="2.5" fill="var(--pen-b)"/>
+  <text x="2" y="8" font-size="8" fill="var(--ink-soft)">cheap</text>
+  <text x="108" y="58" font-size="8" fill="var(--ink-soft)">costly</text>
+</svg>
 ```
+Fails when risers are even; uneven risers show which escalation actually hurts.
 
-**Coordinates.** A centre line at `x = width/2`. Left column right-aligned to
-`centre - 120`, right column left-aligned to `centre + 120`, the dimension label
-centred in the gutter on the same baseline as both. Rows at a fixed pitch.
-
-**Failure mode.** The gutter left empty, or filled with a bare arrow. The gutter
-is the whole idea: without a named dimension per row the reader cannot tell what
-is being compared and reads two unrelated lists. Second failure: unequal box
-widths between the columns, which reads as a verdict you did not earn.
-
-### 4. Layered topology with parallel lanes
-
-**Fits** a system described in tiers where several things happen at the same
-level and the level itself has a name.
-
+### 7. Magnitude bar at true proportion
+Shows the ratio. Shared zero, equal thickness, no truncated axis, ever.
+```html
+<svg viewBox="0 0 320 54" role="img"><title>Magnitudes at true proportion</title>
+  <path d="M60 4v46" stroke="var(--grid)"/>
+  <rect x="60" y="6" width="190" height="10" fill="var(--pen-a)"/>
+  <text x="256" y="15" font-size="11" fill="var(--pen-a)">119,000</text>
+  <rect x="60" y="24" width="1" height="10" fill="var(--pen-b)"/>
+  <text x="66" y="33" font-size="11" fill="var(--pen-b)">25</text>
+  <rect x="60" y="42" width="7" height="10" fill="var(--ink-soft)"/>
+  <text x="73" y="51" font-size="11" fill="var(--ink-soft)">4,000</text>
+</svg>
 ```
-  ═══ interface ══════════════════════════════════════
-     │ intake │        │ status page │
-  ═══ logic ══════════════════════════════════════════
-     │ router │──│ scorer │──│ gate │
-  ═══ store ══════════════════════════════════════════
-     │ cases │          │ index │        │ audit log │
+A one-unit bar is correct and is the point. Widening it "so it shows" is the lie this prevents.
+
+### 8. Big number with its unit
+Shows a figure the speaker wanted heard: large, in a pen, unit small beside it.
+```html
+<svg viewBox="0 0 200 46" role="img"><title>Headline figure</title>
+  <text x="0" y="30" font-size="30" font-weight="600" fill="var(--pen-b)">$237K</text>
+  <text x="106" y="30" font-size="10" fill="var(--ink-soft)">/ yr at this volume</text>
+  <text x="0" y="43" font-size="10" fill="var(--ink)">saved</text>
+</svg>
 ```
+Fails when every number is set large. Two or three per figure set, no more.
 
-**Coordinates.** Lanes are full-width `<rect class="frame">` of equal height,
-stacked at a fixed pitch, labelled at the left edge in the small caps class.
-Members sit on the lane's centre line. Cross-lane dependencies are strictly
-vertical; same-lane relations strictly horizontal. That single rule is what makes
-a layer diagram readable at a glance.
-
-**Failure mode.** A member that spans two lanes because it "sort of does both".
-Pick a lane and say the ambiguity in the caption. Also: lanes of different
-heights, which implies an importance ranking you did not mean.
-
-### 5. Timeline with events on a real axis
-
-**Fits** anything where *when* is the argument — when a concession appeared, how
-long a silence ran, how late the real topic surfaced.
-
+### 9. Compare node
+Shows two things measured against each other, meeting at a symbol, delta leaving right.
+```html
+<svg viewBox="0 0 150 60" role="img"><title>Two readings compared</title>
+  <path d="M2 12h44l22 16M2 48h44l22-16" fill="none" stroke="var(--ink-soft)"/>
+  <circle cx="76" cy="30" r="9" fill="var(--paper)" stroke="var(--ink)"/>
+  <path d="M70 30h12M76 24v12" stroke="var(--ink)"/>
+  <path d="M85 30h38" fill="none" stroke="var(--pen-a)"/>
+  <path d="M117 26l6 4-6 4Z" fill="var(--pen-a)"/>
+  <text x="0" y="59" font-size="8" fill="var(--ink-soft)">compare</text>
+</svg>
 ```
-  00:00                        00:30                       01:07
-  ├────────────┬─────────────────┬──────────┬────────────────┤
-               ▲                 ▲          ▲
-            first             the turn    the ask
-            number             (00:31:40)
-  ░░░░░░░░░░░░░░░░  act I  ░░░░░░░  act II  ░░░░░░░░░░░░░░░░░
+Fails when both inputs use one pen. They are the two things being told apart.
+
+### 10. Route fan-out
+Shows one thing becoming several real destinations — arrows to boxes that exist.
+```html
+<svg viewBox="0 0 170 74" role="img"><title>Fan-out to destinations</title>
+  <rect x="0" y="26" width="46" height="22" fill="var(--paper-2)" stroke="var(--pen-a)"/>
+  <path d="M46 37h22V10h32M68 37h32M68 37v27h32" fill="none" stroke="var(--ink-soft)"/>
+  <rect x="104" y="2" width="62" height="16" fill="none" stroke="var(--grid)"/>
+  <rect x="104" y="29" width="62" height="16" fill="none" stroke="var(--grid)"/>
+  <rect x="104" y="56" width="62" height="16" fill="none" stroke="var(--grid)"/>
+</svg>
 ```
+Fails when the fan ends in a label like "3 queues" instead of three shapes.
 
-**Coordinates.** `x = pad + (s / duration_s) * (width - 2*pad)` and nothing else,
-ever. `duration_s` comes from `metrics.json`. Ticks every five or ten minutes,
-labelled, 0.5px. Events above the axis, act bands below it, so the two never
-fight. If two events collide, stagger their labels vertically and draw a 1px
-leader down to the axis — never nudge the mark off its true position.
-
-**Failure mode.** Even spacing. The moment you space events evenly you have
-thrown away the only information the shape carried, and a reader who checks two
-timestamps against the axis will catch you.
-
-### 6. Matrix or quadrant
-
-**Fits** items scored on two independent dimensions the speakers actually named.
-
+### 11. Rejected option
+Shows the path not taken, still on the page — what was ruled out is half the argument.
+```html
+<svg viewBox="0 0 150 34" role="img"><title>Rejected option</title>
+  <rect x="1" y="1" width="130" height="30" fill="var(--paper-2)" stroke="var(--grid)"/>
+  <text x="10" y="20" font-size="11" fill="var(--ink-soft)">vendor quote</text>
+  <path d="M10 16h72" stroke="var(--ink-soft)"/>
+  <path d="M133 8l13 12M146 8l-13 12" stroke="var(--pen-b)" stroke-width="1.5"/>
+</svg>
 ```
-   high │  ·rush         │  ·flagged
-        │                │
-  effort├────────────────┼────────────────
-        │  ·routine      │  ·audit
-    low │                │
-        └────────────────┴────────────────
-           low        value        high
+Fails when the node is deleted instead of struck: the reader cannot tell it was considered.
+
+### 12. Timeline tick on a shared axis
+Shows *when*. Position is computed from real seconds, never spaced by hand.
+```html
+<svg viewBox="0 0 300 46" role="img"><title>Events on one shared axis</title>
+  <path d="M8 30h284" stroke="var(--ink-soft)" stroke-width="0.5"/>
+  <path d="M8 27v6M104 27v6M200 27v6M292 27v6" stroke="var(--grid)" stroke-width="0.5"/>
+  <path d="M64 18v12M77 24v6M223 12v18" stroke="var(--pen-a)"/>
+  <circle cx="64" cy="18" r="2.5" fill="var(--pen-a)"/>
+  <circle cx="77" cy="24" r="2.5" fill="var(--pen-a)"/>
+  <circle cx="223" cy="12" r="2.5" fill="var(--pen-a)"/>
+  <text x="8" y="44" font-size="9" fill="var(--ink-soft)">00:00</text>
+  <text x="266" y="44" font-size="9" fill="var(--ink-soft)">01:07</text>
+</svg>
 ```
+`x = pad + (s / duration_s) * (width - 2*pad)`, `duration_s` from `metrics.json`. Colliding
+events get staggered leaders, never nudged positions. Even spacing throws the shape away.
 
-**Coordinates.** A square plot area — equal width and height in user units, or
-the visual weighting lies. Axis labels at the ends of each axis, not floating.
-Place each item at coordinates you can defend from a quote; if the transcript
-only supports "more than the other one", use rank order and say so in the
-`<desc>`.
-
-**Failure mode.** Inventing precision. A quadrant chart implies you measured
-both axes. If you did not, either draw ranks on an unlabelled scale or pick a
-different shape. Second failure: an empty quadrant left unremarked — if nothing
-is cheap and valuable, that absence is a finding and belongs in the caption.
-
-### 7. Before-and-after of one concrete record
-
-**Fits** a transformation whose value is invisible in the abstract: the same
-ticket, row, or form, drawn twice.
-
+### 13. Small-multiple frame
+Shows that the same shape recurs. One cell template, one shared scale.
+```html
+<svg viewBox="0 0 300 62" role="img"><title>Small multiples on one scale</title>
+  <g fill="none" stroke="var(--grid)">
+    <rect x="1" y="11" width="92" height="40"/><rect x="103" y="11" width="92" height="40"/>
+    <rect x="205" y="11" width="92" height="40"/>
+  </g>
+  <g fill="none" stroke="var(--pen-a)">
+    <path d="M9 45l18-14 18 8 18-22"/><path d="M111 45l18-3 18-2 18-26"/>
+    <path d="M213 45l18-26 18 6 18 4"/>
+  </g>
+  <text x="1" y="8" font-size="9" fill="var(--ink-soft)">A</text>
+  <text x="103" y="8" font-size="9" fill="var(--ink-soft)">B</text>
+  <text x="205" y="8" font-size="9" fill="var(--ink-soft)">C</text>
+</svg>
 ```
-   ┌ as it arrives ────────┐        ┌ as it leaves ──────────┐
-   │ id      4471          │        │ id      4471           │
-   │ model   —             │  ──▶   │ model   XR-90   ← new  │
-   │ fault   "not working" │        │ fault   seal, thermal   │
-   │ route   —             │        │ route   L2      ← new  │
-   └───────────────────────┘        └────────────────────────┘
+Fails on per-cell scaling: every case then looks identical. Past six cells it is a texture.
+
+### 14. State machine with a return edge
+Shows that the loop closes, and what the closing edge costs.
+```html
+<svg viewBox="0 0 250 70" role="img"><title>Cycle with a costly return edge</title>
+  <g fill="var(--paper-2)" stroke="var(--pen-a)">
+    <rect x="1" y="8" width="62" height="26"/><rect x="93" y="8" width="62" height="26"/>
+    <rect x="185" y="8" width="62" height="26"/>
+  </g>
+  <path d="M63 21h26M155 21h26" fill="none" stroke="var(--ink-soft)"/>
+  <path d="M216 34v24H36v-24" fill="none" stroke="var(--pen-b)" stroke-dasharray="4 3"/>
+  <path d="M33 40l3-6 3 6Z" fill="var(--pen-b)"/>
+  <text x="96" y="54" font-size="9" fill="var(--pen-b)">6 weeks</text>
+</svg>
 ```
+Never a circle: it makes every step look equidistant and hides which edge is expensive. An
+unlabelled return edge reduces the figure to "things are connected".
 
-**Coordinates.** Two identical panels, same width, same field order, same
-baselines, so a changed row is the only thing that moves. Mark changed rows in
-the second pen and leave unchanged rows in `--ink-soft`. Field labels in one
-column, values in another, both left-aligned on fixed x.
-
-**Failure mode.** A fabricated record. Every field value must be traceable to
-something said; if the call named three fields, show three fields and label the
-panel honestly rather than padding it to look like a real screen. Second
-failure: reordering fields between panels, which destroys the comparison.
-
-### 8. Decision tree or escalation cascade
-
-**Fits** a described set of gates: what happens when a check passes, and what
-happens when it does not.
-
+### 15. Composition strip
+Shows one whole splitting into named parts, including the part you cannot account for.
+```html
+<svg viewBox="0 0 300 34" role="img"><title>One whole, named parts</title>
+  <rect x="0" y="4" width="186" height="14" fill="var(--pen-a)"/>
+  <rect x="186" y="4" width="72" height="14" fill="var(--pen-b)"/>
+  <rect x="258" y="4" width="41" height="14" fill="none" stroke="var(--grid)"/>
+  <text x="2" y="30" font-size="9" fill="var(--ink-soft)">triage 62%</text>
+  <text x="190" y="30" font-size="9" fill="var(--ink-soft)">fixes 24%</text>
+</svg>
 ```
-              ┌ confidence high? ┐
-              └────┬────────┬────┘
-                yes│        │no
-           ┌───────▼──┐  ┌──▼────────────┐
-           │ auto-file│  │ second check  │
-           └──────────┘  └───┬───────┬───┘
-                          yes│       │no
-                    ┌────────▼┐   ┌──▼──────┐
-                    │ queue   │   │ human   │
-                    └─────────┘   └─────────┘
-```
+The open segment is the remainder. Fails when parts are inflated to sum, or are not parts.
 
-**Coordinates.** Depth is y at a fixed pitch; siblings share a y. Every branch
-edge is labelled with its condition at the midpoint of its first segment — an
-unlabelled branch is a guess. The failure path goes consistently one way (right,
-say) at every level, so the reader learns the direction once.
+## Composition: one dense surface, not a gallery
 
-**Failure mode.** Missing the terminal states. A cascade that stops at the last
-gate leaves the reader asking what actually happens; every leaf must be an
-outcome, including the boring one. Second failure: branch labels that are not
-the speaker's conditions.
+A professional information graphic is **one surface**, read top to bottom, with section
+rules between bands of related panels. Adjacency is itself an argument: two glyphs on one
+row are compared whether you say so or not.
 
-### 9. Small multiples of one shape
+- **Bands, not figures.** Group panels into horizontal bands, each with a small caps label
+  sitting on a 0.5px full-width rule at the band top, left-aligned.
+- **One gutter value.** Pick one (32 or 40) and use it between every panel and every band.
+  Uneven gutters are the loudest amateur tell there is.
+- **Share the axis.** Two panels in a band that both encode magnitude share a zero and a
+  scale, labelled once; if they encode time, they share the axis and the pixels-per-second.
+- **Reading order is the argument.** Band 1 states the thing, band 2 its cost, band 3 the
+  alternative, band 4 the evidence. If you cannot say your band order as four clauses of
+  one sentence, reorder until you can.
+- **Numbered badges run in reading order** across the whole surface, top-right of each
+  panel, feeding one key at the bottom.
 
-**Fits** three to six cases that share a structure, where sameness is the point:
-each thread's arc, each participant's version of the same week.
+Split into separate figures only when panels genuinely do not share an argument —
+different subject, time frame, actors. That is rare; the default is one surface.
 
-```
-   case A          case B          case C
-  ┌──────────┐   ┌──────────┐   ┌──────────┐
-  │ ▁▃▅▂     │   │ ▁▁▇▇     │   │ ▅▁▁▁     │
-  └──────────┘   └──────────┘   └──────────┘
-   opens early    late spike     front-loaded
-```
+## Motion
 
-**Coordinates.** One cell template, cloned on a strict grid; identical scales in
-every cell — this is the entire discipline of small multiples. Label the shared
-scale once, at the left, not in every cell. Three or four across, wrapping to a
-second row rather than shrinking.
+Motion has exactly one job: enforce reading order on the first pass. After the reveal, the
+figure is still. **Draw-on follows reading order**, not render order: strokes sweep first,
+then fills and text fade in behind them, then numbers count up — stagger with `--d`.
+**Nothing moves after the reveal**: no loops, no bounce, no hover motion, no parallax, no
+pulsing arrowheads. Whole surface under 1.2s; a reader who scrolls back sees a finished
+figure, not a replay. `pathLength="1"` normalises every path to length 1, so one dash
+pattern draws any path without measuring it:
 
-**Failure mode.** Per-cell scaling, which makes every case look identical and
-silently deletes the finding. Second failure: too many cells; past six the form
-turns into a texture.
-
-### 10. Magnitude comparison where the geometry is the argument
-
-**Fits** a claim of the form "this is much larger than that" — where the ratio,
-not the value, is what the speaker wanted heard.
-
-```
-  what closes by itself   ████████████████████████████ 4/5
-  what needs building     ███████ 1/5
-  ──────────────────────────────────────────────────── shared baseline
+```css
+.dg [data-draw]{ stroke-dasharray:1; stroke-dashoffset:1;
+  animation:dg-draw .45s ease-out var(--d,0s) forwards }
+@keyframes dg-draw{ to{ stroke-dashoffset:0 } }
+.dg [data-fade]{ opacity:0; animation:dg-fade .3s ease var(--d,0s) forwards }
+@keyframes dg-fade{ to{ opacity:1 } }
+@media (prefers-reduced-motion:reduce){
+  .dg [data-draw],.dg [data-fade]{ animation:none; stroke-dashoffset:0; opacity:1 }
+}
 ```
 
-**Coordinates.** Length encodes value, always from a shared zero baseline.
-Bars of equal thickness. If you must use area, scale by the square root of the
-value and say in the `<desc>` that you did — otherwise a 4× value looks 16×.
+Usage: `<path pathLength="1" data-draw style="--d:.15s" d="…"/>`. The
+reduced-motion block is not optional, and must leave the figure in its final
+state rather than hidden.
 
-**Failure mode.** A truncated axis. Starting bars at anything but zero to "show
-the difference better" is the oldest lie in charting and the one a hostile reader
-checks first. Second failure: a magnitude figure with no number anywhere — give
-the value in the label, since the picture is the emphasis and the label is the
-evidence.
+## Worked example
 
-### 11. Feedback loop with a return edge
-
-**Fits** a process whose closing edge is the finding: output re-enters as input,
-and the speaker's point was the cycle time or the drift.
-
-```
-    ┌────────┐     ┌─────────┐     ┌──────────┐
-    │ action │ ──▶ │ measure │ ──▶ │ adjust   │
-    └───▲────┘     └─────────┘     └────┬─────┘
-        └───────────── 6 weeks ─────────┘
-```
-
-**Coordinates.** Lay the forward path on one straight line and route the return
-edge below it as a single three-segment path, clearly longer than any forward
-edge. Label the return edge with its cost — the lag, the loss, the rework —
-because that label is the reason the figure exists.
-
-**Failure mode.** Drawing the loop as a circle. A circle makes every step look
-equidistant and hides which edge is the expensive one. Second failure: an
-unlabelled return edge, which reduces the figure to "things are connected".
-
-### 12. Composition bar
-
-**Fits** one whole that splits into named parts, where the split was disputed or
-surprising.
-
-```
-  a working day
-  ├──────────── triage ─────────────┼── fixes ──┼─ meetings ─┤
-  │              62%                │    24%    │    14%     │
-```
-
-**Coordinates.** One bar, full width, segments proportional to value, segment
-boundaries on exact fractions of the bar width. Label inside the segment when it
-fits, on a leader line below when it does not. Order segments largest-first
-unless a natural order (time of day, stage) exists — then keep the natural one
-and say which in the `<desc>`.
-
-**Failure mode.** Parts that do not sum to the whole. If the transcript accounts
-for 80%, draw a `--grid`-hatched remainder labelled "unaccounted" rather than
-inflating the parts. Second failure: using this for things that are not parts of
-one whole — that is a magnitude comparison, kind 10.
-
-## House style — hard rules
-
-**Colour.** Every colour is a CSS variable, always. The permitted set is
-`--ink`, `--ink-soft`, `--grid`, `--pen-a`, `--pen-b`, `--paper`, `--paper-2`.
-Never a literal hex, never `fill="white"`, never `fill="black"`, never a named
-colour, never `rgb()`. The page ships light and dark palettes and a toggle; a
-literal colour is a figure that goes invisible for half your readers.
-
-**Colour means one thing.** Assign one pen per speaker or per actor at the start
-and hold it across all twelve figures: `--pen-a` is the same person in figure 1
-and figure 11. Structure the reader cannot attribute is structure they cannot
-trust. Use `--ink-soft` for anything unattributed or shared. If a figure has no
-attribution axis, draw it entirely in one pen and say why in the `<desc>`.
-
-**Type.** No monospace anywhere — not for labels, not for timestamps, not for
-identifiers. Timestamps use the condensed face with `font-variant-numeric:
-tabular-nums`. Node labels are **five words or fewer**; the note under a node is
-**twelve words or fewer**. Anything longer belongs in the caption. Nothing below
-10px.
-
-**Line.** Strokes 1–1.5px for structure, 0.5px for the hairline grid and axes.
-No shadows. No gradients. No `border-radius` or `rx` above 2. No emoji, no icon
-glyphs, no clip art. Fill boxes with `--paper-2` and stroke them with the pen —
-never fill a box with a pen colour and put text on top of it.
-
-**Marker ids are per-figure.** Every `<marker>` id is prefixed with the figure's
-id: `mk-<figure-id>-a`. All figures land in one document, ids are global, and a
-collision silently repaints every arrowhead on the page with the first
-definition it finds. This is the most common way a set of individually correct
-figures breaks once assembled.
-
-**Every figure carries:**
+Copy this one. Three indexes score on scales that cannot be added; rank normalisation is what
+makes fusion legal. Every node is a glyph.
 
 ```html
-<figure class="dg" id="dg-short-slug">
+<figure class="dg" id="dg-fuse">
   <figcaption>
-    <span class="dg-t">A title that states the finding, not the topic</span>
-    <span class="dg-w">One or two sentences: what to look at, and what it means.</span>
+    <span class="dg-t">Three indexes, three scales, one comparable order</span>
+    <span class="dg-w">Read the middle column before the labels: one bar has a
+      track with both ends fixed, one has no track and runs off the panel, one
+      has a track that starts somewhere else. The right column is the same three
+      after rank normalisation — that is all fusion does, and why it works.</span>
   </figcaption>
   <div class="dg-scroll">
-    <svg viewBox="0 0 880 520" role="img" preserveAspectRatio="xMidYMid meet"
+    <svg viewBox="0 0 880 268" role="img" preserveAspectRatio="xMidYMid meet"
          style="width:100%;height:auto;min-width:880px">
-      <title>Short accessible name</title>
-      <desc>What the figure shows, read in its reading order, including what
-        position and colour encode.</desc>
-      <defs><marker id="mk-short-slug-a" …>…</marker></defs>
-      …
+      <title>Three incompatible score scales normalised to rank before fusion</title>
+      <desc>A query fans out to three indexes drawn as score bars: bounded with a
+        fixed track, unbounded running past the panel edge, and offset on its own
+        track. All three are redrawn on one shared track inside a normalise band,
+        then merged at a plus symbol into a single ranked list. Bar length encodes
+        score magnitude; the two pens separate the two scoring families.</desc>
+      <defs>
+        <marker id="mk-fuse-a" viewBox="0 0 8 8" refX="7" refY="4"
+                markerWidth="7" markerHeight="7" orient="auto">
+          <path d="M0 0 8 4 0 8Z" fill="var(--ink-soft)"/>
+        </marker>
+      </defs>
+      <g fill="none" stroke="var(--ink-soft)" marker-end="url(#mk-fuse-a)">
+        <path d="M136 132h20V48h16"/><path d="M136 132h36"/><path d="M136 132h20v84h16"/>
+        <path d="M448 48h28"/><path d="M448 132h28"/><path d="M448 216h28"/>
+      </g>
+      <rect x="16" y="106" width="120" height="52" fill="var(--paper-2)" stroke="var(--ink-soft)"/>
+      <text x="28" y="130" font-size="13" fill="var(--ink)">one query</text>
+      <text x="28" y="147" font-size="10" fill="var(--ink-soft)">1</text>
+      <g fill="var(--paper-2)" stroke="var(--pen-a)">
+        <rect x="176" y="16" width="272" height="64"/><rect x="176" y="100" width="272" height="64"/>
+        <rect x="176" y="184" width="272" height="64"/>
+      </g>
+      <text x="188" y="36" font-size="13" fill="var(--ink)">semantic</text>
+      <rect x="188" y="44" width="180" height="10" fill="var(--paper)" stroke="var(--grid)"/>
+      <rect x="188" y="44" width="112" height="10" fill="var(--pen-a)"/>
+      <text x="188" y="70" font-size="10" fill="var(--ink-soft)">bounded 0–1 · 2</text>
+      <text x="188" y="120" font-size="13" fill="var(--ink)">lexical</text>
+      <rect x="188" y="128" width="196" height="10" fill="var(--pen-b)"/>
+      <text x="390" y="139" font-size="13" fill="var(--pen-b)">≫</text>
+      <text x="188" y="154" font-size="10" fill="var(--ink-soft)">unbounded · 3</text>
+      <text x="188" y="204" font-size="13" fill="var(--ink)">graph</text>
+      <rect x="248" y="212" width="120" height="10" fill="var(--paper)" stroke="var(--grid)"/>
+      <rect x="248" y="212" width="52" height="10" fill="var(--ink-soft)"/>
+      <text x="188" y="238" font-size="10" fill="var(--ink-soft)">own scale · 4</text>
+      <rect x="496" y="16" width="204" height="232" fill="none" stroke="var(--grid)" stroke-dasharray="4 4"/>
+      <text x="508" y="38" font-size="11" fill="var(--ink-soft)">NORMALISE TO RANK</text>
+      <g fill="var(--paper)" stroke="var(--grid)">
+        <rect x="512" y="56" width="172" height="10"/><rect x="512" y="88" width="172" height="10"/>
+        <rect x="512" y="120" width="172" height="10"/>
+      </g>
+      <rect x="512" y="56" width="132" height="10" fill="var(--pen-a)"/>
+      <rect x="512" y="88" width="104" height="10" fill="var(--pen-b)"/>
+      <rect x="512" y="120" width="72" height="10" fill="var(--ink-soft)"/>
+      <text x="512" y="152" font-size="10" fill="var(--ink)">one scale, 0–1 · 5</text>
+      <path d="M692 61h12v63M692 93h12v31M692 125h12M704 124h3" fill="none" stroke="var(--ink-soft)"/>
+      <circle cx="718" cy="124" r="11" fill="var(--paper)" stroke="var(--ink)"/>
+      <path d="M712 124h12M718 118v12" stroke="var(--ink)"/>
+      <path d="M729 124h11" fill="none" stroke="var(--ink-soft)" marker-end="url(#mk-fuse-a)"/>
+      <rect x="750" y="86" width="114" height="88" fill="var(--paper-2)" stroke="var(--pen-a)"/>
+      <text x="762" y="108" font-size="13" fill="var(--ink)">fused list</text>
+      <rect x="762" y="116" width="90" height="7" fill="var(--pen-a)"/>
+      <rect x="762" y="128" width="68" height="7" fill="var(--pen-b)"/>
+      <rect x="762" y="140" width="46" height="7" fill="var(--ink-soft)"/>
+      <text x="762" y="164" font-size="10" fill="var(--ink-soft)">one order · 6</text>
     </svg>
   </div>
   <ol class="dg-key">
-    <li><b>Node label</b> <span>00:14:22</span></li>
-    …
+    <li><b>one query</b> <span>00:12:40</span></li>
+    <li><b>semantic, bounded</b> <span>00:13:02</span></li>
+    <li><b>lexical, unbounded</b> <span>00:13:31</span></li>
+    <li><b>graph, own scale</b> <span>00:14:08</span></li>
+    <li><b>rank normalisation</b> <span>00:15:22</span></li>
+    <li><b>fused ranking</b> <span>00:15:47</span></li>
   </ol>
 </figure>
 ```
 
-The numbered key is not optional. Each numbered node in the figure gets one
-entry giving the timestamp where it was said. That key is what makes a diagram
-checkable, and it is the first thing the verifier reads.
+## Kind reference
 
-## Composition — the set is one argument
+Pick by the structure in the conversation, never by variety. Each kind is an
+arrangement of glyphs, not a new drawing:
 
-Individually dense figures that do not compose is the specific failure this
-section exists to prevent. Twelve good diagrams in arbitrary order is a gallery,
-and a reader gets nothing from a gallery that they could not get from the
-transcript.
+| Kind | Built from | Layout | Failure mode |
+|---|---|---|---|
+| Pipeline with bands | any node glyph, gate chain | fixed stage pitch (188 = 156 box + 32 gutter); band rects inset 12 | diagonal arrows; a band hugging its contents |
+| Causal / economics net | big number, magnitude bar | 3–4 columns at fixed x, free y; disputed node off the main row | hub-and-spoke blob with no reading direction |
+| Two-column comparison | record field, score-scale bar | centre line; named dimension in the gutter on every row | empty gutter; unequal column widths |
+| Layered topology | any node glyph, person | full-width lanes of equal height; cross-lane edges strictly vertical | a member spanning two lanes |
+| Timeline | timeline tick, composition strip | true position from seconds; events above, act bands below | even spacing |
+| Matrix / quadrant | person, big number | square plot area in user units; axis labels at the ends | invented precision; an unremarked empty quadrant |
+| Before / after record | record field: empty → filled → cited | two identical panels, same field order and baselines | reordered or fabricated fields |
+| Decision tree | gate chain, escalation cascade | depth is y at fixed pitch; failure path always the same side | missing terminal states; unlabelled branches |
+| Small multiples | small-multiple frame | one cell template on a strict grid, one shared scale | per-cell scaling; more than six cells |
+| Magnitude comparison | magnitude bar, big number | shared zero, equal thickness, length encodes value | truncated axis; no number anywhere |
+| Feedback loop | state machine with return edge | forward path straight, return routed below and longer | drawn as a circle; unlabelled return |
+| Composition | composition strip | one bar, exact fractional boundaries, largest first unless natural order | parts that do not sum to the whole |
 
-- Open the fragment with a **lead-in** (`<div class="dg-lead">`) that names the
-  sequence: what the first figure establishes, what each one after it does to
-  that. Three or four sentences. If you cannot write it, the set has no order and
-  you should reorder it until you can.
-- Between consecutive figures, one **bridge** sentence (`<p class="dg-bridge">`)
-  that carries the reader from what they just saw to why the next figure follows.
-  A bridge states a consequence or a question, never a summary. "Which raises the
-  question of what it costs" is a bridge; "the next figure shows costs" is a
-  label.
-- Sequence by argument, not by chronology. The call wandered; the figures should
-  not.
-- Each figure must survive being read alone — caption, key and `<desc>` carry it
-  — while still sitting in the sequence.
+## House style — hard rules
+
+**Colour.** Every colour is a CSS variable. The permitted set is `--ink`, `--ink-soft`,
+`--grid`, `--pen-a`, `--pen-b`, `--paper`, `--paper-2`. Never a literal hex, never
+`fill="white"` or `fill="black"`, never a named colour, never `rgb()`. The page ships light
+and dark palettes; a literal colour goes invisible for half your readers.
+
+**Two pens, fixed meaning.** One pen per speaker or actor, held across every figure:
+`--pen-a` is the same actor in figure 1 and figure 11. `--ink-soft` for anything
+unattributed. A figure with no attribution axis is drawn in one pen, and `<desc>` says why.
+
+**Type.** No fixed-width typewriter faces anywhere — not for labels, not for timestamps,
+not for identifiers. Timestamps use the condensed face with `font-variant-numeric:
+tabular-nums`. Node labels are **five words or fewer**; the note under a node is **twelve
+words or fewer**. Nothing below 10px.
+
+**Line.** Strokes 1–1.5px for structure, 0.5px for hairline grid and axes. No shadows, no
+gradients, no `rx` above 2, no emoji, no icon fonts, no clip art. Fill boxes with
+`--paper-2` and stroke with a pen — never fill a box with a pen colour and set text on it.
+
+**Marker ids are per-figure**, prefixed with the figure id: `mk-<figure-id>-a`. All figures
+land in one document, ids are global, and a collision silently repaints every arrowhead on
+the page — the commonest way a set of individually correct figures breaks once assembled.
+
+**Every figure carries** `role="img"`, a `<title>`, a `<desc>` reading the figure in its
+reading order and stating what position and colour encode, a `<figcaption>` with `dg-t` (a
+title stating the finding, not the topic) and `dg-w` (what to look at and what it means),
+and a numbered `dg-key` — one entry per badge with the timestamp where it was said. The key
+is what makes a diagram checkable, and the first thing the verifier reads.
+
+## The set is one argument
+
+- Open the fragment with a **lead-in** (`<div class="dg-lead">`) naming the sequence: what
+  the first figure establishes, what each one after does to that. If you cannot write it,
+  the set has no order — reorder until you can.
+- Between consecutive figures, one **bridge** (`<p class="dg-bridge">`) stating a
+  consequence or a question, never a summary. "Which raises the question of what it costs"
+  is a bridge; "the next figure shows costs" is a label.
+- Sequence by argument, not chronology; each figure must survive being read alone.
 
 ## Responsiveness
 
-Each figure must be legible at 390px wide. Either design it to that width, or
-wrap the `<svg>` in `<div class="dg-scroll">` with `overflow-x:auto` and give the
-svg `min-width` equal to its viewBox width. The figure scrolls; the page body
-must never scroll horizontally. The `dg-key` collapses to one column under
-640px.
+Each figure must be legible at 390px wide. Either design it to that width, or wrap the
+`<svg>` in `<div class="dg-scroll">` with `overflow-x:auto` and a `min-width` equal to its
+viewBox width. The figure scrolls; the page body never scrolls horizontally. The `dg-key`
+collapses to one column under 640px.
 
 ## The self-check before declaring done
-
-Run every one of these. A failure is a fix, not a note.
 
 ```
 callsheet lint-diagrams out/diagrams.html --turns work/turns.json
 ```
 
-That covers well-formedness, literal hex colours, monospace, `fill="white"` and
-`fill="black"`, marker ids reused across figures, a figure missing `role="img"`,
-`<title>` or `<desc>`, a figure with no numbered key, text below 10px, and every
-cited timestamp resolving to a real turn. It exits nonzero and names each fault.
+That covers well-formedness, literal colours, fixed-width faces, marker ids reused across
+figures, a missing `role="img"`, `<title>`, `<desc>` or key, text below 10px, and every
+cited timestamp resolving to a real turn. Then check by hand what a linter cannot:
 
-Then check by hand what a linter cannot:
-
-1. **Build and open the page.** `callsheet build … --diagrams out/diagrams.html`
-   reports external requests; that number must be zero.
-2. **Toggle the theme.** Every stroke, fill and label must remain legible in both.
-   A figure that disappears in dark mode has a hard-coded colour the grep missed.
-3. **Narrow to 390px.** The page body does not scroll sideways. Each figure
-   either fits or scrolls inside its own container.
-4. **Read only the captions and bridges, in order.** They must form a coherent
-   argument on their own. If they do not, the set is a gallery.
-5. **Pick three nodes at random and find them in `work/turns.json`.** Not the
-   timestamp — the *claim*. A node whose content is not in the transcript is
-   deleted, not softened.
-6. **Count words in the longest label.** Over five, rewrite it.
-7. **Check one pen means one actor** across the whole set.
+1. **Cover the labels.** Read each figure with every text element hidden. If you cannot
+   state its claim from the shapes alone, it is not glyph-first — go back.
+2. **Build and open the page.** External requests must be zero.
+3. **Toggle the theme.** A figure that vanishes in dark mode has a hard-coded
+   colour the grep missed.
+4. **Narrow to 390px.** The body does not scroll sideways.
+5. **Turn on reduced motion.** Every figure renders complete and still.
+6. **Read only the captions and bridges, in order.** If they do not form a
+   coherent argument alone, the set is a gallery.
+7. **Pick three nodes at random and find them in `work/turns.json`** — not the timestamp,
+   the *claim*. A node whose content is not in the transcript is deleted, not softened.
+8. **Count words in the longest label.** Over five, rewrite it.
+9. **Check one pen means one actor** across the whole set.
