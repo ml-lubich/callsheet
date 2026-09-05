@@ -6,6 +6,7 @@ import json
 import re
 from pathlib import Path
 
+from . import modes as _modes
 from .schema import validate
 
 CONTENT_MARKER = "/*__CONTENT__*/null"
@@ -31,11 +32,18 @@ def template_path() -> Path:
 
 
 def build(
-    template: str, content: dict, turns: list, metrics: dict, diagrams: str | None = None
+    template: str,
+    content: dict,
+    turns: list,
+    metrics: dict,
+    diagrams: str | None = None,
+    mode: str = "professional",
+    root=None,
 ) -> str:
     """Return the finished page. Raises if the template is not shaped as expected."""
     validate(content)
-    page = template
+    content = _modes.apply(content, mode, root)
+    page = _modes.shape_template(template, content["_mode"])
     for marker, payload in (
         (CONTENT_MARKER, content),
         (TURNS_MARKER, turns),

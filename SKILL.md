@@ -24,6 +24,7 @@ self-contained and meant to be run in its own context:
 |---|---|
 | `skills/lexicon/SKILL.md` | recovering domain vocabulary the recogniser mangled, before anything reads the transcript |
 | `skills/diagrams/SKILL.md` | authoring the figure set — the catalog, the house style, the self-check |
+| `skills/modes/SKILL.md` | the output modes — the register and the shape the same call is rendered in |
 | `skills/verify/SKILL.md` | the adversarial fact-check, in a fresh context |
 | `skills/holdout/SKILL.md` | sealing a reference answer and measuring independence |
 
@@ -114,6 +115,21 @@ last, and what each participant wanted that they did not say directly. In
 `shapes`, note anything described in scattered pieces that would only be visible
 assembled.*
 
+## Choose a mode — before you synthesize
+
+A mode is a preset over register, shape and emphasis: how the prose is written,
+which sections render in what order under what word and figure budgets, and what
+the verdict optimises for. It never changes a fact. `professional` is the
+default and the right answer unless you have a reason. `callsheet modes` lists
+the nine; **`skills/modes/SKILL.md`** defines each and says who each is for.
+
+Put the register into the synthesizer prompt in step 5, and name the same mode
+again in step 7:
+
+```
+python -c "from callsheet.modes import prompt_guidance; print(prompt_guidance('concise'))"
+```
+
 ## 5. Synthesize
 
 One agent, strongest model. It reads every `analysis-N.json` and `arc.json` and
@@ -161,8 +177,12 @@ callsheet lint-diagrams out/diagrams.html --turns work/turns.json
 ```
 callsheet build --content work/content.json --turns work/turns.json \
                 --metrics work/metrics.json --diagrams out/diagrams.html \
-                -o out/index.html
+                --mode professional -o out/index.html
 ```
+
+`--mode` drops the sections the mode leaves out, reorders the rest, caps the
+figure set and sets the transcript. Rendering the same call in a second mode
+reruns steps 5 and 7 only.
 
 The build fails loudly on a missing or duplicated template marker, escapes the
 injected JSON so it cannot break out of its `<script>`, and reports the number of

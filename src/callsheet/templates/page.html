@@ -62,6 +62,7 @@ button{font:inherit;color:inherit;background:none;border:0}
 h1,h2,h3,h4,p,ul,ol,dl,dd,figure{margin:0}
 ul,ol{padding:0;list-style:none}
 [hidden]{display:none!important}
+section[data-collapsed] #tlist{max-height:60vh;overflow-y:auto}
 
 .wrap{max-width:1180px;margin:0 auto;padding:0 24px}
 .narrow{max-width:66ch}
@@ -535,6 +536,7 @@ document.getElementById("legend").innerHTML = KEYS.map(function(k, i){
 
 /* ---- 3. abstract ---- */
 if (CONTENT.abstract) document.getElementById("abstract").innerHTML = "<p>" + esc(CONTENT.abstract) + "</p>";
+document.getElementById("highlights").innerHTML = (CONTENT.highlights || []).map(function(h){ return "<li>" + esc(h) + "</li>"; }).join("");
 
 /* ---- 4. acts ---- */
 const acts = CONTENT.acts || [];
@@ -716,6 +718,13 @@ document.getElementById("filters").addEventListener("click", function(e){
 });
 applyFilter();
 
+/* a mode may cap the figure set; the sections it drops are gone before the page ships */
+const MODE = CONTENT._mode || {};
+if (typeof MODE.figures === "number") {
+  Array.prototype.slice.call(document.querySelectorAll("#diagrams > figure"))
+    .slice(MODE.figures).forEach(function(f){ f.remove(); });
+}
+
 /* a section the analysis had nothing for is removed, not left as an empty heading */
 Array.prototype.forEach.call(document.querySelectorAll("[data-needs]"), function(el){
   const filled = el.dataset.needs.split(" ").some(function(id){
@@ -751,7 +760,7 @@ if (/^#t-\d+$/.test(location.hash)) setTimeout(function(){ jump(+location.hash.s
   <div id="plate-body"></div>
 </header>
 
-<section class="chart-sec">
+<section class="chart-sec" data-sec="strip">
   <div class="wrap">
     <div class="chart-head">
       <div class="legend" id="legend"></div>
@@ -764,21 +773,28 @@ if (/^#t-\d+$/.test(location.hash)) setTimeout(function(){ jump(+location.hash.s
   </div>
 </section>
 
-<section data-needs="abstract">
+<section data-sec="abstract" data-needs="abstract">
   <div class="wrap">
     <h2 class="sec">Abstract</h2>
     <div class="narrow abstract" id="abstract"></div>
   </div>
 </section>
 
-<section data-needs="diagrams">
+<section data-sec="highlights" data-needs="highlights">
+  <div class="wrap">
+    <h2 class="sec">Highlights</h2>
+    <ul class="rows" id="highlights"></ul>
+  </div>
+</section>
+
+<section data-sec="figures" data-needs="diagrams">
   <div class="wrap">
     <h2 class="sec">Diagrams</h2>
     <div class="dg-wrap" id="diagrams"><!--__DIAGRAMS__--></div>
   </div>
 </section>
 
-<section data-needs="actlist">
+<section data-sec="acts" data-needs="actlist">
   <div class="wrap">
     <h2 class="sec">Acts</h2>
     <div class="timebar" id="actbar"></div>
@@ -786,14 +802,14 @@ if (/^#t-\d+$/.test(location.hash)) setTimeout(function(){ jump(+location.hash.s
   </div>
 </section>
 
-<section data-needs="threads">
+<section data-sec="threads" data-needs="threads">
   <div class="wrap">
     <h2 class="sec">Threads</h2>
     <div class="threads" id="threads"></div>
   </div>
 </section>
 
-<section data-needs="evbody">
+<section data-sec="evidence" data-needs="evbody">
   <div class="wrap">
     <h2 class="sec">Evidence</h2>
     <div class="tscroll">
@@ -810,7 +826,7 @@ if (/^#t-\d+$/.test(location.hash)) setTimeout(function(){ jump(+location.hash.s
   </div>
 </section>
 
-<section data-needs="signals numbers">
+<section data-sec="signals numbers" data-needs="signals numbers">
   <div class="wrap">
     <h2 class="sec">Signals &amp; numbers</h2>
     <div class="twoup">
@@ -826,7 +842,7 @@ if (/^#t-\d+$/.test(location.hash)) setTimeout(function(){ jump(+location.hash.s
   </div>
 </section>
 
-<section data-needs="tech">
+<section data-sec="tech" data-needs="tech">
   <div class="wrap">
     <h2 class="sec">Named in the call</h2>
     <p class="narrow dia-note" id="technote"></p>
@@ -834,7 +850,7 @@ if (/^#t-\d+$/.test(location.hash)) setTimeout(function(){ jump(+location.hash.s
   </div>
 </section>
 
-<section data-needs="tensions diarization">
+<section data-sec="friction" data-needs="tensions diarization">
   <div class="wrap">
     <h2 class="sec">Friction</h2>
     <ul class="rows" id="tensions"></ul>
@@ -847,14 +863,14 @@ if (/^#t-\d+$/.test(location.hash)) setTimeout(function(){ jump(+location.hash.s
   </div>
 </section>
 
-<section data-needs="quotes">
+<section data-sec="quotes" data-needs="quotes">
   <div class="wrap">
     <h2 class="sec">Quotes</h2>
     <div class="quotes" id="quotes"></div>
   </div>
 </section>
 
-<section data-needs="aligned unresolved risks">
+<section data-sec="fit" data-needs="aligned unresolved risks">
   <div class="wrap">
     <h2 class="sec">Fit</h2>
     <div class="fitgrid">
@@ -871,14 +887,14 @@ if (/^#t-\d+$/.test(location.hash)) setTimeout(function(){ jump(+location.hash.s
   </div>
 </section>
 
-<section data-needs="next">
+<section data-sec="next" data-needs="next">
   <div class="wrap">
     <h2 class="sec">Next</h2>
     <ul class="steps" id="next"></ul>
   </div>
 </section>
 
-<section data-needs="tlist">
+<section data-sec="transcript" data-needs="tlist">
   <div class="wrap">
     <h2 class="sec">Transcript</h2>
     <div class="tools">

@@ -52,6 +52,7 @@ tells a reader nothing the transcript did not.
 |---|---|
 | `skills/lexicon/` | recovering domain vocabulary the recogniser mangled, before anything reads the transcript |
 | `skills/diagrams/` | authoring the figure set: twelve figure kinds, the house style, the self-check |
+| `skills/modes/` | the output modes: the register and the shape the same call is rendered in |
 | `skills/verify/` | the adversarial fact-check, in a fresh context, grading FABRICATED / WRONG / MISATTRIBUTED / IMPRECISE |
 | `skills/holdout/` | sealing a reference answer and measuring independence afterwards |
 
@@ -108,12 +109,22 @@ callsheet chunk work/turns.json -n 4 -o work
 callsheet lint-diagrams out/diagrams.html --turns work/turns.json
 callsheet build --content work/content.json --turns work/turns.json \
                 --metrics work/metrics.json --diagrams out/diagrams.html \
-                -o out/index.html
+                --mode professional -o out/index.html
 ```
 
 `callsheet build` refuses to run on a `content.json` that does not validate, and
 names the field that is wrong. It reports the number of external requests in the
 finished page, which should be zero.
+
+### Modes
+
+`callsheet modes` lists the nine output modes a build can be rendered in —
+`professional` (the default), `concise`, `formal`, `casual`, `interesting`,
+`summarized`, `compact`, `creative` and `diagrams-only`. A mode sets the register
+the synthesizer writes in, which sections render in what order, the prose and
+figure budgets, and the transcript setting. It never changes a fact. A project
+can add its own in `.callsheet/modes.json`, merged over the built-ins. See
+`skills/modes/`.
 
 ### Linting the figures
 

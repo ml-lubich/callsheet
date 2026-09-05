@@ -26,6 +26,7 @@ from .lexicon import (
     load_profile,
     suggest_corrections,
 )
+from .modes import ModeError, all_modes
 from .parse import ParseError, chunks, metrics, parse_transcript, transcript_from_turns
 from .schema import SchemaError
 from .transcribe import DEFAULT_BINARY, TranscribeError, transcribe
@@ -37,6 +38,7 @@ ERRORS = (
     HoldoutError,
     TranscribeError,
     LexiconError,
+    ModeError,
     OSError,
 )
 
@@ -86,6 +88,7 @@ def cmd_build(a) -> int:
         _load(a.turns),
         _load(a.metrics),
         diagrams,
+        mode=a.mode,
     )
     out = Path(a.out)
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -93,6 +96,12 @@ def cmd_build(a) -> int:
     refs = external_refs(page)
     print(f"wrote {out} — {len(page) / 1024:.0f} KB, {len(refs) or 'no'} external requests")
     return 1 if refs else 0
+
+
+def cmd_modes(a) -> int:
+    for name, mode in all_modes().items():
+        print(f"{name:<14} {mode.summary}")
+    return 0
 
 
 def cmd_lint_diagrams(a) -> int:
@@ -291,8 +300,13 @@ def build_parser() -> argparse.ArgumentParser:
     b.add_argument("--metrics", required=True)
     b.add_argument("--diagrams", help="optional inline SVG fragment")
     b.add_argument("--template", help="defaults to the packaged template")
+    b.add_argument("--mode", default="professional",
+                   help="output mode; see `callsheet modes`")
     b.add_argument("-o", "--out", default="out/index.html")
     b.set_defaults(fn=cmd_build)
+
+    n = sub.add_parser("modes", help="list the output modes a build can be rendered in")
+    n.set_defaults(fn=cmd_modes)
 
     d = sub.add_parser("lint-diagrams", help="house-style checks on an inline SVG fragment")
     d.add_argument("fragment")
