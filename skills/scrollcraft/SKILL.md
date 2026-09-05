@@ -63,10 +63,12 @@ The honest default for a callsheet readout is: **most of the page is not
 driven.** Three or four driven sections in an hour-long call's readout. Past
 that, motion stops being emphasis and becomes the page's texture.
 
-## 2. The grammar — six moves
+## 2. The grammar — seven moves
 
 Every move below names what it communicates, the primitive it uses, the layout,
-the parameters that feel right, and the way it is abused.
+the parameters that feel right, and the way it is abused. Six are generic; the
+seventh, Stack, is a specific tested device that this repo ports rather than
+reinvents.
 
 ### Build
 
@@ -191,6 +193,38 @@ reader's attention, not to balance the layout.
 
 **Abuse.** Treating the Rest as leftover space and filling it with a small
 decorative animation. A Rest with motion in it is not a Rest.
+
+### Stack
+
+**Communicates** that a sequence of peers is one sequence: each item arrives,
+takes the reader's attention, then settles back under the next. Chapters,
+case studies, the acts of a call.
+
+**Primitive.** `ScrollStack` in `web/src/components/` — a port of the
+stacking-cards device in the user's `scroll-stack` skill (framer-motion, ~150
+lines, with tests). Each card is `position: sticky` at
+`stickyTop + i * stackOffset`, with a runway of `scrollPerCard` viewport
+heights; the covered card eases to `scale 0.94 / opacity 0.72` over the slice
+of progress where the next card travels in. The last card never shrinks.
+
+**Layout.** The cards are the section's existing items. The component takes
+the pre-existing layout's classes as `compactClassName`, and that is the whole
+safety mechanism: every visitor who does not get the stack gets the old layout
+verbatim, so shipping the effect cannot regress a phone.
+
+**Parameters.** `stickyTop 112`, `stackOffset 18`, `scrollPerCard 62` felt
+right at 1600×1000 under a fixed nav. Whether a visitor gets the stack at all
+is a pure, unit-tested function of viewport signals, not a media query:
+`innerWidth <= 1366`, reduced motion, a coarse pointer, touch with no hover,
+touch at or under 1920 wide, or four or fewer cores each route to the column.
+Port that function and its test verbatim; the thresholds came from real
+device complaints. First paint is always the column; the stack is swapped in
+after mount, so place the section below the fold.
+
+**Abuse.** More than one Stack on a page — five sections behaving identically
+is one section shown five times. Porting a larger drag-physics engine because
+it exists. Replacing the routing function with a breakpoint: reduced motion,
+coarse pointers and low core counts are not widths.
 
 ## 3. Pacing
 
