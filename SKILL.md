@@ -5,7 +5,8 @@ description: Turn a recording or transcript of a call, meeting or interview into
 
 # callsheet
 
-Pipeline: **transcribe → parse → analyse (agents) → draw → build → verify → hold out.**
+Pipeline: **transcribe → check the vocabulary → parse → analyse (agents) → draw →
+build → verify → hold out.**
 Python owns the mechanical steps. The analysis is yours; the CLI only produces the
 files you read and validates what you hand back.
 
@@ -21,6 +22,7 @@ self-contained and meant to be run in its own context:
 
 | | |
 |---|---|
+| `skills/lexicon/SKILL.md` | recovering domain vocabulary the recogniser mangled, before anything reads the transcript |
 | `skills/diagrams/SKILL.md` | authoring the figure set — the catalog, the house style, the self-check |
 | `skills/verify/SKILL.md` | the adversarial fact-check, in a fresh context |
 | `skills/holdout/SKILL.md` | sealing a reference answer and measuring independence |
@@ -35,7 +37,43 @@ Audio never leaves the machine. If the recording has two or more voices and the
 model did not diarize, say so in `meta` and fill the `diarization` section later —
 never present unlabelled attribution as certain.
 
-## 2. Parse
+## 2. Check the vocabulary
+
+The recogniser has no prior for the words the call is about, so it substitutes
+the nearest ordinary English: FAISS becomes "fate face", BM25 becomes "abeam 25",
+SQLite becomes "SQL light". Every claim in this document is supposed to trace to
+a timestamp, and a reader searching your spelling finds nothing in a transcript
+that says "abeam 25". Worse, the analysts in step 4 will read the garbled form
+and explain what they think it means.
+
+```
+callsheet lexicon check work/transcript.txt --profile profiles/example-engineer.json \
+                       -o work/lexicon.md
+```
+
+It exits nonzero when it finds anything, so it gates the rest of the pipeline.
+Build a profile from the speaker's own writing when you have it, and use the
+shipped one when you do not:
+
+```
+callsheet lexicon build --from their/docs --name them -o profiles/them.json
+```
+
+**Read `work/lexicon.md` and decide each line yourself.** A phonetic match is a
+guess; a guess applied silently is a fabrication that is now spelled correctly.
+Then apply the ones you accept, re-parse, and keep the audit:
+
+```
+callsheet lexicon apply work/transcript.txt --profile profiles/them.json --write
+```
+
+`work/transcript.txt.corrections.json` records every span, offset and score.
+Carry it into `meta.extra` — a reader is entitled to know the transcript was
+edited and how — and give it to the verifier in step 8.
+
+Full sub-skill: **`skills/lexicon/SKILL.md`**.
+
+## 3. Parse
 
 ```
 callsheet parse work/transcript.txt -o work     # -> work/turns.json, work/metrics.json
@@ -46,7 +84,7 @@ Read `metrics.json` before dispatching anything: duration, turn count and the
 word split tell you how many segment analysts the call actually needs. One
 analyst per ~15–20 minutes; four is the usual number.
 
-## 3. Analyse — the fan-out
+## 4. Analyse — the fan-out
 
 Dispatch these in one batch. They do not depend on each other.
 
@@ -76,7 +114,7 @@ last, and what each participant wanted that they did not say directly. In
 `shapes`, note anything described in scattered pieces that would only be visible
 assembled.*
 
-## 4. Synthesize
+## 5. Synthesize
 
 One agent, strongest model. It reads every `analysis-N.json` and `arc.json` and
 writes `work/content.json`. Its rules:
@@ -90,14 +128,14 @@ writes `work/content.json`. Its rules:
 - `span` strings are derived from `start_s`/`end_s`, never typed by hand.
 - **Keep the prose short.** `abstract` 90–120 words. Each act `summary` ≤ 60
   words. Each thread's `what` and `why_it_matters` one sentence each. Anything
-  longer is a figure you have not drawn yet — hand it to step 5 instead.
+  longer is a figure you have not drawn yet — hand it to step 6 instead.
 - Merge every analyst's `shapes` into one ranked list for the diagram agent, and
   drop the ones that are only a single relationship.
 
 Validate before going further (see **Required gates**) — the schema names the
 field that is wrong.
 
-## 5. Draw — the main event
+## 6. Draw — the main event
 
 One agent, strongest model, in its own context, following
 **`skills/diagrams/SKILL.md`**. It reads `work/content.json`, `work/turns.json`
@@ -118,7 +156,7 @@ Gate before building:
 callsheet lint-diagrams out/diagrams.html --turns work/turns.json
 ```
 
-## 6. Build
+## 7. Build
 
 ```
 callsheet build --content work/content.json --turns work/turns.json \
@@ -130,7 +168,7 @@ The build fails loudly on a missing or duplicated template marker, escapes the
 injected JSON so it cannot break out of its `<script>`, and reports the number of
 external requests in the finished page. That number must be zero.
 
-## 7. Verify — adversarial, in a fresh context
+## 8. Verify — adversarial, in a fresh context
 
 One agent that has **not** seen the analysis, following
 **`skills/verify/SKILL.md`**. Give it `out/index.html` and `work/turns.json` and
@@ -143,7 +181,7 @@ generalized from, that pass caught a per-case cost figure that no one had said o
 loud, sitting in a finished diagram. Rebuild after the deletions and run the
 verifier once more, in another fresh context.
 
-## 8. Hold out (only when a reference answer exists)
+## 9. Hold out (only when a reference answer exists)
 
 If someone else has already written up the same call, follow
 **`skills/holdout/SKILL.md`**: seal it *before* the analysis starts, run the build
@@ -151,7 +189,7 @@ inside `callsheet.holdout.sealed_guard`, and compare only after the artifact is
 frozen.
 
 ```
-callsheet seal sealed/                     # read-only + sha256, before step 3
+callsheet seal sealed/                     # read-only + sha256, before step 4
 callsheet compare out/index.html sealed/   # after the artifact is final
 ```
 
@@ -184,6 +222,7 @@ with no data removes itself from the page rather than leaving an empty heading.
 ## Required gates — none are advisory, each names the fault
 
 ```
+callsheet lexicon check work/transcript.txt --profile PROFILE   # before anything reads it
 python -c "import json;from callsheet.schema import validate;validate(json.load(open('work/content.json')))"
 callsheet lint-diagrams out/diagrams.html --turns work/turns.json
 callsheet build …    # reports external requests; that count must be zero
@@ -194,5 +233,7 @@ callsheet build …    # reports external requests; that count must be zero
 - If it has a shape, it is a figure. Prose is for what does not.
 - A claim without a timestamp does not go in the document.
 - Quote text is copied, never tidied.
+- A transcript correction is proposed, reviewed by a person, and recorded in the
+  artifact. Nothing rewrites a transcript silently.
 - The verifier runs in a fresh context, and its deletions are applied.
 - Sealed material stays sealed until the artifact is final.

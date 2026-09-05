@@ -16,8 +16,9 @@ recording ──▶ transcript ──▶ turns.json ──▶ chunk1..N.txt ─�
                                                               (agents write)
 ```
 
-Python does the mechanical parts: transcription, parsing, chunking, schema
-validation, diagram linting, injection, sealing and overlap measurement. The
+Python does the mechanical parts: transcription, vocabulary checking, parsing,
+chunking, schema validation, diagram linting, injection, sealing and overlap
+measurement. The
 reading and drawing is done by agents, and `SKILL.md` is the Claude Code skill
 that drives them.
 
@@ -49,6 +50,7 @@ tells a reader nothing the transcript did not.
 
 | | |
 |---|---|
+| `skills/lexicon/` | recovering domain vocabulary the recogniser mangled, before anything reads the transcript |
 | `skills/diagrams/` | authoring the figure set: twelve figure kinds, the house style, the self-check |
 | `skills/verify/` | the adversarial fact-check, in a fresh context, grading FABRICATED / WRONG / MISATTRIBUTED / IMPRECISE |
 | `skills/holdout/` | sealing a reference answer and measuring independence afterwards |
@@ -63,6 +65,7 @@ pip install -e ".[dev]"
 
 ```
 callsheet transcribe call.m4a -m ~/models/ggml-large-v3.bin -o work/transcript
+callsheet lexicon check work/transcript.txt --profile profiles/example-engineer.json
 callsheet parse work/transcript.txt -o work
 callsheet chunk work/turns.json -n 4 -o work
 
@@ -87,6 +90,35 @@ two figures so every arrowhead on the page repaints itself, a figure missing
 `role="img"`, `<title>`, `<desc>` or its numbered key, text under 10px, and — with
 `--turns` — a cited timestamp that starts no real turn. It exits nonzero and
 names each fault and the figure it lives in.
+
+### Recovering mangled vocabulary
+
+Local speech recognition has no prior for the words a conversation is about, so
+it writes the nearest ordinary English it knows. From one real interview: FAISS
+became "fate face", Cognee "cockney", LangGraph "land graph", BM25 "abeam 25",
+reciprocal rank fusion "rank reciprocal factor", SQLite "SQL light", ChromaDB
+"Chrome IDB". A reader who searches the write-up's spelling finds nothing in the
+transcript, and anything summarising it downstream will explain what it thinks
+"abeam 25" means.
+
+`callsheet lexicon` profiles how one person writes — their vocabulary and their
+phrasing, from documents they wrote — and uses that profile twice: to propose
+corrections where the transcript sounds like a term the speaker uses but is not
+spelled like one, and to flag sentences whose phrasing is absent from the profile
+*and* whose register sits far from it, which is what invented text looks like.
+
+```
+callsheet lexicon build --from docs/ notes/*.md --name ada -o profiles/ada.json
+callsheet lexicon check work/transcript.txt --profile profiles/ada.json -o work/lexicon.md
+callsheet lexicon apply work/transcript.txt --profile profiles/ada.json --write
+```
+
+`check` exits nonzero when it finds anything, so it gates a pipeline. Corrections
+are never applied on their own: `apply` does nothing without `--write`, and
+writes a `.corrections.json` audit of every span, offset and score beside its
+output. `profiles/example-engineer.json` ships so the check works before you have
+built a profile of your own, and `profiles/README.md` explains why a profile —
+frequencies, never message content — is safe to commit.
 
 ### Transcript formats
 

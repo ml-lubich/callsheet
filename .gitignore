@@ -10,3 +10,5 @@ out/
 work/
 sealed/
 .omc/
+profiles/*.local.json
+corpus/

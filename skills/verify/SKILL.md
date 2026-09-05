@@ -19,6 +19,7 @@ what we found", no reassurance about which parts are solid.
 ```
 out/index.html      the finished artifact
 work/turns.json     the parsed transcript
+work/transcript.txt.corrections.json    if the transcript was corrected — see check 11
 ```
 
 **`work/turns.json` is the only source of truth.** Not your knowledge of the
@@ -93,7 +94,14 @@ the artifact, and either the supporting timestamp or `UNSUPPORTED`.
    silently reassigns an argument.
 9. **The abstract asserts nothing new.** Anything in the abstract must appear,
    supported, further down. Summaries are where unsupported synthesis hides.
-10. **Diarization honesty.** If the transcript was not reliably diarized, the
+10. **Applied corrections are disclosed.** If a corrections audit exists, the
+    artifact must say the transcript was edited and which terms were changed. An
+    undisclosed correction is the same defect as a fabrication — a word appears
+    in the document, spelled authoritatively, that the recording does not
+    contain. Check each applied correction against the audit's score and span,
+    and grade an accepted low-scoring guess IMPRECISE at best. Any term in the
+    document that is neither in `turns.json` nor in the audit is FABRICATED.
+11. **Diarization honesty.** If the transcript was not reliably diarized, the
     document must say so, and attributions must not be stated as certain.
 
 ## Output
