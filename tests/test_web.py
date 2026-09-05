@@ -4,12 +4,15 @@ Only the subprocess boundary is faked. Everything else — locating the front en
 environment it is handed, the file it leaves behind — is real.
 """
 
+import json
 import subprocess
 
 import pytest
 
 from callgen.build import BuildError, build_web, web_path
 from callgen.cli import main
+
+from .conftest import FIXTURES
 
 
 class Runner:
@@ -37,6 +40,15 @@ def web(tmp_path):
     (directory / "node_modules").mkdir(parents=True)
     (directory / "package.json").write_text('{"name":"callgen-web"}')
     return directory
+
+
+@pytest.fixture
+def valid_work(tmp_path):
+    """A WORKDIR the CLI's schema and mode gates will let through."""
+    work = tmp_path / "work"
+    work.mkdir()
+    (work / "content.json").write_text((FIXTURES / "content.json").read_text())
+    return work
 
 
 def test_the_front_end_ships_beside_the_source_tree():
@@ -86,6 +98,35 @@ def test_a_build_that_wrote_nothing_is_an_error_not_a_success(tmp_path, web):
         build_web(tmp_path / "work", tmp_path / "out.html", web=web, runner=silent)
 
 
+def test_the_theme_reaches_the_web_build_as_an_env_var(tmp_path, web):
+    runner = Runner(web)
+    build_web(tmp_path / "work", tmp_path / "out.html", web=web, runner=runner, theme="dark")
+    (argv, kw) = runner.calls[-1]
+    assert kw["env"]["CALLGEN_THEME"] == "dark"
+
+
+def test_the_theme_defaults_to_auto(tmp_path, web):
+    runner = Runner(web)
+    build_web(tmp_path / "work", tmp_path / "out.html", web=web, runner=runner)
+    (argv, kw) = runner.calls[-1]
+    assert kw["env"]["CALLGEN_THEME"] == "auto"
+
+
+def test_cli_web_branch_passes_the_theme_flag(valid_work, web, monkeypatch, tmp_path, capsys):
+    runner = Runner(web)
+    monkeypatch.setattr("callgen.build.web_path", lambda: web)
+    monkeypatch.setattr("callgen.build.subprocess.run", runner)
+
+    assert main([
+        "build", "--web", str(valid_work), "--theme", "light",
+        "-o", str(tmp_path / "out" / "index.html"),
+    ]) == 0
+    capsys.readouterr()
+    (argv, kw) = runner.calls[-1]
+    assert kw["env"]["CALLGEN_THEME"] == "light"
+    assert kw["env"]["CALLGEN_MODE"] == "professional"
+
+
 def test_a_missing_front_end_says_so(tmp_path):
     with pytest.raises(BuildError, match="no web front end"):
         build_web(tmp_path, tmp_path / "out.html", web=tmp_path / "nowhere")
@@ -97,15 +138,48 @@ def test_missing_npm_is_named_rather_than_a_stack_trace(tmp_path, web, monkeypat
         build_web(tmp_path / "work", tmp_path / "out.html", web=web)
 
 
-def test_cli_web_branch_writes_the_page(tmp_path, web, monkeypatch, capsys):
+def test_cli_web_branch_writes_the_page(valid_work, web, monkeypatch, tmp_path, capsys):
     out = tmp_path / "out" / "index.html"
     runner = Runner(web)
     monkeypatch.setattr("callgen.build.web_path", lambda: web)
     monkeypatch.setattr("callgen.build.subprocess.run", runner)
 
-    assert main(["build", "--web", str(tmp_path / "work"), "-o", str(out)]) == 0
+    assert main(["build", "--web", str(valid_work), "-o", str(out)]) == 0
     assert out.is_file()
     assert "one file" in capsys.readouterr().out
+
+
+def test_cli_web_branch_refuses_content_that_breaks_its_mode(tmp_path, web, monkeypatch, capsys):
+    work = tmp_path / "work"
+    work.mkdir()
+    payload = json.loads((FIXTURES / "content.json").read_text())
+    payload["abstract"] = " ".join(["word"] * 300)
+    (work / "content.json").write_text(json.dumps(payload))
+    runner = Runner(web)
+    monkeypatch.setattr("callgen.build.web_path", lambda: web)
+    monkeypatch.setattr("callgen.build.subprocess.run", runner)
+
+    code = main(["build", "--web", str(work), "-o", str(tmp_path / "out" / "index.html")])
+    assert code == 1
+    assert "abstract" in capsys.readouterr().err
+    assert runner.calls == []
+
+
+def test_web_content_finds_content_json_in_workdir_or_its_work_subdir(tmp_path):
+    from callgen.build import web_content
+
+    direct = tmp_path / "direct"
+    direct.mkdir()
+    (direct / "content.json").write_text('{"a": 1}')
+    assert web_content(direct) == {"a": 1}
+
+    nested = tmp_path / "nested"
+    (nested / "work").mkdir(parents=True)
+    (nested / "work" / "content.json").write_text('{"b": 2}')
+    assert web_content(nested) == {"b": 2}
+
+    with pytest.raises(BuildError, match="no content.json"):
+        web_content(tmp_path / "empty")
 
 
 def test_cli_still_demands_the_data_when_there_is_no_web_flag(tmp_path, capsys):

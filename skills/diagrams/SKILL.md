@@ -337,9 +337,8 @@ makes fusion legal. Every node is a glyph.
       has a track that starts somewhere else. The right column is the same three
       after rank normalisation — that is all fusion does, and why it works.</span>
   </figcaption>
-  <div class="dg-scroll">
     <svg viewBox="0 0 880 268" role="img" preserveAspectRatio="xMidYMid meet"
-         style="width:100%;height:auto;min-width:880px">
+         style="width:100%;height:auto">
       <title>Three incompatible score scales normalised to rank before fusion</title>
       <desc>A query fans out to three indexes drawn as score bars: bounded with a
         fixed track, unbounded running past the panel edge, and offset on its own
@@ -396,7 +395,6 @@ makes fusion legal. Every node is a glyph.
       <rect x="762" y="140" width="46" height="7" fill="var(--ink-soft)"/>
       <text x="762" y="164" font-size="10" fill="var(--ink-soft)">one order · 6</text>
     </svg>
-  </div>
   <ol class="dg-key">
     <li><b>one query</b> <span>00:12:40</span></li>
     <li><b>semantic, bounded</b> <span>00:13:02</span></li>
@@ -470,10 +468,7 @@ is what makes a diagram checkable, and the first thing the verifier reads.
 
 ## Responsiveness
 
-Each figure must be legible at 390px wide. Either design it to that width, or wrap the
-`<svg>` in `<div class="dg-scroll">` with `overflow-x:auto` and a `min-width` equal to its
-viewBox width. The figure scrolls; the page body never scrolls horizontally. The `dg-key`
-collapses to one column under 640px.
+Figures scale to the column: `width:100%; height:auto`, never a `min-width`, never a scrolling wrapper. A horizontal scrollbar inside a figure is overflow with a frame around it, and on a narrow window it clips the left column and reads as broken. Author at a viewBox width of 1000-1200 units with labels at 13px or larger so the figure is still legible when a 1000px window scales it to 0.8; the page renders the figures section single-column below 1280px so a figure always has the full content width. If a figure cannot be read at that scale, it has too much in it: split it.
 
 ## The self-check before declaring done
 

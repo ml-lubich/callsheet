@@ -13,7 +13,7 @@
       {"key": "C", "name": "Colm Ferreira", "role": "Platform engineer"}
     ]
   },
-  "abstract": "Nadia Brandt and Colm Ferreira reconstruct an overnight outage. A connection-pool change Colm meant to scope to one queue lands on the ingest fleet's shared default, and when nightly batch volume rises the workers cannot keep pace; backlog climbs for half an hour before an alert pages Nadia. Seeing healthy workers, she restarts the fleet, which triggers a reconnect storm and redelivers unacknowledged messages, so customers receive duplicate confirmation emails.\n\nColm eventually traces the outage to his own change, and after coordinating a safe revert the backlog drains. The pair leave with next steps on message deduplication, a config guardrail, a reconnect limit, and confirming what customers were told.",
+  "abstract": "Nadia Brandt and Colm Ferreira reconstruct an overnight outage. A connection-pool change Colm meant to scope to one queue lands on the ingest fleet's shared default, and when nightly batch volume rises the workers cannot keep pace. Backlog climbs for half an hour before an alert pages Nadia. Seeing healthy workers, she restarts the fleet, which triggers a reconnect storm and redelivers unacknowledged messages, so customers receive duplicate confirmation emails.\n\nColm eventually traces the outage to his own change, and after coordinating a safe revert the backlog drains. The pair leave with next steps on message deduplication, a config guardrail, a reconnect limit, and confirming what customers were told.",
   "acts": [
     {
       "n": 1,
@@ -21,7 +21,7 @@
       "span": "00:00:00-00:16:50",
       "start_s": 0,
       "end_s": 1010,
-      "summary": "A connection-pool change meant for a different queue lands on the shared ingest default; when nightly batch volume rises the workers cannot keep pace, and the queue depth climbs for nearly half an hour before the alert pages Nadia.",
+      "summary": "A connection-pool change meant for a different queue lands on the shared ingest default. When nightly batch volume rises the workers cannot keep pace, and the queue depth climbs for nearly half an hour before the alert pages Nadia.",
       "turning_point": {"ts": "00:07:53", "s": 473, "text": "backlog is flat, flat, flat, and then it just starts climbing at 0214 UTC."}
     },
     {
@@ -30,7 +30,7 @@
       "span": "00:16:50-00:28:02",
       "start_s": 1010,
       "end_s": 1682,
-      "summary": "Seeing healthy-looking workers, Nadia restarts the ingest fleet; the simultaneous reconnect spikes the config service and redelivers unacknowledged messages, which the notification service resends as duplicate confirmation emails to customers.",
+      "summary": "Seeing healthy-looking workers, Nadia restarts the ingest fleet. The simultaneous reconnect spikes the config service and redelivers unacknowledged messages, which the notification service resends as duplicate confirmation emails to customers.",
       "turning_point": {"ts": "00:21:22", "s": 1282, "text": "Killing the process before the ack means the queue thinks that message was never delivered, so it redelivers it once a worker comes back."}
     },
     {
@@ -39,7 +39,7 @@
       "span": "00:28:02-00:46:04",
       "start_s": 1682,
       "end_s": 2764,
-      "summary": "Colm traces the outage to his own misapplied config change, and after confirming it is safe to revert, the two coordinate a fix; the backlog drains and the pair sets next steps on dedupe, guardrails and comms.",
+      "summary": "Colm traces the outage to his own misapplied config change, and after confirming it is safe to revert, the two coordinate a fix. The backlog drains and the pair sets next steps on dedupe, guardrails and comms.",
       "turning_point": {"ts": "00:28:02", "s": 1682, "text": "0338 UTC. I'm confident on that one, I've got the terminal history and the diff right in front of me, timestamped."}
     }
   ],

@@ -15,7 +15,7 @@
       {"key": "W", "name": "Wren Okafor", "role": "Support lead"}
     ]
   },
-  "abstract": "Three people review why a bulk shift-import flow silently drops bad rows without telling anyone, and agree to reject an entire uploaded file the moment one row fails validation instead.\n\nThat plan holds until Wren's own ticket data shows most failures are a single bad row in an otherwise clean file, and cracks further once Tomas remembers an enterprise account already piloting nightly imports whose export mixes three regional systems that will never agree on formatting. Priya reverses the decision: good rows post, bad rows are quarantined, and a per-row report explains what happened and why.\n\nThe call ends assigning a stakeholder write-up, a rewritten support macro, and a revised engineering timeline.",
+  "abstract": "Three people review why a bulk shift-import flow silently drops bad rows without telling anyone. They agree to reject an entire uploaded file the moment one row fails validation instead. That plan holds until Wren's own ticket data shows most failures are a single bad row in an otherwise clean file.\n\nIt cracks further once Tomas remembers an enterprise account already piloting nightly imports whose export mixes three regional systems that will never agree on formatting. Priya reverses the decision: good rows post, bad rows are quarantined, and a per-row report explains what happened and why. The call ends assigning a stakeholder write-up, a rewritten support macro, and a revised engineering timeline.",
   "acts": [
     {
       "n": 1,

@@ -13,7 +13,7 @@
       {"key": "B", "name": "Bo Marek", "role": "Yard supervisor"}
     ]
   },
-  "abstract": "Two people spend an hour narrowing a stock discrepancy that had been read as theft. Bo Marek locates the gap at the receiving door rather than in the racks: a pallet is scanned on arrival and then waits on the apron, sometimes for two hours, before anyone assigns it a bin. For that wait the system claims custody of stock the floor cannot find.\n\nA quarter of measurement puts roughly eighty per cent of the gap back within four hours, reframing loss as latency. Ada Sterling presses on the residual and Bo proposes a handheld that refuses to release a driver until a bin is assigned. The call ends without a decision on who funds the handhelds.",
+  "abstract": "Two people spend an hour narrowing a stock discrepancy that had been read as theft. Bo Marek locates the gap at the receiving door rather than in the racks. A pallet is scanned on arrival and waits on the apron, sometimes for two hours, before anyone assigns it a bin. For that wait the system claims custody of stock the floor cannot find.\n\nA quarter of measurement puts roughly eighty per cent of the gap back within four hours, reframing loss as latency. Ada Sterling presses on the residual and Bo proposes a handheld that refuses to release a driver until a bin is assigned. The call ends without a decision on who funds the handhelds.",
   "acts": [
     {
       "n": 1,

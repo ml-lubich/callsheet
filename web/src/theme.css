@@ -1,68 +1,75 @@
-/* The token system the vanilla template established, modernised: one ground, one ink,
-   two pens. The ground is a cool off-white in light and a deep blue-black slate in
-   dark — never cream, never black. The pens are one warm and one cool, which is the
-   axis a colour-blind reader can still separate, and the page never leans on colour
-   alone: the two speakers also sit above and below the chart's baseline, carry
-   different margin rules in the transcript, and are named in every legend.
+/* One ground, one ink, two pens. The ground is a cool near-white in light and a deep
+   slate in dark — never cream, never black. The pens are one warm and one cool, which
+   is the axis a colour-blind reader can still separate, and the page never leans on
+   colour alone: the two speakers also sit above and below the chart's baseline, take
+   opposite sides of the transcript column, carry an initialled chip, and are named in
+   every legend.
 
-   Every colour clears 4.5:1 on its ground (AA body) and the ink clears 7:1 (AAA).
-   Light lives on bare :root so a page with no media query still has a complete
-   palette; dark is declared twice, once for the system preference and once for the
-   explicit toggle, so neither can strand the other. No monospace anywhere — tabular
-   numerals come from font-variant-numeric on the body face. */
+   Every pen clears 4.5:1 on both its grounds (--paper and the slightly lifted --paper-2
+   the cards sit on) and each ink clears 7:1. Measured, not guessed:
+
+     light  paper #F6F7F9 / paper-2 #FFFFFF
+       ink #14161A 16.9  ink-soft #5F6670 5.41  pen-a #BC3418 5.38  pen-b #15529E 7.17
+     dark   paper #0F1216 / paper-2 #171B21
+       ink #E8EBEF 15.7  ink-soft #98A1AD 7.19  pen-a #FF8A6B 8.14  pen-b #5FC8E8 9.76
+
+   Light lives on bare :root so a page with no media query still has a complete palette;
+   dark is declared twice, once for the system preference and once for the explicit
+   toggle, so neither can strand the other. No monospace anywhere — tabular numerals come
+   from font-variant-numeric on the body face. */
 :root{
   /* the hand-authored figure fragments name the pens by speaker role (d/m);
      alias them to the page pens so every figure follows both themes */
   --pen-d: var(--pen-a);
   --pen-m: var(--pen-b);
 
-  --paper:#F2F4F7;
-  --paper-2:#FAFBFC;
-  --grid:#D5DBE3;
-  --ink:#10151C;
-  --ink-soft:#55606E;
-  --pen-a:#A8321A;
-  --pen-b:#17557F;
-  --pen-n:#55606E;
-  --hl:rgba(23,85,127,.17);
-  --band:rgba(16,21,28,.045);
-  --shimmer:rgba(16,21,28,.07);
-  --shimmer-hi:rgba(16,21,28,.02);
+  --paper:#F6F7F9;
+  --paper-2:#FFFFFF;
+  --grid:#D9DDE3;
+  --ink:#14161A;
+  --ink-soft:#5F6670;
+  --pen-a:#BC3418;
+  --pen-b:#15529E;
+  --pen-n:#5F6670;
+  --hl:rgba(21,82,158,.15);
+  --band:rgba(20,22,26,.04);
+  --shimmer:rgba(20,22,26,.06);
+  --shimmer-hi:rgba(20,22,26,.015);
+  --radius:10px;
   --display:Superclarendon,"Bookman Old Style",Rockwell,Georgia,serif;
   --body:"Avenir Next",Avenir,"Segoe UI",system-ui,sans-serif;
   --cond:"Avenir Next Condensed","Avenir Next","Roboto Condensed",system-ui,sans-serif;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
-    --paper:#0F1720;
-    --paper-2:#17212C;
-    --grid:#2B3A4A;
-    --ink:#E7EDF3;
-    --ink-soft:#9BAABA;
-    --pen-a:#F1874E;
-    --pen-b:#54BAE2;
-    --pen-n:#9BAABA;
-    --hl:rgba(84,186,226,.22);
-    --band:rgba(231,237,243,.05);
-    --shimmer:rgba(231,237,243,.08);
-    --shimmer-hi:rgba(231,237,243,.02);
+    --paper:#0F1216;
+    --paper-2:#171B21;
+    --grid:#262C35;
+    --ink:#E8EBEF;
+    --ink-soft:#98A1AD;
+    --pen-a:#FF8A6B;
+    --pen-b:#5FC8E8;
+    --pen-n:#98A1AD;
+    --hl:rgba(95,200,232,.20);
+    --band:rgba(232,235,239,.05);
+    --shimmer:rgba(232,235,239,.07);
+    --shimmer-hi:rgba(232,235,239,.02);
   }
 }
 :root[data-theme="dark"]{
-  --paper:#0F1720;
-  --paper-2:#17212C;
-  --grid:#2B3A4A;
-  --ink:#E7EDF3;
-  --ink-soft:#9BAABA;
-  --pen-a:#F1874E;
-  --pen-b:#54BAE2;
-  --pen-n:#9BAABA;
-  --hl:rgba(84,186,226,.22);
-  --band:rgba(231,237,243,.05);
-  --shimmer:rgba(231,237,243,.08);
-  --shimmer-hi:rgba(231,237,243,.02);
+  --paper:#0F1216;
+  --paper-2:#171B21;
+  --grid:#262C35;
+  --ink:#E8EBEF;
+  --ink-soft:#98A1AD;
+  --pen-a:#FF8A6B;
+  --pen-b:#5FC8E8;
+  --pen-n:#98A1AD;
+  --hl:rgba(95,200,232,.20);
+  --band:rgba(232,235,239,.05);
+  --shimmer:rgba(232,235,239,.07);
+  --shimmer-hi:rgba(232,235,239,.02);
 }
-
 *,*::before,*::after{box-sizing:border-box}
 /* clip, not hidden: the viewport never scrolls sideways and no new scroll container is
    made, so the chart and the tables keep their own horizontal scrollbars */

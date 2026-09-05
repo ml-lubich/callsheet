@@ -48,6 +48,7 @@ export interface Content {
     sections?: string[];
     figures?: number;
     transcript?: "open" | "collapsed" | "omit";
+    collapsed?: string[];
   };
   /** `summarized` mode folds threads, signals and tensions into this one short list. */
   highlights?: string[];

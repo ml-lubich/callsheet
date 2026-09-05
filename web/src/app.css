@@ -62,6 +62,7 @@ a.ts:hover,button.ts:hover{color:var(--ink);border-bottom-color:currentColor}
   letter-spacing:.06em;
   text-transform:uppercase;
   border:1px solid var(--grid);
+  border-radius:8px;
   padding:8px 13px;
   cursor:pointer;
   background:var(--paper-2);
@@ -72,7 +73,7 @@ a.ts:hover,button.ts:hover{color:var(--ink);border-bottom-color:currentColor}
 
 /* ---------- verdict ---------- */
 .verdict-sec{padding-top:26px;padding-bottom:26px}
-.verdict{border:1px solid var(--ink-soft);background:var(--paper-2);padding:26px 28px 22px}
+.verdict{border:1px solid var(--ink-soft);border-radius:var(--radius);background:var(--paper-2);padding:26px 28px 22px}
 .verdict-position{
   font-family:var(--display);
   font-weight:400;
@@ -124,7 +125,7 @@ a.ts:hover,button.ts:hover{color:var(--ink);border-bottom-color:currentColor}
 .terrain-note{max-width:60ch;font-size:15px;color:var(--ink-soft)}
 /* a landscape box: the scene is fitted to the stage, so the stage keeps a shape
    worth fitting to rather than a tall empty column on a phone */
-.terrain-stage{aspect-ratio:16/9;max-height:min(52vh,380px);min-height:190px;border:1px solid var(--grid);background:var(--paper-2);position:relative;touch-action:pan-y}
+.terrain-stage{border-radius:var(--radius);overflow:hidden;aspect-ratio:16/9;max-height:min(52vh,380px);min-height:190px;border:1px solid var(--grid);background:var(--paper-2);position:relative;touch-action:pan-y}
 .terrain-stage canvas{display:block}
 .terrain-read{
   position:absolute;left:12px;bottom:10px;
@@ -138,7 +139,7 @@ a.ts:hover,button.ts:hover{color:var(--ink);border-bottom-color:currentColor}
 .abstract p{font-size:19px;line-height:1.62}
 
 /* ---------- acts ---------- */
-.timebar{position:relative;height:30px;border:1px solid var(--grid);background:var(--paper-2);margin-bottom:22px}
+.timebar{position:relative;height:30px;border:1px solid var(--grid);border-radius:8px;overflow:hidden;background:var(--paper-2);margin-bottom:22px}
 .timebar .seg{
   position:absolute;top:0;bottom:0;
   border-right:1px solid var(--grid);
@@ -160,8 +161,8 @@ a.ts:hover,button.ts:hover{color:var(--ink);border-bottom-color:currentColor}
 .tp .ts{display:inline-block;margin-top:10px}
 
 /* ---------- threads ---------- */
-.threads{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1px;background:var(--grid);border:1px solid var(--grid)}
-.thread{background:var(--paper-2);padding:22px 20px 20px;display:flex;flex-direction:column}
+.threads{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px}
+.thread{background:var(--paper-2);border:1px solid var(--grid);border-radius:var(--radius);padding:22px 20px 20px;display:flex;flex-direction:column}
 .thread h3{font-family:var(--display);font-weight:400;font-size:21px;line-height:1.2}
 .thread .what{margin-top:10px;font-size:15px}
 .thread .why{margin-top:10px;font-size:15px;color:var(--ink-soft)}
@@ -172,8 +173,8 @@ a.ts:hover,button.ts:hover{color:var(--ink);border-bottom-color:currentColor}
 .thread .count{margin-top:7px;font-size:13px}
 
 /* ---------- lands ---------- */
-.lands{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1px;background:var(--grid);border:1px solid var(--grid)}
-.land{background:var(--paper-2);padding:20px}
+.lands{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.land{background:var(--paper-2);border:1px solid var(--grid);border-radius:var(--radius);padding:20px}
 .land h3{font-family:var(--display);font-weight:400;font-size:19px;line-height:1.25}
 .land p{margin-top:9px;font-size:15px;color:var(--ink-soft)}
 .land .ts{display:inline-block;margin-top:12px}
@@ -182,7 +183,8 @@ a.ts:hover,button.ts:hover{color:var(--ink);border-bottom-color:currentColor}
 /* minmax(0,1fr): a figure with a min-width would otherwise widen the column and
    push the prose beside it off a phone, instead of scrolling inside its own box */
 .dg-wrap{display:grid;grid-template-columns:minmax(0,1fr);gap:22px}
-.dg-wrap figure{margin:0}
+.dg-wrap figure{margin:0;min-width:0}
+.dg-wrap svg{max-width:100%;height:auto}
 .dg-lead{max-width:66ch;font-size:18px;line-height:1.62;color:var(--ink);margin:0}
 .dg-bridge{max-width:60ch;font-size:15px;line-height:1.6;color:var(--ink-soft);margin:0 0 0 34px}
 .dg-bridge::before{content:"";display:block;width:38px;border-top:1px solid var(--grid);margin-bottom:10px}
@@ -190,7 +192,7 @@ a.ts:hover,button.ts:hover{color:var(--ink);border-bottom-color:currentColor}
 /* Desktop: the prose runs beside the figures rather than between them. The bridge is a
    lead-in to the figure that follows it, so plain (non-dense) auto-placement is what is
    wanted — it puts the bridge in the left column of the row the next figure lands in. */
-@media (min-width:1080px){
+@media (min-width:1280px){
   .dg-wrap{grid-template-columns:minmax(0,23ch) minmax(0,1fr);column-gap:38px;align-items:start}
   .dg-lead{grid-column:1 / -1;max-width:76ch}
   .dg-bridge{grid-column:1;margin:0;align-self:center;font-size:16px}
@@ -248,7 +250,7 @@ th .arrow{opacity:.55}
 .quote.q0 blockquote{color:var(--pen-a)}
 .quote.q1 blockquote{color:var(--pen-b)}
 .quote.qn blockquote{color:var(--pen-n)}
-.quote .attr{padding-left:24px}
+.quote .attr{padding-left:24px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
 
 .techlist{display:flex;flex-wrap:wrap;margin-top:18px;border-top:1px solid var(--grid)}
 .techlist li{
@@ -264,9 +266,9 @@ th .arrow{opacity:.55}
 @media (max-width:760px){.fitgrid{grid-template-columns:1fr}}
 .bullets li{padding:9px 0 9px 18px;position:relative;border-bottom:1px solid var(--grid);font-size:16px}
 .bullets li::before{content:"";position:absolute;left:0;top:17px;width:7px;height:1px;background:var(--ink-soft)}
-.risks{margin-top:24px;display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--grid);border:1px solid var(--grid)}
+.risks{margin-top:24px;display:grid;grid-template-columns:1fr 1fr;gap:14px}
 @media (max-width:760px){.risks{grid-template-columns:1fr}}
-.risk{background:var(--paper-2);padding:20px}
+.risk{background:var(--paper-2);border:1px solid var(--grid);border-radius:var(--radius);padding:20px}
 .risk h4{font:400 13px/1 var(--cond);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);font-weight:400}
 .risk p{margin-top:10px;font-size:16px}
 .steps li{display:grid;grid-template-columns:78px minmax(0,1fr);gap:0 14px;padding:14px 0;border-bottom:1px solid var(--grid)}
@@ -296,9 +298,10 @@ th .arrow{opacity:.55}
   background:var(--paper-2);
   color:var(--ink);
   border:1px solid var(--grid);
+  border-radius:8px;
 }
 .search::placeholder{color:var(--ink-soft)}
-.filters{display:flex;border:1px solid var(--grid);flex-wrap:wrap}
+.filters{display:flex;border:1px solid var(--grid);border-radius:8px;overflow:hidden;flex-wrap:wrap}
 .filters button{
   font:400 13px/1 var(--cond);letter-spacing:.06em;text-transform:uppercase;
   padding:11px 14px;cursor:pointer;border-right:1px solid var(--grid);color:var(--ink-soft);
@@ -310,11 +313,7 @@ th .arrow{opacity:.55}
 .turn.p0{border-left-color:var(--pen-a)}
 .turn.p1{border-left-color:var(--pen-b)}
 .turn.pn{border-left-color:var(--pen-n)}
-.turn .head{display:flex;gap:14px;align-items:baseline;flex-wrap:wrap}
-.turn .who{font:400 13px/1 var(--cond);letter-spacing:.06em;text-transform:uppercase}
-.turn.p0 .who{color:var(--pen-a)}
-.turn.p1 .who{color:var(--pen-b)}
-.turn.pn .who{color:var(--pen-n)}
+.turn .head{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
 .turn p{margin-top:8px;font-size:16px;line-height:1.6}
 .turn.flash{background:var(--hl)}
 mark{background:var(--hl);color:inherit}
@@ -367,8 +366,9 @@ mark{background:var(--hl);color:inherit}
 .actstack .actcard{
   background:var(--paper-2);
   border:1px solid var(--grid);
+  border-radius:var(--radius);
   padding:22px 26px;
-  box-shadow:0 12px 30px -22px rgba(0,0,0,.55);
+  box-shadow:0 6px 18px -14px rgba(0,0,0,.35);
 }
 .actstack .act{padding:0}
 .actstack .actcard .n{color:var(--pen-a)}
@@ -420,3 +420,72 @@ mark{background:var(--hl);color:inherit}
 .chapter{margin-top:14px}
 .chapter .collapse-head{border-top:0}
 .lands-block{margin-top:26px;border-top:1px solid var(--grid);padding-top:18px}
+
+/* ---------- the editorial spread ---------- */
+/* A titled section is a spread, not a centred column: the heading sits in a sticky rail
+   down the left and the content takes the rest of the width, so the page stops being a
+   narrow ribbon with margins either side of it. Narrow screens stack the two, which is
+   what the page always did. */
+.spread{display:grid;grid-template-columns:minmax(0,1fr)}
+.sec-body{min-width:0}
+@media (min-width:960px){
+  .spread{grid-template-columns:200px minmax(0,1fr);column-gap:44px;align-items:start}
+  .sec-rail{position:sticky;top:20px}
+  .sec-rail .sec{margin:0}
+  /* two-up lists rather than one long ladder down the middle of a wide column;
+     the child combinators keep this off the lists already inside .twoup */
+  .sec-body > div > .rows,
+  .sec-body > div > .steps{display:grid;grid-template-columns:1fr 1fr;column-gap:38px}
+  .sec-body > div > .rows > li,
+  .sec-body > div > .steps > li{border-top:1px solid var(--grid);border-bottom:0}
+  /* the figures and the reader bring their own rails; two side by side is one too many */
+  #sec-figures .spread,
+  #sec-transcript .spread{grid-template-columns:minmax(0,1fr)}
+  #sec-figures .sec-rail,
+  #sec-transcript .sec-rail{position:static}
+  #sec-transcript .sec-rail .sec{margin:0 0 18px}
+}
+
+/* ---------- speaker chip ---------- */
+.chip{display:inline-flex;align-items:center;gap:9px;min-width:0}
+.chip-i{
+  display:inline-flex;align-items:center;justify-content:center;
+  flex:0 0 auto;width:22px;height:22px;border-radius:50%;
+  font:400 11px/1 var(--cond);font-style:normal;letter-spacing:.03em;
+  color:var(--paper);background:var(--pen-n);
+}
+.chip.p0 .chip-i{background:var(--pen-a)}
+.chip.p1 .chip-i{background:var(--pen-b)}
+.chip-n{font:400 13px/1 var(--cond);letter-spacing:.06em;text-transform:uppercase;color:var(--pen-n)}
+.chip.p0 .chip-n{color:var(--pen-a)}
+.chip.p1 .chip-n{color:var(--pen-b)}
+
+/* ---------- who is talking ---------- */
+/* Two speakers take opposite sides of the column and keep their own pen down the outer
+   edge, so a scroll through the transcript reads as a conversation before a single name
+   is read. Anyone else stays centred and neutral. */
+@media (min-width:760px){
+  .turn{max-width:72ch}
+  .turn.p1{
+    margin-left:auto;
+    border-left:0;border-right:2px solid var(--pen-b);
+    padding-left:0;padding-right:18px;
+  }
+  .turn.p1 .head{justify-content:flex-end}
+  .turn.pn{margin-left:auto;margin-right:auto}
+}
+
+/* ---------- masthead and colophon ---------- */
+.masthead{display:inline-flex;align-items:center;gap:11px}
+.brand{
+  font:500 13px/1 var(--cond);letter-spacing:.24em;text-transform:uppercase;
+  color:var(--ink-soft);
+}
+.brand-dot{flex:0 0 auto;width:3px;height:3px;border-radius:50%;background:var(--ink-soft);opacity:.55}
+.colophon{
+  max-width:1180px;margin:0 auto;padding:24px 24px 46px;
+  border-top:1px solid var(--grid);
+  font:400 13px/1.5 var(--cond);letter-spacing:.06em;text-transform:uppercase;
+  color:var(--ink-soft);
+}
+@media (max-width:600px){.colophon{padding:20px 18px 36px}}

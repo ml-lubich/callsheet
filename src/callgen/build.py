@@ -39,7 +39,25 @@ def web_path() -> Path:
     return Path(__file__).resolve().parents[2] / "web"
 
 
-def build_web(work: Path, out: Path, web: Path | None = None, runner=None) -> Path:
+def web_content(work: Path) -> dict:
+    """content.json for the --web build: WORKDIR itself, or WORKDIR/work — the same
+    rule `vite.config.ts`'s `workDir()` uses to locate it."""
+    work = Path(work)
+    for candidate in (work, work / "work"):
+        found = candidate / "content.json"
+        if found.is_file():
+            return json.loads(found.read_text())
+    raise BuildError(f"no content.json under {work} (looked in {work} and {work}/work)")
+
+
+def build_web(
+    work: Path,
+    out: Path,
+    web: Path | None = None,
+    runner=None,
+    theme: str = "auto",
+    mode: str = "professional",
+) -> Path:
     """Run the Vite build over `work` and copy the one file it produces to `out`.
 
     The vanilla template stays the default; this is the other way of building the same
@@ -55,7 +73,12 @@ def build_web(work: Path, out: Path, web: Path | None = None, runner=None) -> Pa
     if not npm:
         raise BuildError("npm is not on PATH; the web front end needs node and npm to build")
 
-    env = {**os.environ, "CALLGEN_WORK": str(Path(work).resolve())}
+    env = {
+        **os.environ,
+        "CALLGEN_WORK": str(Path(work).resolve()),
+        "CALLGEN_THEME": theme,
+        "CALLGEN_MODE": mode,
+    }
     steps = [] if (web / "node_modules").is_dir() else [[npm, "install"]]
     steps.append([npm, "run", "build"])
     for step in steps:
@@ -81,11 +104,13 @@ def build(
     metrics: dict,
     diagrams: str | None = None,
     mode: str = "professional",
+    theme: str = "auto",
     root=None,
 ) -> str:
     """Return the finished page. Raises if the template is not shaped as expected."""
     validate(content)
     content = _modes.apply(content, mode, root)
+    content["_theme"] = theme
     _modes.enforce(content, mode, root)
     page = _modes.shape_template(template, content["_mode"])
     for marker, payload in (
@@ -94,7 +119,22 @@ def build(
         (METRICS_MARKER, metrics),
     ):
         page = _substitute(page, marker, _encode(payload))
-    return _substitute(page, DIAGRAMS_MARKER, diagrams or "")
+    page = _substitute(page, DIAGRAMS_MARKER, diagrams or "")
+    return _pin_theme(page, theme)
+
+
+_HTML_OPEN = re.compile(r"<html\b([^>]*)>", re.I)
+
+
+def _pin_theme(page: str, theme: str) -> str:
+    """Bake a light/dark theme into the page and hide the toggle. `auto` is a no-op."""
+    if theme not in ("light", "dark"):
+        return page
+    return _HTML_OPEN.sub(
+        lambda m: f'<html{m.group(1)} data-theme="{theme}" data-theme-pin="{theme}">',
+        page,
+        count=1,
+    )
 
 
 def _substitute(page: str, marker: str, payload: str) -> str:

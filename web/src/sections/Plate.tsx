@@ -27,20 +27,27 @@ function Cells({ meta }: { meta: Deck["content"]["meta"] }) {
 
 export function Plate({ deck }: { deck: Deck }) {
   const meta = deck.content.meta;
-  const { theme, toggle } = useTheme();
+  const { theme, toggle, pinned } = useTheme();
 
   return (
     <header className="wrap plate">
       <div className="plate-top">
-        <span className="rule-word">{meta.kind || "Call record"}</span>
-        <button
-          type="button"
-          className="tbtn"
-          onClick={toggle}
-          aria-label="Toggle light and dark theme"
-        >
-          {theme === "dark" ? "Light" : "Dark"}
-        </button>
+        <span className="masthead">
+          <span className="brand">Callgen</span>
+          <span className="brand-dot" aria-hidden="true" />
+          <span className="rule-word">{meta.kind || "Call record"}</span>
+        </span>
+        {/* a build pinned to one theme has nothing to toggle */}
+        {!pinned && (
+          <button
+            type="button"
+            className="tbtn"
+            onClick={toggle}
+            aria-label="Toggle light and dark theme"
+          >
+            {theme === "dark" ? "Light" : "Dark"}
+          </button>
+        )}
       </div>
       <Boot
         order={0}

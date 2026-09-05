@@ -10,7 +10,7 @@ import sys
 from dataclasses import asdict
 from pathlib import Path
 
-from .build import BuildError, build, build_web, external_refs, template_path
+from .build import BuildError, build, build_web, external_refs, template_path, web_content
 from .diagrams import (
     check_svg_fragment,
     extract_timestamps,
@@ -26,9 +26,16 @@ from .lexicon import (
     load_profile,
     suggest_corrections,
 )
-from .modes import ModeError, all_modes, layout_violations, prose_violations
+from .modes import (
+    ModeError,
+    all_modes,
+    enforce,
+    layout_violations,
+    prose_violations,
+    register_violations,
+)
 from .parse import ParseError, chunks, metrics, parse_transcript, transcript_from_turns
-from .schema import SchemaError
+from .schema import SchemaError, validate
 from .transcribe import DEFAULT_BINARY, TranscribeError, transcribe
 
 ERRORS = (
@@ -82,7 +89,11 @@ def cmd_chunk(a) -> int:
 
 def cmd_build(a) -> int:
     if a.web:
-        out = build_web(Path(a.web), Path(a.out))
+        work = Path(a.web)
+        content = web_content(work)
+        validate(content)
+        enforce(content, a.mode)
+        out = build_web(work, Path(a.out), theme=a.theme, mode=a.mode)
         size = out.stat().st_size / 1024
         print(f"wrote {out} — {size:.0f} KB, one file, no external requests")
         return 0
@@ -97,6 +108,7 @@ def cmd_build(a) -> int:
         _load(a.metrics),
         diagrams,
         mode=a.mode,
+        theme=a.theme,
     )
     out = Path(a.out)
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -114,7 +126,11 @@ def cmd_modes(a) -> int:
 
 def cmd_lint_prose(a) -> int:
     content = _load(a.content)
-    bad = prose_violations(content, a.mode) + layout_violations(content, a.mode)
+    bad = (
+        prose_violations(content, a.mode)
+        + register_violations(content, a.mode)
+        + layout_violations(content, a.mode)
+    )
     for line in bad:
         print(f"  {line}", file=sys.stderr)
     if bad:
@@ -327,6 +343,8 @@ def build_parser() -> argparse.ArgumentParser:
     b.add_argument("--template", help="defaults to the packaged template")
     b.add_argument("--mode", default="professional",
                    help="output mode; see `callgen modes`")
+    b.add_argument("--theme", choices=("auto", "light", "dark"), default="auto",
+                   help="pin the rendered theme; auto follows the visitor's system preference")
     b.add_argument("-o", "--out", default="out/index.html")
     b.set_defaults(fn=cmd_build)
 

@@ -87,17 +87,24 @@ carry the argument; every claim lives in a figure or in a number.
 ## The caps are hard
 
 Budgets are not advice. `callgen build` refuses a `content.json` whose prose
-runs over, and names every field with its word count and its excess. Per mode,
-scaled from the professional defaults — `summarized` and `compact` at 0.6,
-`concise` at 0.75, `creative` at 1.3:
+runs over, or that breaks a register rule (below), or that stacks a wall of
+prose sections, and names every field and rule it fails. Per mode, scaled from
+the professional defaults — `summarized` and `compact` at 0.6, `concise` at
+0.75, `creative` at 1.3:
 
 | Cap | Professional | Applies to |
 |---|---|---|
 | abstract | the mode's abstract budget | `abstract` |
-| paragraph | 70 | every paragraph of every prose field |
+| paragraph | 70 | every paragraph of every prose field, including a field with only one |
 | act summary | 60 | `acts[].summary` |
 | thread | 55 | `threads[].what`, `threads[].why_it_matters` |
 | list item | 30 | signals, tensions, numbers, diarization, next steps, evidence claims, fit items, turning points |
+| page | 900 | every capped field, summed |
+
+The paragraph cap applies even to a field with a single paragraph — the abstract's
+own budget can run higher than 70, so a one-paragraph abstract is still checked
+against the paragraph cap on top of its own. The page cap catches an artifact
+that stays inside every field's own budget but is long in aggregate.
 
 Quote text is never capped. Trimming a quote to a word count falsifies it.
 
@@ -124,6 +131,20 @@ satisfies this; a project mode that does not will be told so.
 - Concepts over words: a sentence describing a structure — an order, a fan-out,
   a comparison, a magnitude, a position in time — is a figure you have not drawn
   yet. It goes in a `shapes` entry for the diagram agent, not into the prose.
+
+Five of those are checked mechanically by `callgen.modes.register_violations`
+(also folded into `enforce` and `lint-prose`), not left as prompt text alone:
+
+| Rule | Mechanical check |
+|---|---|
+| No analogies or metaphors | a marker phrase — "like a", "as if", "akin to", "imagine", "in the same way that" and the rest — anywhere in a prose field |
+| No scare quotes | a straight or curly double-quoted span of 1–3 words; four words or more is a real quotation and is exempt |
+| No filler | "essentially", "basically", "simply", "very", "really", "actually", "in order to" |
+| One idea per sentence | any sentence over 28 words, split on `. ! ?` followed by whitespace or end (a decimal like `3.5` and a timestamp like `00:37:10` never split) |
+| No wall inside one field | more than 2 paragraphs in a single prose field |
+
+Quote text is exempt from all five — it is verbatim, so it is never rewritten to
+satisfy a register rule.
 
 ## Choosing one
 
@@ -165,6 +186,15 @@ setting. **Prose over budget is not truncated** — a paragraph cut to a word
 count is a mutilated paragraph, so the budget goes to the writer, and the page
 records what was asked for. Naming a mode that does not exist fails with the
 list of the ones that do.
+
+`--theme {auto,light,dark}` pins the rendered theme at build time, independent
+of mode. `auto` (the default) leaves the page following the visitor's system
+preference and the toggle button in place. `light` or `dark` bakes
+`data-theme="…"` onto the page and removes the toggle, for a page meant to be
+read one way regardless of who opens it — an embed, a printout, a brand that
+only ships one theme. It works on both build paths: the template records it as
+a sibling `_theme` key next to `_mode`, and `--web` passes it to the front end
+as the `CALLGEN_THEME` environment variable.
 
 Rendering the same call twice in two modes is cheap: the analysis does not
 change, only steps 5 and 7 rerun.

@@ -78,3 +78,15 @@ describe("the mode's figure cap", () => {
     expect(capFigures(splitFragment(FRAGMENT)).length).toBe(5);
   });
 });
+
+describe("collapsed sections", () => {
+  it("reads _mode.collapsed and keeps only known section ids", async () => {
+    const { shapeOf } = await import("../lib/mode");
+    const shape = shapeOf({ _mode: { collapsed: ["evidence", "signals", "not-a-section"] } } as never);
+    expect(shape.collapsed).toEqual(["evidence", "signals"]);
+  });
+  it("collapses nothing when the mode says nothing", async () => {
+    const { shapeOf } = await import("../lib/mode");
+    expect(shapeOf({} as never).collapsed).toEqual([]);
+  });
+});

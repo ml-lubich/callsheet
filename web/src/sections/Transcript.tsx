@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Collapsible } from "../components/Collapsible";
 import { Scrubber } from "../components/Scrubber";
-import { SpeakerKey } from "../components/SpeakerKey";
+import { SpeakerChip, SpeakerKey } from "../components/SpeakerKey";
 import { penClass } from "../lib/derive";
 import { onJump, reduceMotion } from "../lib/jump";
 import type { TranscriptMode } from "../lib/mode";
@@ -313,8 +313,12 @@ export function Reader({ deck }: { deck: Deck }) {
                   className={`turn ${penClass(keys, t.spk)}${flash === t.i ? " flash" : ""}`}
                 >
                   <div className="head">
+                    <SpeakerChip
+                      keys={keys}
+                      spk={t.spk}
+                      name={names[t.spk] || t.name || t.spk}
+                    />
                     <span className="ts">{t.ts}</span>
-                    <span className="who">{names[t.spk] || t.name || t.spk}</span>
                     <span className="ts">{t.w} words</span>
                   </div>
                   <Body text={t.t} query={query} />

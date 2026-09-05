@@ -1,4 +1,4 @@
-import { penVar, stats } from "../lib/derive";
+import { penClass, penVar, stats } from "../lib/derive";
 import type { Deck } from "../types";
 
 /**
@@ -33,5 +33,35 @@ export function SpeakerKey({ deck, className }: { deck: Deck; className?: string
         );
       })}
     </ul>
+  );
+}
+
+/** "Ada Speaker" -> "AS". One word, one letter; anything unnamed falls back to the key. */
+export function initials(name: string): string {
+  const words = String(name || "").trim().split(/\s+/).filter(Boolean);
+  return words.slice(0, 2).map((w) => w[0].toUpperCase()).join("") || "?";
+}
+
+/**
+ * A speaker, named and colour-coded, small enough to sit in a transcript turn head or
+ * under a quote. The disc carries the initials in that speaker's pen, so a reader
+ * scanning the transcript knows who is talking before reading the name.
+ */
+export function SpeakerChip({
+  keys,
+  spk,
+  name,
+}: {
+  keys: string[];
+  spk: string;
+  name: string;
+}) {
+  return (
+    <span className={`chip ${penClass(keys, spk)}`}>
+      <i className="chip-i" aria-hidden="true">
+        {initials(name)}
+      </i>
+      <span className="chip-n">{name}</span>
+    </span>
   );
 }

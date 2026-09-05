@@ -6,7 +6,7 @@ import { reduceMotion } from "../lib/jump";
  * The one in-section stagger, in seconds. Every list on the page steps its rows by
  * this, so the whole document has a single rhythm rather than one per section.
  */
-export const STAGGER = 0.055;
+export const STAGGER = 0.04;
 
 /**
  * Opacity and eight pixels of rise, once, on the way in. Nothing bounces and nothing

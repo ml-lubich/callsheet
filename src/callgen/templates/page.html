@@ -120,6 +120,7 @@ a.ts:hover{color:var(--ink);border-bottom-color:currentColor}
   white-space:nowrap;
 }
 .tbtn:hover{border-color:var(--ink-soft)}
+:root[data-theme-pin] #theme{display:none}
 
 /* ---------- chart ---------- */
 .chart-sec{padding-top:8px;border-top:0}
@@ -321,8 +322,10 @@ const METRICS = /*__METRICS__*/null;
 
 /* ---- theme, applied before body paints ---- */
 const root = document.documentElement;
-const stored = (function(){ try{ return localStorage.getItem("cs-theme"); }catch(e){ return null; } })();
-if (stored === "light" || stored === "dark") root.setAttribute("data-theme", stored);
+if (!root.hasAttribute("data-theme-pin")) {
+  const stored = (function(){ try{ return localStorage.getItem("cs-theme"); }catch(e){ return null; } })();
+  if (stored === "light" || stored === "dark") root.setAttribute("data-theme", stored);
+}
 
 if (!CONTENT || !TURNS || !METRICS) return;
 

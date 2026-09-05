@@ -52,8 +52,28 @@ function callgenData(): Plugin {
   };
 }
 
+/**
+ * What the CLI decided about this build, written into the inline script in index.html
+ * and stamped on <html> before the first paint: the theme it is pinned to (auto, light
+ * or dark), and the mode it was rendered for. A pinned page never flashes the other
+ * theme and never renders a toggle it would ignore.
+ *
+ * The mode's real content — which sections, how many figures — travels in content.json's
+ * _mode block, which stays the authority. This carries the name only.
+ */
+function buildFlags(): Plugin {
+  const asked = process.env.CALLGEN_THEME || "auto";
+  const theme = asked === "light" || asked === "dark" ? asked : "auto";
+  const mode = process.env.CALLGEN_MODE || "professional";
+  return {
+    name: "callgen-build-flags",
+    transformIndexHtml: (html) =>
+      html.replaceAll("__CALLGEN_THEME__", theme).replaceAll("__CALLGEN_MODE__", mode),
+  };
+}
+
 export default defineConfig({
-  plugins: [react(), callgenData(), viteSingleFile()],
+  plugins: [react(), callgenData(), buildFlags(), viteSingleFile()],
   build: { assetsInlineLimit: 100_000_000, chunkSizeWarningLimit: 4000 },
   test: {
     globals: true,

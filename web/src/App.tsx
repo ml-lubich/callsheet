@@ -3,6 +3,7 @@ import { useOnceInView } from "./lib/inview";
 import { Reveal, STAGGER } from "./components/Reveal";
 import { Skeleton, SkeletonLines } from "./components/Skeleton";
 import { shapeOf } from "./lib/mode";
+import { Collapsible } from "./components/Collapsible";
 import { Abstract, AbstractSkeleton } from "./sections/Abstract";
 import { Acts, ActsSkeleton } from "./sections/Acts";
 import { Evidence, EvidenceSkeleton } from "./sections/Evidence";
@@ -52,6 +53,8 @@ function Terrain({ deck }: { deck: Deck }) {
 interface Block {
   title?: string;
   className?: string;
+  /** Row count shown on the folded header when the mode collapses this section. */
+  count?: number;
   when: boolean;
   skeleton: ReactNode;
   body: ReactNode;
@@ -132,30 +135,35 @@ function blocks(deck: Deck, figureCap?: number): Record<string, Block> {
     },
     evidence: {
       title: "Evidence",
+      count: (c.evidence ?? []).length,
       when: (c.evidence ?? []).length > 0,
       skeleton: <EvidenceSkeleton />,
       body: <Evidence rows={c.evidence!} turns={turns} />,
     },
     signals: {
       title: "Signals",
+      count: (c.signals ?? []).length,
       when: (c.signals ?? []).length > 0,
       skeleton: <RowsSkeleton n={4} />,
       body: <Signals rows={c.signals!} turns={turns} />,
     },
     numbers: {
       title: "Numbers",
+      count: (c.numbers ?? []).length,
       when: (c.numbers ?? []).length > 0,
       skeleton: <RowsSkeleton n={3} />,
       body: <Numbers rows={c.numbers!} turns={turns} />,
     },
     tech: {
       title: "Named in the call",
+      count: (c.tech ?? []).length,
       when: (c.tech ?? []).length > 0,
       skeleton: <NamedSkeleton />,
       body: <Named tech={c.tech!} />,
     },
     friction: {
       title: "Friction",
+      count: (c.tensions ?? []).length + (c.diarization ?? []).length,
       when: (c.tensions ?? []).length > 0 || (c.diarization ?? []).length > 0,
       skeleton: <RowsSkeleton />,
       body: <Friction tensions={c.tensions} diarization={c.diarization} turns={turns} />,
@@ -206,6 +214,20 @@ function pairUp(ids: string[]): string[][] {
   return out;
 }
 
+/**
+ * A section the mode folds. The body is identical; only its default visibility changes,
+ * so a reader who wants the 26 rows gets the 26 rows, and one who does not is not
+ * handed a wall of text between two figures.
+ */
+function fold(folded: boolean, label: string, count: number | undefined, body: ReactNode) {
+  if (!folded) return body;
+  return (
+    <Collapsible label={`Show ${label.toLowerCase()}`} meta={count ? `${count} rows` : undefined}>
+      {body}
+    </Collapsible>
+  );
+}
+
 export function App({ deck }: { deck: Deck }) {
   const shape = useMemo(() => shapeOf(deck.content), [deck.content]);
   const all = useMemo(() => blocks(deck, shape.figures), [deck, shape.figures]);
@@ -225,16 +247,21 @@ export function App({ deck }: { deck: Deck }) {
               title="Signals & numbers"
               skeleton={<RowsSkeleton n={4} />}
             >
-              <div className="twoup">
-                <div>
-                  <h3 className="subhead">{a.title}</h3>
-                  {a.body}
-                </div>
-                <div>
-                  <h3 className="subhead">{b.title}</h3>
-                  {b.body}
-                </div>
-              </div>
+              {fold(
+                row.every((id) => shape.collapsed.includes(id)),
+                "Signals and numbers",
+                (a.count ?? 0) + (b.count ?? 0),
+                <div className="twoup">
+                  <div>
+                    <h3 className="subhead">{a.title}</h3>
+                    {a.body}
+                  </div>
+                  <div>
+                    <h3 className="subhead">{b.title}</h3>
+                    {b.body}
+                  </div>
+                </div>,
+              )}
             </Sec>
           );
         }
@@ -248,10 +275,13 @@ export function App({ deck }: { deck: Deck }) {
             className={block.className}
             skeleton={block.skeleton}
           >
-            {block.body}
+            {fold(shape.collapsed.includes(row[0]), block.title ?? row[0], block.count, block.body)}
           </Sec>
         );
       })}
+      <p className="colophon">
+        Callgen · one file, every timestamp links to the turn it came from.
+      </p>
     </main>
   );
 }

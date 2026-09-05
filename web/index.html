@@ -5,11 +5,25 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Call record</title>
 <script>
-  /* the stored theme is applied before the first paint, so the page never flashes */
-  try {
-    var t = localStorage.getItem("cs-theme");
-    if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t);
-  } catch (e) {}
+  /* The theme is settled before the first paint, so the page never flashes the wrong
+     one. A build pinned to light or dark says so here and the toggle is not rendered;
+     an auto build applies whatever the reader last chose and leaves the rest to the
+     prefers-color-scheme rules. The pin is read outside the try, so a host that refuses
+     storage still gets it. */
+  (function () {
+    var pin = "__CALLGEN_THEME__";
+    var root = document.documentElement;
+    root.setAttribute("data-mode", "__CALLGEN_MODE__");
+    if (pin === "light" || pin === "dark") {
+      root.setAttribute("data-theme", pin);
+      root.setAttribute("data-theme-pin", pin);
+      return;
+    }
+    try {
+      var t = localStorage.getItem("cs-theme");
+      if (t === "light" || t === "dark") root.setAttribute("data-theme", t);
+    } catch (e) {}
+  })();
 </script>
 </head>
 <body>

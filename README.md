@@ -154,11 +154,20 @@ can add its own in `.callgen/modes.json`, merged over the built-ins. See
 `skills/modes/`.
 
 The word budgets are hard. `callgen build` refuses a `content.json` whose
-abstract, act summary, thread, list item or any single paragraph runs over the
-mode's cap, and names each field with its count and its excess. `callgen
-lint-prose work/content.json --mode concise` reports the same list without the
-failure, and additionally flags a wall of text: three consecutive prose sections
-with no figure, table or list to break them.
+abstract, act summary, thread, list item, any single paragraph or the page's
+total prose runs over the mode's cap, and names each field with its count and
+its excess. It also refuses a register-rule break — an analogy, scare quotes,
+filler ("essentially", "basically", …), a sentence over 28 words, or more than
+two paragraphs in one field — and a wall of text: three consecutive prose
+sections with no figure, table or list to break them. `callgen lint-prose
+work/content.json --mode concise` reports the same list without the failure.
+
+`callgen build --theme {auto,light,dark}` pins the rendered theme, independent
+of mode. `auto` (the default) leaves the page following the visitor's system
+preference. `light` or `dark` bakes the theme into the page and removes the
+toggle button — on the template path via a `data-theme` attribute, on the
+`--web` path via the `CALLGEN_THEME` environment variable the front end
+reads at build time.
 
 ### Linting the figures
 

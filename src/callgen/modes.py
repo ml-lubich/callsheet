@@ -84,6 +84,10 @@ class Mode:
     emphasis: str
     transcript: str
     summary: str
+    # Sections the page renders folded behind a one-line header. The facts stay in
+    # content.json untouched; only the default visibility changes. A 26-row table next
+    # to the figure that plots the same 26 rows is a wall of text, so the table folds.
+    collapsed: tuple[str, ...] = ()
 
 
 def _halved(budgets: dict[str, int]) -> dict[str, int]:
@@ -117,6 +121,7 @@ _BUILT_INS = (
         ),
         transcript="open",
         summary="the default — neutral register, every section, 8-12 figures",
+        collapsed=("evidence", "signals", "numbers", "tech", "friction"),
     ),
     Mode(
         name="concise",
@@ -135,6 +140,7 @@ _BUILT_INS = (
         ),
         transcript="collapsed",
         summary="every budget halved, threads and signals folded into the abstract, 6 figures",
+        collapsed=("evidence", "numbers", "tech", "friction"),
     ),
     Mode(
         name="formal",
@@ -152,6 +158,7 @@ _BUILT_INS = (
         ),
         transcript="open",
         summary="third person, no contractions, findings not recommendations, evidence first",
+        collapsed=("evidence", "signals", "numbers", "tech", "friction"),
     ),
     Mode(
         name="casual",
@@ -170,6 +177,7 @@ _BUILT_INS = (
         ),
         transcript="open",
         summary="second person, contractions, quotes lead, a lighter figure set",
+        collapsed=("evidence", "signals", "numbers", "tech", "friction"),
     ),
     Mode(
         name="interesting",
@@ -189,6 +197,7 @@ _BUILT_INS = (
         ),
         transcript="open",
         summary="leads with the surprises, threads reframed as what nobody said out loud",
+        collapsed=("evidence", "signals", "numbers", "tech", "friction"),
     ),
     Mode(
         name="summarized",
@@ -223,6 +232,7 @@ _BUILT_INS = (
         ),
         transcript="collapsed",
         summary="everything, but dense — one-line items, tables over prose, two screens",
+        collapsed=("evidence", "signals", "numbers", "tech", "friction"),
     ),
     Mode(
         name="creative",
@@ -241,6 +251,7 @@ _BUILT_INS = (
         ),
         transcript="open",
         summary="a titled essay opening, narrative captions, quotes set large",
+        collapsed=("evidence", "signals", "numbers", "tech", "friction"),
     ),
     Mode(
         name="diagrams-only",
@@ -313,6 +324,7 @@ def _from_dict(name: str, spec, where: str) -> Mode:
         name=name,
         register=str(spec.get("register", base.register)),
         sections=tuple(spec.get("sections", base.sections)),
+        collapsed=tuple(spec.get("collapsed", base.collapsed)),
         budgets=dict(spec.get("budgets", base.budgets)),
         figures=spec.get("figures", base.figures),
         emphasis=str(spec.get("emphasis", base.emphasis)),
@@ -399,6 +411,7 @@ def apply(content: dict, mode: str, root=None) -> dict:
         "budgets": dict(m.budgets),
         "figures": m.figures,
         "transcript": m.transcript,
+        "collapsed": [sec for sec in m.collapsed if sec in m.sections],
     }
     return out
 
@@ -438,6 +451,9 @@ REGISTER_RULES = """Register rules, in every mode:
 PROSE_CAPS = {"paragraph": 70, "act_summary": 60, "thread_what": 55, "list_item": 30}
 _CAP_SCALE = {"summarized": 0.6, "compact": 0.6, "concise": 0.75, "creative": 1.3}
 
+# The whole page's prose, summed across every capped field. Scaled like the rest.
+PAGE_PROSE_CAP = 900
+
 # Rows whose one prose field is a list item on the page. Quote text is verbatim
 # and is never capped — trimming a quote to a word count falsifies it.
 _LIST_FIELDS = (
@@ -460,6 +476,7 @@ def caps(mode: str, root=None) -> dict[str, int]:
     scale = _CAP_SCALE.get(m.name, 1.0)
     out = {kind: max(5, round(cap * scale)) for kind, cap in PROSE_CAPS.items()}
     out["abstract"] = m.budgets.get("abstract", BUDGETS["abstract"])
+    out["page"] = max(5, round(PAGE_PROSE_CAP * scale))
     return out
 
 
@@ -488,18 +505,18 @@ def prose_violations(content: dict, mode: str, root=None) -> list[str]:
     """Every field that is over its cap, with the count and the excess."""
     cap = caps(mode, root)
     out = []
+    page_total = 0
     for where, text, kind in _prose_fields(content):
         text = str(text or "")
         if not text.strip():
             continue
         total = len(text.split())
+        page_total += total
         if total > cap[kind]:
             out.append(
                 f"{where}: {total} words, {mode} allows {cap[kind]} ({total - cap[kind]} over)"
             )
         paragraphs = [p for p in re.split(r"\n\s*\n", text) if p.strip()]
-        if len(paragraphs) < 2:
-            continue
         for i, paragraph in enumerate(paragraphs, 1):
             count = len(paragraph.split())
             if count > cap["paragraph"]:
@@ -507,6 +524,113 @@ def prose_violations(content: dict, mode: str, root=None) -> list[str]:
                     f"{where} paragraph {i}: {count} words, {mode} allows "
                     f"{cap['paragraph']} ({count - cap['paragraph']} over)"
                 )
+    if page_total > cap["page"]:
+        out.append(
+            f"page: {page_total} words of prose, {mode} allows {cap['page']} "
+            f"({page_total - cap['page']} over)"
+        )
+    return out
+
+
+# --- register rules, made mechanical -----------------------------------------
+
+# "like a"/"like an" get their own, stricter rule below — a bare "imagine" and a
+# hedge like "look like a" or "seems like a" are ordinary English, not an analogy.
+ANALOGY_MARKERS = (
+    "is like", "it's like", "as if", "as though", "akin to",
+    "think of it as", "much like", "sort of like", "kind of like",
+    "in the same way that",
+)
+FILLER_WORDS = ("essentially", "basically", "simply", "very", "really", "actually", "in order to")
+SENTENCE_CAP = 28
+MAX_PARAGRAPHS = 2
+
+_ANALOGY_RE = re.compile(
+    r"\b(" + "|".join(re.escape(m) for m in sorted(ANALOGY_MARKERS, key=len, reverse=True))
+    + r")\b",
+    re.I,
+)
+# "like a"/"like an" is an analogy only after a genuine comparison — a copula or a
+# verb standing in for one. "look(s/ed) like a" and "seem(s/ed) like a" are hedges
+# about appearance, not a metaphor, so they are deliberately excluded by omission.
+_COMPARISON_VERBS = (
+    "is", "are", "was", "were", "feels", "felt", "works", "worked",
+    "acts", "acted", "behaves", "behaved", "reads", "sounds", "sounded",
+)
+_LIKE_A_AN_RE = re.compile(
+    r"\b(?:" + "|".join(_COMPARISON_VERBS) + r")\s+like\s+an?\b", re.I,
+)
+_FILLER_RE = re.compile(
+    r"\b(" + "|".join(re.escape(w) for w in sorted(FILLER_WORDS, key=len, reverse=True)) + r")\b",
+    re.I,
+)
+# A double-quoted span, straight or curly, short enough to be scare quotes rather
+# than an actual quotation (four words or more is treated as verbatim speech). The
+# content class excludes the quote character itself, so a match can never cross a
+# real quote and pair one quotation's closer with the next quotation's opener.
+_SCARE_QUOTE = re.compile(r'"([^"\n]*)"|“([^”\n]*)”')
+# Sentence-ending punctuation followed by whitespace or end of string. A period
+# inside a decimal ("3.5") or a timestamp ("00:37:10", no periods at all) is never
+# followed by whitespace, so it never matches here.
+_SENTENCE_END = re.compile(r"[.!?]+(?=\s|$)")
+
+# Abbreviations whose period is not a sentence end. Masked before splitting and
+# restored after, so "the call ran until 2 a.m. and nobody noticed." stays one
+# sentence instead of breaking after "a.m."
+_ABBREVIATIONS = (
+    "e.g.", "i.e.", "U.S.", "approx.", "a.m.", "p.m.", "vs.", "etc.",
+    "Dr.", "Mr.", "Ms.", "Mrs.", "No.",
+)
+_ABBR_RE = re.compile("|".join(re.escape(a) for a in _ABBREVIATIONS))
+
+
+def _sentences(text: str) -> list[str]:
+    """*text* split on sentence-ending punctuation, including a trailing fragment."""
+    masked = _ABBR_RE.sub(lambda m: m.group(0).replace(".", "\0"), text)
+    out, start = [], 0
+    for m in _SENTENCE_END.finditer(masked):
+        out.append(masked[start : m.end()])
+        start = m.end()
+    tail = masked[start:]
+    if tail.strip():
+        out.append(tail)
+    return [s.replace("\0", ".").strip() for s in out if s.strip()]
+
+
+def register_violations(content: dict, mode: str, root=None) -> list[str]:
+    """Every field that breaks a mechanical register rule: analogy, scare quotes,
+    filler, an over-long sentence, or too many paragraphs. Quote text is exempt —
+    it is verbatim, so it is never rewritten to satisfy a register rule."""
+    out = []
+    for where, text, _kind in _prose_fields(content):
+        text = str(text or "")
+        if not text.strip():
+            continue
+        for m in _ANALOGY_RE.finditer(text):
+            out.append(f"{where}: analogy/metaphor marker {m.group(0)!r} — say the thing")
+        for m in _LIKE_A_AN_RE.finditer(text):
+            out.append(f"{where}: analogy/metaphor marker {m.group(0)!r} — say the thing")
+        for m in _SCARE_QUOTE.finditer(text):
+            span = m.group(1) or m.group(2)
+            if 1 <= len(span.split()) <= 3:
+                out.append(
+                    f"{where}: scare quotes around {span!r} — drop the quotes or quote at length"
+                )
+        for m in _FILLER_RE.finditer(text):
+            out.append(f"{where}: filler word {m.group(0)!r} — cut it")
+        for s in _sentences(text):
+            n = len(s.split())
+            if n > SENTENCE_CAP:
+                out.append(
+                    f"{where}: sentence of {n} words over the {SENTENCE_CAP}-word cap "
+                    f"({n - SENTENCE_CAP} over) — {s[:60]!r}"
+                )
+        paragraphs = [p for p in re.split(r"\n\s*\n", text) if p.strip()]
+        if len(paragraphs) > MAX_PARAGRAPHS:
+            out.append(
+                f"{where}: {len(paragraphs)} paragraphs, register allows {MAX_PARAGRAPHS} "
+                f"({len(paragraphs) - MAX_PARAGRAPHS} over)"
+            )
     return out
 
 
@@ -535,8 +659,12 @@ def layout_violations(content: dict, mode: str, root=None) -> list[str]:
 
 
 def enforce(content: dict, mode: str, root=None) -> None:
-    """Raise :class:`ModeError` naming every field that is over its word cap."""
-    bad = prose_violations(content, mode, root)
+    """Raise :class:`ModeError` naming every prose, register or layout violation."""
+    bad = (
+        prose_violations(content, mode, root)
+        + register_violations(content, mode, root)
+        + layout_violations(content, mode, root)
+    )
     if bad:
         raise ModeError(
             f"content.json is over budget for mode {mode!r}:\n  - " + "\n  - ".join(bad)

@@ -22,6 +22,7 @@ from callgen.modes import (
     layout_violations,
     prompt_guidance,
     prose_violations,
+    register_violations,
     section_order,
 )
 from callgen.parse import metrics, parse_transcript
@@ -131,6 +132,7 @@ def test_apply_carries_the_mode_block(content, name):
         "budgets": dict(m.budgets),
         "figures": m.figures,
         "transcript": m.transcript,
+            "collapsed": [sec for sec in MODES[name].collapsed if sec in MODES[name].sections],
     }
 
 
@@ -361,12 +363,31 @@ def test_a_quote_is_never_capped(content):
 def test_every_mode_carries_its_own_caps(name):
     cap = caps(name)
     assert cap["abstract"] == get(name).budgets.get("abstract", 120)
-    for kind in ("paragraph", "act_summary", "thread_what", "list_item"):
+    for kind in ("paragraph", "act_summary", "thread_what", "list_item", "page"):
         assert cap[kind] > 0
     if name in ("compact", "summarized"):
         assert cap["list_item"] < caps("professional")["list_item"]
     if name == "creative":
         assert cap["list_item"] > caps("professional")["list_item"]
+
+
+def test_a_single_paragraph_field_is_still_capped_by_the_paragraph_rule(content):
+    """The abstract's own cap (120, professional) is looser than the paragraph cap
+    (70) — a one-paragraph abstract between those two must still be flagged."""
+    body = " ".join(["word"] * 90)
+    bad = prose_violations(over(content, abstract=body), "professional")
+    assert any("paragraph 1" in v and "90 words" in v for v in bad)
+
+
+def test_page_total_prose_is_capped(content):
+    huge = " ".join(["word"] * 950)
+    bad = prose_violations(over(content, abstract=huge), "professional")
+    assert any(v.startswith("page:") and "professional allows" in v for v in bad)
+
+
+def test_page_cap_is_scaled_like_the_other_caps():
+    assert caps("summarized")["page"] < caps("professional")["page"]
+    assert caps("creative")["page"] > caps("professional")["page"]
 
 
 def test_the_build_refuses_an_over_budget_page(content):
@@ -434,6 +455,120 @@ def test_cli_lint_prose_passes_and_fails(tmp_path, capsys):
 # The page renders the verdict as the abstract's first block and "where it lands"
 # as the acts' conclusion. apply() must not strip either when its owner survives.
 
+# --- register rules, made mechanical ----------------------------------------
+
+
+def test_an_analogy_marker_is_flagged(content):
+    text = "The process works like a well-oiled machine end to end."
+    bad = register_violations(over(content, abstract=text), "professional")
+    assert any("analogy" in v and "abstract" in v and "like a" in v for v in bad)
+
+
+def test_a_hedge_about_appearance_is_not_an_analogy(content):
+    """'look like a' and 'seem like a' hedge what something appears to be; they are
+    not a metaphor, and a bare 'imagine' is an ordinary verb, not an analogy marker."""
+    text = (
+        "The change made the queue look like a recurring outage. "
+        "Nobody could seem like a match for what happened. "
+        "Nobody could imagine the volume in advance."
+    )
+    assert register_violations(over(content, abstract=text), "professional") == []
+
+
+def test_a_short_quoted_span_is_scare_quotes_but_a_long_one_is_a_real_quotation(content):
+    short = over(content, abstract='The team called it a "quick win" before the numbers came in.')
+    bad = register_violations(short, "professional")
+    assert any("scare quotes" in v for v in bad)
+
+    long_quote = over(
+        content,
+        abstract=(
+            'He said "the whole plan falls apart without the missing driver data" '
+            "on the call."
+        ),
+    )
+    assert register_violations(long_quote, "professional") == []
+
+
+def test_two_long_adjacent_quotations_do_not_flag_the_connector(content):
+    """A regex that caps the quoted span's length can fail to reach the real closing
+    quote of a long quotation, then wrongly pair that closer with the NEXT
+    quotation's opener — flagging the connector words between them as scare quotes."""
+    q1 = "the whole plan for the northern route depends entirely on numbers nobody has ever " \
+        "measured"
+    q2 = "and every driver working that route has known the real schedule for a very long " \
+        "time now"
+    assert len(q1) > 80 and len(q2) > 80
+    text = f'She said "{q1}" and then said "{q2}" before the call wrapped up for good.'
+    bad = register_violations(over(content, abstract=text), "professional")
+    assert not any("scare quotes" in v for v in bad)
+
+
+def test_a_filler_word_is_flagged(content):
+    text = "The team is essentially done with the migration."
+    bad = register_violations(over(content, abstract=text), "professional")
+    assert any("filler word" in v and "essentially" in v for v in bad)
+
+
+def test_an_over_long_sentence_is_flagged(content):
+    text = " ".join(["word"] * 29) + "."
+    bad = register_violations(over(content, abstract=text), "professional")
+    assert any("sentence of 29 words" in v and "1 over" in v for v in bad)
+
+
+def test_a_sentence_split_does_not_trip_on_a_decimal_or_a_timestamp(content):
+    text = "The rate held at 3.5 percent through the call at 00:37:10 without moving."
+    assert register_violations(over(content, abstract=text), "professional") == []
+
+
+def test_a_sentence_split_does_not_trip_on_an_abbreviation(content):
+    short = "The shift wrapped around 2 a.m. after the crew fixed the issue, e.g. the pool pump."
+    bad = register_violations(over(content, abstract=short), "professional")
+    assert not any("sentence of" in v for v in bad)
+
+    long_text = " ".join(["word"] * 29) + " e.g. word and 2 a.m. word."
+    bad = register_violations(over(content, abstract=long_text), "professional")
+    assert any("sentence of" in v for v in bad)
+
+
+def test_too_many_paragraphs_is_flagged(content):
+    text = "One paragraph here.\n\nSecond paragraph here.\n\nA third paragraph is one too many."
+    bad = register_violations(over(content, abstract=text), "professional")
+    assert any("3 paragraphs" in v and "abstract" in v for v in bad)
+
+
+def test_a_quote_is_exempt_from_register_rules(content):
+    text = "it's like a rocket ship, honestly, essentially unstoppable"
+    quotes = [dict(content["quotes"][0], text=text)]
+    assert register_violations(over(content, quotes=quotes), "professional") == []
+
+
+def test_enforce_raises_on_a_register_violation(content):
+    text = "This plan reads like a rocket ship to the moon."
+    with pytest.raises(ModeError) as e:
+        enforce(over(content, abstract=text), "professional")
+    assert "analogy" in str(e.value)
+
+
+def test_enforce_raises_on_a_layout_violation(content, tmp_path):
+    _write_project_modes(
+        tmp_path,
+        {"wall": {"sections": ["abstract", "acts", "threads", "quotes"], "transcript": "omit"}},
+    )
+    with pytest.raises(ModeError) as e:
+        enforce(content, "wall", tmp_path)
+    assert "abstract, acts, threads" in str(e.value) and "figure" in str(e.value)
+
+
+def test_cli_lint_prose_reports_a_register_violation(tmp_path, capsys):
+    payload = json.loads((FIXTURES / "content.json").read_text())
+    payload["abstract"] = "This plan reads like a rocket ship to the moon."
+    bad = tmp_path / "content.json"
+    bad.write_text(json.dumps(payload))
+    assert main(["lint-prose", str(bad)]) == 1
+    assert "analogy" in capsys.readouterr().err
+
+
 def test_verdict_travels_with_abstract_and_lands_with_acts(content):
     content = dict(content)
     content["verdict"] = {"position": "p", "for": ["a"], "against": ["b"], "decides_it": "c"}
@@ -446,3 +581,29 @@ def test_verdict_travels_with_abstract_and_lands_with_acts(content):
     summarized = apply(content, "summarized")
     assert "verdict" in summarized          # abstract survives, so its verdict does
     assert "lands" not in summarized        # acts do not
+
+
+# --- text-heavy sections fold behind their figures ---------------------------
+# A table of 26 claims is a wall of text next to the figure that plots the same
+# 26 claims. The mode says which sections the page renders collapsed; the facts
+# are untouched, only the default visibility changes.
+
+def test_professional_collapses_the_text_heavy_sections(content):
+    kept = apply(content, "professional")
+    collapsed = kept["_mode"]["collapsed"]
+    for sec in ("evidence", "signals", "numbers", "tech", "friction"):
+        assert sec in collapsed, f"{sec} should render collapsed"
+    for sec in ("abstract", "figures", "acts", "quotes"):
+        assert sec not in collapsed, f"{sec} must stay open"
+    # collapsing never removes facts
+    assert kept["evidence"] == content["evidence"]
+
+
+def test_collapsed_is_a_subset_of_the_modes_sections():
+    for m in MODES.values():
+        assert set(m.collapsed) <= set(m.sections), m.name
+
+
+def test_diagrams_only_and_summarized_collapse_nothing():
+    assert MODES["diagrams-only"].collapsed == ()
+    assert MODES["summarized"].collapsed == ()

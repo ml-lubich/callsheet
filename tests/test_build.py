@@ -1,4 +1,5 @@
 import json
+import re
 
 import pytest
 
@@ -83,6 +84,23 @@ def test_external_refs_finds_what_it_should():
     assert external_refs('<script src="//example.com/a.js"></script>')
     assert external_refs('<a href="#t-3">local</a>') == []
     assert external_refs('<img src="data:image/png;base64,AAA">') == []
+
+
+def test_auto_theme_leaves_the_page_unpinned(content):
+    tpl = template_path().read_text()
+    frag = (FIXTURES / "diagrams.html").read_text()
+    out = build(tpl, content, TURNS, METRICS, diagrams=frag)
+    assert not re.search(r"<html\b[^>]*data-theme", out)
+    assert embedded(out, "CONTENT")["_theme"] == "auto"
+
+
+def test_a_pinned_theme_is_baked_into_the_html_tag_and_hides_the_toggle(content):
+    tpl = template_path().read_text()
+    frag = (FIXTURES / "diagrams.html").read_text()
+    out = build(tpl, content, TURNS, METRICS, diagrams=frag, theme="dark")
+    assert re.search(r'<html\b[^>]*data-theme="dark"[^>]*data-theme-pin="dark"', out)
+    assert embedded(out, "CONTENT")["_theme"] == "dark"
+    assert out.count("<html") == 1, "the theme is pinned on the one existing <html> tag"
 
 
 def test_content_is_validated_before_injection(content):

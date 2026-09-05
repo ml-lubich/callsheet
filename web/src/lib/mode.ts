@@ -14,6 +14,8 @@ export interface ModeBlock {
   sections?: string[];
   figures?: number;
   transcript?: TranscriptMode;
+  /** Sections rendered folded behind a one-line header; facts untouched. */
+  collapsed?: string[];
 }
 
 /** Every section the page can draw, in the order it draws them when no mode says otherwise. */
@@ -35,11 +37,24 @@ export const DEFAULT_SECTIONS = [
   "transcript",
 ] as const;
 
+/**
+ * The mode this build was rendered for, as the CLI passed it through the environment and
+ * index.html stamped on <html>. It is a label: the shape itself comes from content.json's
+ * _mode block, which knows the sections, and that block wins wherever both have a name.
+ */
+export function buildMode(): string | null {
+  if (typeof document === "undefined") return null;
+  return document.documentElement.getAttribute("data-mode") || null;
+}
+
 export interface Shape {
+  name: string;
   sections: string[];
   transcript: TranscriptMode;
   /** undefined means no cap. */
   figures?: number;
+  /** Section ids the page renders collapsed by default. */
+  collapsed: string[];
 }
 
 /**
@@ -58,9 +73,15 @@ export function shapeOf(content: Pick<Content, "_mode">): Shape {
   );
   if (transcript !== "omit") sections.push("transcript");
 
+  const collapsed = Array.isArray(block.collapsed)
+    ? block.collapsed.filter((s) => known.has(s))
+    : [];
+
   return {
+    name: block.name || buildMode() || "professional",
     sections,
     transcript,
+    collapsed,
     figures: typeof block.figures === "number" && block.figures >= 0 ? block.figures : undefined,
   };
 }
