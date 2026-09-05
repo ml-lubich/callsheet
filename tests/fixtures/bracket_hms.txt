@@ -1,0 +1,29 @@
+Warehouse inventory review — Orchard Yard
+Recorded 12 March, 68 minutes. Diarized locally; the audio never left the machine.
+Timestamps are elapsed time from the start of the recording.
+==========================================================================
+
+[00:00:00] Ada Sterling:
+    right, we are recording. walk me through where the count actually breaks.
+
+[00:00:11] Bo Marek:
+    the count breaks at the door, not in the racks. a pallet arrives, the driver
+
+    scans it, and then it sits on the apron for anywhere between ten minutes and
+
+    two hours before anyone assigns it a bin.
+
+    during that window the system says we have it and the floor says we do not.
+
+[00:00:48] Ada Sterling:
+    so the discrepancy is a timing artefact rather than shrinkage?
+
+[00:01:02] Bo Marek:
+    mostly. we measured it over a quarter — café deliveries, naïve counts, the lot —
+    and about eighty per cent of the gap closed itself within four hours.
+
+[01:04:30] Ada Sterling:
+    that is the number I would lead with. what would it take to close the rest?
+
+[01:07:15] Bo Marek:
+    a handheld that forces a bin assignment before the driver leaves the apron.

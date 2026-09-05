@@ -1,0 +1,91 @@
+{
+  "meta": {
+    "title": "Where the warehouse count breaks",
+    "subtitle": "A yard supervisor walks an operations lead through a discrepancy that turns out to be a clock, not a thief.",
+    "kind": "Call record",
+    "date": "12 March",
+    "duration_label": "67 min",
+    "duration_s": 4035,
+    "turns": 7,
+    "words": 148,
+    "participants": [
+      {"key": "A", "name": "Ada Sterling", "role": "Operations lead"},
+      {"key": "B", "name": "Bo Marek", "role": "Yard supervisor"}
+    ]
+  },
+  "abstract": "Two people spend an hour narrowing a stock discrepancy that had been read as theft. Bo Marek locates the gap at the receiving door rather than in the racks: a pallet is scanned on arrival and then waits on the apron, sometimes for two hours, before anyone assigns it a bin. For the length of that wait the system claims custody of stock the floor cannot find. A quarter of measurement puts roughly eighty per cent of the gap back within four hours, which reframes the problem from loss to latency. Ada Sterling presses on the residual and Bo proposes a handheld that refuses to release a driver until a bin is assigned. The call ends without a decision on who funds the handhelds.",
+  "acts": [
+    {
+      "n": 1,
+      "title": "The gap is at the door",
+      "span": "00:00:00-00:16:40",
+      "start_s": 0,
+      "end_s": 1000,
+      "summary": "Bo relocates the discrepancy from the racks to the receiving apron and describes the dwell window between scan and bin assignment.",
+      "turning_point": {"ts": "00:00:11", "s": 11, "text": "the count breaks at the door, not in the racks"}
+    },
+    {
+      "n": 2,
+      "title": "Latency, not loss",
+      "span": "00:16:40-00:50:00",
+      "start_s": 1000,
+      "end_s": 3000,
+      "summary": "A quarter of measurement shows most of the gap closing on its own, which changes the category of the problem."
+    },
+    {
+      "n": 3,
+      "title": "The residual",
+      "span": "00:50:00-01:07:15",
+      "start_s": 3000,
+      "end_s": 4035,
+      "summary": "Attention moves to the fifth of the gap that does not close, and to a handheld that would force a bin assignment.",
+      "turning_point": {"ts": "01:04:30", "s": 3870, "text": "that is the number I would lead with"}
+    }
+  ],
+  "threads": [
+    {
+      "name": "Apron dwell",
+      "what": "The interval between a pallet being scanned at the door and being assigned a bin.",
+      "why_it_matters": "Every minute of dwell is stock the system owns and the floor cannot produce.",
+      "marks": [{"ts": "00:00:11", "s": 11}, {"ts": "00:01:02", "s": 62}]
+    },
+    {
+      "name": "Who funds the handhelds",
+      "what": "The proposed fix needs hardware nobody has budgeted.",
+      "why_it_matters": "The call ends on this and nothing is committed.",
+      "marks": [{"ts": "01:07:15", "s": 4035}]
+    }
+  ],
+  "evidence": [
+    {"ts": "00:01:02", "s": 62, "claim": "About eighty per cent of the gap closes within four hours.", "evidence": "Bo cites a quarter of measurement in the yard.", "strength": "medium"},
+    {"ts": "00:00:11", "s": 11, "claim": "The discrepancy originates at the receiving door.", "evidence": "Stated directly and never contested across the call.", "strength": "strong"}
+  ],
+  "signals": [
+    {"ts": "00:00:48", "s": 48, "signal": "Ada reaches for the word 'shrinkage' and then drops it for the rest of the call."}
+  ],
+  "numbers": [
+    {"ts": "00:01:02", "s": 62, "value": "80%", "means": "Share of the counted gap that resolves without intervention inside four hours."}
+  ],
+  "quotes": [
+    {"ts": "00:00:11", "s": 11, "speaker": "B", "text": "the count breaks at the door, not in the racks"},
+    {"ts": "00:00:48", "s": 48, "speaker": "A", "text": "so the discrepancy is a timing artefact rather than shrinkage?"}
+  ],
+  "tech": ["Handheld scanners", "Yard management system"],
+  "tensions": [
+    {"ts": "01:07:15", "s": 4035, "note": "The fix is named but not funded, and the call ends there."}
+  ],
+  "diarization": [
+    {"ts": "00:00:48", "s": 48, "why": "Short overlapping acknowledgement at a turn boundary; attribution is the weakest here."}
+  ],
+  "next_steps": [
+    {"ts": "01:07:15", "s": 4035, "commitment": "Bo will price a handheld that blocks driver release until a bin is assigned."}
+  ],
+  "fit": {
+    "aligned_on": ["The gap is latency at the receiving door.", "Measurement over a quarter is the right basis."],
+    "unresolved": ["Who pays for the handhelds.", "What happens to the residual twenty per cent."],
+    "risks": [
+      {"who": "Ada Sterling", "note": "She may report the eighty per cent figure upward before the residual has an owner."},
+      {"who": "Bo Marek", "note": "The fix he proposed depends on hardware his budget does not cover."}
+    ]
+  }
+}

@@ -1,0 +1,4 @@
+Ada Sterling: right, we are recording. walk me through where the count actually breaks.
+Bo Marek: the count breaks at the door, not in the racks. a pallet arrives, the driver scans it, and then it sits on the apron.
+Ada Sterling: so the discrepancy is a timing artefact rather than shrinkage?
+Bo Marek: mostly, yes.
