@@ -4,8 +4,8 @@ import json
 
 import pytest
 
-from callsheet.cli import main
-from callsheet.diagrams import (
+from callgen.cli import main
+from callgen.diagrams import (
     MIN_FONT_PX,
     check_svg_fragment,
     extract_timestamps,
@@ -239,4 +239,4 @@ def test_cli_accepts_resolved_timestamps(tmp_path, capsys, good):
 
 def test_cli_reports_a_missing_file(tmp_path, capsys):
     assert main(["lint-diagrams", str(tmp_path / "nope.html")]) == 1
-    assert "callsheet:" in capsys.readouterr().err
+    assert "callgen:" in capsys.readouterr().err

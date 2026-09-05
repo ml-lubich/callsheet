@@ -13,7 +13,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "src"))
 
-from callsheet.lexicon import build_profile  # noqa: E402
+from callgen.lexicon import build_profile  # noqa: E402
 
 # Curated vocabulary. These are authoritative: a term mined from prose must
 # never outrank one of these, because these are the words the guardrail exists

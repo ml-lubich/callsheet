@@ -58,7 +58,7 @@ interface Block {
 }
 
 /**
- * Every section the page can draw, keyed by the id `src/callsheet/modes.py` uses. The
+ * Every section the page can draw, keyed by the id `src/callgen/modes.py` uses. The
  * mode decides which of these appear and in what order; a section the analysis had
  * nothing for is dropped whatever the mode says, rather than left as an empty heading.
  *

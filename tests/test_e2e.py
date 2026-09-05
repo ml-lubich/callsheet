@@ -1,8 +1,8 @@
 import json
 
-from callsheet.build import build, external_refs, template_path
-from callsheet.cli import main
-from callsheet.parse import metrics, parse_transcript
+from callgen.build import build, external_refs, template_path
+from callgen.cli import main
+from callgen.parse import metrics, parse_transcript
 
 from .conftest import FIXTURES, embedded, html_errors
 

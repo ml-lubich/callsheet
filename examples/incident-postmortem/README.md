@@ -40,10 +40,10 @@ own change is the cause, they coordinate a revert, and the backlog drains.
 ./run.sh
 ```
 
-or, if `callsheet` isn't on your `PATH`:
+or, if `callgen` isn't on your `PATH`:
 
 ```
-CALLSHEET=../../.venv/bin/callsheet ./run.sh
+CALLGEN=../../.venv/bin/callgen ./run.sh
 ```
 
 This parses `transcript.txt`, copies the shipped `expected/content.json` and

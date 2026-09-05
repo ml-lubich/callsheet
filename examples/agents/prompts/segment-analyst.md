@@ -1,5 +1,5 @@
 You are reading one slice of a recorded conversation — a chunk file produced by
-`callsheet chunk`, appended below. Several analysts are reading the other slices
+`callgen chunk`, appended below. Several analysts are reading the other slices
 at the same time; none of you sees the others' work.
 
 Return **JSON only**. No prose, no markdown fence, no preamble. Keys:

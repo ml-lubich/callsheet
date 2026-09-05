@@ -9,7 +9,7 @@ harness you cannot inspect.
 ./fanout.sh ../product-review/transcript.txt
 ```
 
-It expects `claude` and `callsheet` on `PATH`. Everything else is an environment
+It expects `claude` and `callgen` on `PATH`. Everything else is an environment
 variable with a sane default: `N` (segment analysts, default 4), `WORK`, `OUT`,
 and one model variable per role.
 

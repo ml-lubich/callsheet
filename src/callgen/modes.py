@@ -19,7 +19,7 @@ import re
 from dataclasses import dataclass, replace
 from pathlib import Path
 
-PROJECT_MODES = Path(".callsheet") / "modes.json"
+PROJECT_MODES = Path(".callgen") / "modes.json"
 
 TRANSCRIPT = ("open", "collapsed", "omit")
 
@@ -323,7 +323,7 @@ def _from_dict(name: str, spec, where: str) -> Mode:
 
 
 def project_modes(root=None) -> dict[str, Mode]:
-    """Modes declared in ``.callsheet/modes.json`` under *root*, validated."""
+    """Modes declared in ``.callgen/modes.json`` under *root*, validated."""
     path = Path(root or ".") / PROJECT_MODES
     if not path.is_file():
         return {}

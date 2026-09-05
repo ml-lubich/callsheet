@@ -1,5 +1,5 @@
 ---
-name: callsheet-holdout
+name: callgen-holdout
 description: Seal someone else's write-up of the same call before the analysis starts, refuse to read it during the build, and measure n-gram overlap afterwards to show the two readings were independent. Use whenever a reference answer exists.
 ---
 
@@ -20,7 +20,7 @@ Put the reference under `sealed/` and seal it *before the first analyst runs*.
 Sealing after the fact proves nothing.
 
 ```
-callsheet seal sealed/
+callgen seal sealed/
 ```
 
 This makes every file read-only and records a sha256 of each in
@@ -37,7 +37,7 @@ headings".
 This is enforced, not promised:
 
 ```python
-from callsheet.holdout import sealed_guard
+from callgen.holdout import sealed_guard
 
 with sealed_guard("sealed/"):
     ...run the analysis...
@@ -57,7 +57,7 @@ harmless.
 Only once `out/index.html` is built, verified twice and frozen:
 
 ```
-callsheet compare out/index.html sealed/
+callgen compare out/index.html sealed/
 ```
 
 It re-checks every hash — a broken seal invalidates the whole exercise and it

@@ -3,7 +3,7 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "callsheet"
+name = "callgen"
 version = "0.1.0"
 description = "Turn a recorded conversation into one self-contained, timestamp-traceable HTML document."
 readme = "README.md"
@@ -15,13 +15,13 @@ dependencies = []
 dev = ["pytest>=8", "ruff>=0.6"]
 
 [project.scripts]
-callsheet = "callsheet.cli:main"
+callgen = "callgen.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
 
 [tool.setuptools.package-data]
-callsheet = ["templates/*.html"]
+callgen = ["templates/*.html"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

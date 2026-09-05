@@ -2,7 +2,7 @@
 
 A profile is a count of how one person writes: which terms they use and how
 often, which two- and three-word phrasings they reach for, and two numbers
-describing the length of the words in their sentences. `callsheet lexicon` uses
+describing the length of the words in their sentences. `callgen lexicon` uses
 it to recover domain vocabulary the recogniser mangled, and to flag phrasing the
 speaker demonstrably never uses. See `skills/lexicon/SKILL.md` for when that
 helps and how the corrections are reviewed.
@@ -13,7 +13,7 @@ Point it at things you wrote in your own words — design docs, READMEs, commit
 messages, posts, a transcript you have already corrected by hand:
 
 ```
-callsheet lexicon build --from docs/ notes/*.md --name yourname -o profiles/yourname.local.json
+callgen lexicon build --from docs/ notes/*.md --name yourname -o profiles/yourname.local.json
 ```
 
 Files, globs and directories all work, and binaries are skipped. Lowercase
@@ -44,11 +44,11 @@ private `*.local.json` and keep its source under `corpus/`.
 ## example-engineer.json
 
 Built from this repository's own documentation plus a list of common
-infrastructure and machine-learning vocabulary, so `callsheet lexicon` does
+infrastructure and machine-learning vocabulary, so `callgen lexicon` does
 something useful before you have written anything of your own. It is a starting
 point, not a substitute for a profile of the person actually speaking — see the
 last section of `skills/lexicon/SKILL.md`.
 
 ```
-callsheet lexicon check work/transcript.txt --profile profiles/example-engineer.json
+callgen lexicon check work/transcript.txt --profile profiles/example-engineer.json
 ```

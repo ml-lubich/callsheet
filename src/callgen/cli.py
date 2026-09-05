@@ -1,4 +1,4 @@
-"""callsheet command line: transcribe / parse / chunk / build / lint-diagrams / lexicon /
+"""callgen command line: transcribe / parse / chunk / build / lint-diagrams / lexicon /
 seal / compare."""
 
 from __future__ import annotations
@@ -118,7 +118,7 @@ def cmd_lint_prose(a) -> int:
     for line in bad:
         print(f"  {line}", file=sys.stderr)
     if bad:
-        print(f"callsheet: {len(bad)} problem(s) in {a.content} for mode {a.mode}", file=sys.stderr)
+        print(f"callgen: {len(bad)} problem(s) in {a.content} for mode {a.mode}", file=sys.stderr)
         return 1
     print(f"{a.content}: within every {a.mode} budget")
     return 0
@@ -134,7 +134,7 @@ def cmd_lint_diagrams(a) -> int:
         print(f"  unresolved-timestamp: {ts} starts no turn in the transcript", file=sys.stderr)
     if problems or unresolved:
         n = len(problems) + len(unresolved)
-        print(f"callsheet: {n} problem(s) in {a.fragment}", file=sys.stderr)
+        print(f"callgen: {n} problem(s) in {a.fragment}", file=sys.stderr)
         return 1
     ids = figure_ids(text)
     checked = " checked" if a.turns else ""
@@ -239,7 +239,7 @@ def _review(name, profile, corrections, flags) -> str:
         for f in flags
     ]
     out += ["", "Nothing here is applied automatically. Accept a correction by hand, or run",
-            "`callsheet lexicon apply … --write` once you have read the list.", ""]
+            "`callgen lexicon apply … --write` once you have read the list.", ""]
     return "\n".join(out)
 
 
@@ -290,7 +290,7 @@ def cmd_compare(a) -> int:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    p = argparse.ArgumentParser(prog="callsheet", description=__doc__)
+    p = argparse.ArgumentParser(prog="callgen", description=__doc__)
     sub = p.add_subparsers(dest="cmd", required=True)
 
     t = sub.add_parser("transcribe", help="run whisper.cpp locally over a recording")
@@ -326,7 +326,7 @@ def build_parser() -> argparse.ArgumentParser:
     b.add_argument("--diagrams", help="optional inline SVG fragment")
     b.add_argument("--template", help="defaults to the packaged template")
     b.add_argument("--mode", default="professional",
-                   help="output mode; see `callsheet modes`")
+                   help="output mode; see `callgen modes`")
     b.add_argument("-o", "--out", default="out/index.html")
     b.set_defaults(fn=cmd_build)
 
@@ -386,7 +386,7 @@ def main(argv: list[str] | None = None) -> int:
     try:
         return args.fn(args)
     except ERRORS as e:
-        print(f"callsheet: {e}", file=sys.stderr)
+        print(f"callgen: {e}", file=sys.stderr)
         return 1
 
 

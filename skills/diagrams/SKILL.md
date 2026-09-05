@@ -1,6 +1,6 @@
 ---
-name: callsheet-diagrams
-description: Author the figure set for a callsheet artifact — 8 to 12 publication-quality inline SVGs that carry the argument of a recorded conversation, so the prose only has to check them. Use after work/content.json validates and before callsheet build.
+name: callgen-diagrams
+description: Author the figure set for a callgen artifact — 8 to 12 publication-quality inline SVGs that carry the argument of a recorded conversation, so the prose only has to check them. Use after work/content.json validates and before callgen build.
 ---
 
 # Diagrams
@@ -38,7 +38,7 @@ the node is a plain box and the sequence is the glyph. Four plain boxes in a row
 
 ## What you are writing
 
-`out/diagrams.html`: a fragment of inline `<figure class="dg">` elements that `callsheet
+`out/diagrams.html`: a fragment of inline `<figure class="dg">` elements that `callgen
 build` injects at the `__DIAGRAMS__` marker. No `<img>`, no raster, no libraries, no
 external requests — hand-written paths and one `<style>` block at the top of the fragment.
 Read first: `work/content.json` (the analysis), `work/turns.json` (ground truth),
@@ -478,7 +478,7 @@ collapses to one column under 640px.
 ## The self-check before declaring done
 
 ```
-callsheet lint-diagrams out/diagrams.html --turns work/turns.json
+callgen lint-diagrams out/diagrams.html --turns work/turns.json
 ```
 
 That covers well-formedness, literal colours, fixed-width faces, marker ids reused across

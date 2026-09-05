@@ -55,7 +55,7 @@ def build_web(work: Path, out: Path, web: Path | None = None, runner=None) -> Pa
     if not npm:
         raise BuildError("npm is not on PATH; the web front end needs node and npm to build")
 
-    env = {**os.environ, "CALLSHEET_WORK": str(Path(work).resolve())}
+    env = {**os.environ, "CALLGEN_WORK": str(Path(work).resolve())}
     steps = [] if (web / "node_modules").is_dir() else [[npm, "install"]]
     steps.append([npm, "run", "build"])
     for step in steps:

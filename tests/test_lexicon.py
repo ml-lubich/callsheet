@@ -3,8 +3,8 @@ from pathlib import Path
 
 import pytest
 
-from callsheet.cli import main
-from callsheet.lexicon import (
+from callgen.cli import main
+from callgen.lexicon import (
     LexiconError,
     apply_corrections,
     build_profile,
@@ -341,12 +341,12 @@ def test_format_placeholders_and_paths_are_not_terms():
         [
             "Stamps read [HH:MM:SS] and dates read YYYY-MM-DD. "
             "Chunks land in work/chunk1.txt and the spec is SKILL.md. "
-            "The CI/CD job reads content.json from src/callsheet."
+            "The CI/CD job reads content.json from src/callgen."
         ],
         name="t",
     )
     for junk in ("HH", "MM", "SS", "YYYY", "HH MM", "HH MM SS", "work/chunk1", "SKILL.md",
-                 "content.json", "src/callsheet"):
+                 "content.json", "src/callgen"):
         assert junk not in p["terms"], f"{junk!r} was kept as a term"
     assert "CI/CD" in p["terms"]
 

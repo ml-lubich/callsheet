@@ -1,6 +1,6 @@
 ---
-name: callsheet-scrollcraft
-description: Drive a callsheet readout with the reader's scroll position — pinned figures that build in argument order, numbers that count when they arrive, a sticky strip-chart tracker, a chapter rail, and the rests between them. Use when a long readout has an argument whose stages the reader should pass through in order. Do not use for short pages, reference material, appendices, or anything a reader will search with Ctrl-F.
+name: callgen-scrollcraft
+description: Drive a callgen readout with the reader's scroll position — pinned figures that build in argument order, numbers that count when they arrive, a sticky strip-chart tracker, a chapter rail, and the rests between them. Use when a long readout has an argument whose stages the reader should pass through in order. Do not use for short pages, reference material, appendices, or anything a reader will search with Ctrl-F.
 ---
 
 # Scrollcraft
@@ -59,7 +59,7 @@ Does not earn it:
 - Anything that makes the page longer than its content. If half the scroll
   distance is pinned padding, the reader is scrolling through nothing.
 
-The honest default for a callsheet readout is: **most of the page is not
+The honest default for a callgen readout is: **most of the page is not
 driven.** Three or four driven sections in an hour-long call's readout. Past
 that, motion stops being emphasis and becomes the page's texture.
 

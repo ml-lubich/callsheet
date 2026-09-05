@@ -8,12 +8,12 @@ const DEV_WORK = resolve(__dirname, "../examples/product-review");
 
 /** Locate the directory holding content.json, tolerating a project root or a work dir. */
 function workDir(): string {
-  const given = process.env.CALLSHEET_WORK || DEV_WORK;
+  const given = process.env.CALLGEN_WORK || DEV_WORK;
   for (const dir of [given, resolve(given, "work")]) {
     if (existsSync(resolve(dir, "content.json"))) return dir;
   }
   throw new Error(
-    `CALLSHEET_WORK: no content.json under ${given} (looked in ${given} and ${given}/work)`,
+    `CALLGEN_WORK: no content.json under ${given} (looked in ${given} and ${given}/work)`,
   );
 }
 
@@ -31,11 +31,11 @@ function diagrams(work: string): string {
 }
 
 /** Reads the pipeline's JSON at build time and serves it as one virtual module. */
-function callsheetData(): Plugin {
-  const id = "virtual:callsheet-data";
+function callgenData(): Plugin {
+  const id = "virtual:callgen-data";
   const resolved = "\0" + id;
   return {
-    name: "callsheet-data",
+    name: "callgen-data",
     resolveId: (source) => (source === id ? resolved : null),
     load(source) {
       if (source !== resolved) return null;
@@ -53,7 +53,7 @@ function callsheetData(): Plugin {
 }
 
 export default defineConfig({
-  plugins: [react(), callsheetData(), viteSingleFile()],
+  plugins: [react(), callgenData(), viteSingleFile()],
   build: { assetsInlineLimit: 100_000_000, chunkSizeWarningLimit: 4000 },
   test: {
     globals: true,

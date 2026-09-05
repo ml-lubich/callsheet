@@ -1,6 +1,6 @@
 ---
-name: callsheet-verify
-description: Adversarially fact-check a finished callsheet artifact against the transcript, in a fresh context, grading defects FABRICATED / WRONG / MISATTRIBUTED / IMPRECISE and deleting what cannot be traced. Use after callsheet build and before the artifact is shown to anyone.
+name: callgen-verify
+description: Adversarially fact-check a finished callgen artifact against the transcript, in a fresh context, grading defects FABRICATED / WRONG / MISATTRIBUTED / IMPRECISE and deleting what cannot be traced. Use after callgen build and before the artifact is shown to anyone.
 ---
 
 # Verify

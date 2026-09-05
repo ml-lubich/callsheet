@@ -1,6 +1,6 @@
 ---
-name: callsheet-lexicon
-description: Build a profile of how one person writes, then use it to recover domain vocabulary a local speech recogniser mangled and to flag phrasing that speaker never uses. Use after callsheet transcribe and before any agent reads the transcript, whenever the conversation is full of product names, libraries, acronyms or in-house jargon.
+name: callgen-lexicon
+description: Build a profile of how one person writes, then use it to recover domain vocabulary a local speech recogniser mangled and to flag phrasing that speaker never uses. Use after callgen transcribe and before any agent reads the transcript, whenever the conversation is full of product names, libraries, acronyms or in-house jargon.
 ---
 
 # Lexicon
@@ -42,7 +42,7 @@ commit messages, published posts, an earlier transcript they have already
 corrected. Two thousand words is enough to be useful.
 
 ```
-callsheet lexicon build --from docs/ notes/*.md --name ada -o profiles/ada.json
+callgen lexicon build --from docs/ notes/*.md --name ada -o profiles/ada.json
 ```
 
 Files, globs and directories all work; binaries are skipped. Lowercase
@@ -50,7 +50,7 @@ vocabulary no extractor can guess — `embeddings`, `reciprocal rank fusion` —
 goes in a plain list, one term per line:
 
 ```
-callsheet lexicon build --from docs/ --name ada --terms vocab.txt -o profiles/ada.json
+callgen lexicon build --from docs/ --name ada --terms vocab.txt -o profiles/ada.json
 ```
 
 A profile holds counts, not prose: term frequencies, 2- and 3-gram frequencies,
@@ -60,7 +60,7 @@ addresses are stripped before anything is counted. See `profiles/README.md`.
 ## Check the transcript, before anything reads it
 
 ```
-callsheet lexicon check work/transcript.txt --profile profiles/ada.json -o work/lexicon.md
+callgen lexicon check work/transcript.txt --profile profiles/ada.json -o work/lexicon.md
 ```
 
 It prints two lists and exits nonzero if either is non-empty, so it gates a
@@ -81,7 +81,7 @@ verifier hunts for — worse, it is now spelled correctly and looks authoritativ
 Read the review file. Decide each line. Then, if you accept them:
 
 ```
-callsheet lexicon apply work/transcript.txt --profile profiles/ada.json --write
+callgen lexicon apply work/transcript.txt --profile profiles/ada.json --write
 ```
 
 Without `--write` nothing is written and the command exits nonzero. With it, an

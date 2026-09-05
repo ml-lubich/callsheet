@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# The callsheet fan-out, run for real against the Claude Code CLI.
+# The callgen fan-out, run for real against the Claude Code CLI.
 #
 #   ./fanout.sh ../product-review/transcript.txt
 #
@@ -23,7 +23,7 @@ DIAGRAM_MODEL=${DIAGRAM_MODEL:-claude-opus-5}
 VERIFIER_MODEL=${VERIFIER_MODEL:-claude-opus-5}
 
 CLAUDE=${CLAUDE:-claude}
-CALLSHEET=${CALLSHEET:-callsheet}
+CALLGEN=${CALLGEN:-callgen}
 PYTHON=${PYTHON:-python3}
 N=${N:-4}                                          # segment analysts
 WORK=${WORK:-work}
@@ -59,14 +59,14 @@ TRANSCRIPT=${1:-}
 [ -n "$TRANSCRIPT" ] || die "usage: $(basename "$0") TRANSCRIPT   (env: N, WORK, OUT, *_MODEL)"
 [ -f "$TRANSCRIPT" ] || die "no such transcript: $TRANSCRIPT"
 command -v "$CLAUDE" >/dev/null 2>&1 || die "the Claude Code CLI ($CLAUDE) is not on PATH"
-command -v "$CALLSHEET" >/dev/null 2>&1 || die "callsheet ($CALLSHEET) is not on PATH — pip install -e ."
+command -v "$CALLGEN" >/dev/null 2>&1 || die "callgen ($CALLGEN) is not on PATH — pip install -e ."
 
 mkdir -p "$WORK" "$OUT"
 
 # ── 1. parse and chunk (mechanical) ─────────────────────────────────────────
 echo "== parse and chunk =="
-"$CALLSHEET" parse "$TRANSCRIPT" -o "$WORK"
-"$CALLSHEET" chunk "$WORK/turns.json" -n "$N" -o "$WORK" --metrics "$WORK/metrics.json"
+"$CALLGEN" parse "$TRANSCRIPT" -o "$WORK"
+"$CALLGEN" chunk "$WORK/turns.json" -n "$N" -o "$WORK" --metrics "$WORK/metrics.json"
 produced "parse" "$WORK/turns.json"
 produced "parse" "$WORK/metrics.json"
 
@@ -99,7 +99,7 @@ ask "$HERE/prompts/synthesizer.md" "$SYNTH_MODEL" "$WORK/content.json" \
     "$WORK/metrics.json" "$WORK"/analysis-*.json "$WORK/arc.json"
 produced "synthesizer" "$WORK/content.json"
 unfence "$WORK/content.json"
-"$PYTHON" -c "import json,sys;from callsheet.schema import validate;validate(json.load(open(sys.argv[1])))" \
+"$PYTHON" -c "import json,sys;from callgen.schema import validate;validate(json.load(open(sys.argv[1])))" \
     "$WORK/content.json"
 
 # ── 4. draw ─────────────────────────────────────────────────────────────────
@@ -108,11 +108,11 @@ ask "$HERE/prompts/diagram-author.md" "$DIAGRAM_MODEL" "$OUT/diagrams.html" \
     "$WORK/content.json" "$WORK/metrics.json" "$WORK/turns.json"
 produced "diagram author" "$OUT/diagrams.html"
 unfence "$OUT/diagrams.html"
-"$CALLSHEET" lint-diagrams "$OUT/diagrams.html" --turns "$WORK/turns.json"
+"$CALLGEN" lint-diagrams "$OUT/diagrams.html" --turns "$WORK/turns.json"
 
 # ── 5. build the page (mechanical — no agent) ───────────────────────────────
 echo "== build =="
-"$CALLSHEET" build --content "$WORK/content.json" --turns "$WORK/turns.json" \
+"$CALLGEN" build --content "$WORK/content.json" --turns "$WORK/turns.json" \
                    --metrics "$WORK/metrics.json" --diagrams "$OUT/diagrams.html" \
                    -o "$OUT/index.html"
 produced "build" "$OUT/index.html"

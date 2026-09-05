@@ -3,7 +3,7 @@ import stat
 
 import pytest
 
-from callsheet.holdout import (
+from callgen.holdout import (
     HoldoutError,
     ngram_overlap,
     read_manifest,

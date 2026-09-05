@@ -2,7 +2,7 @@ import copy
 
 import pytest
 
-from callsheet.schema import SchemaError, validate
+from callgen.schema import SchemaError, validate
 
 
 def test_valid_content_passes(content):

@@ -1,6 +1,6 @@
 import pytest
 
-from callsheet.parse import ParseError, parse_transcript
+from callgen.parse import ParseError, parse_transcript
 
 from .conftest import FIXTURES
 

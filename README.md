@@ -1,4 +1,6 @@
-# callsheet
+# callgen
+
+Formerly published as callsheet.
 
 Turn a recorded conversation into a single self-contained HTML document that
 someone who was not on the call can read, where the argument is carried by
@@ -99,32 +101,32 @@ pip install -e ".[dev]"
 ## Use
 
 ```
-callsheet transcribe call.m4a -m ~/models/ggml-large-v3.bin -o work/transcript
-callsheet lexicon check work/transcript.txt --profile profiles/example-engineer.json
-callsheet parse work/transcript.txt -o work
-callsheet chunk work/turns.json -n 4 -o work
+callgen transcribe call.m4a -m ~/models/ggml-large-v3.bin -o work/transcript
+callgen lexicon check work/transcript.txt --profile profiles/example-engineer.json
+callgen parse work/transcript.txt -o work
+callgen chunk work/turns.json -n 4 -o work
 
 # ... agents read work/chunk*.txt and write work/content.json and out/diagrams.html ...
 
-callsheet lint-diagrams out/diagrams.html --turns work/turns.json
-callsheet build --content work/content.json --turns work/turns.json \
+callgen lint-diagrams out/diagrams.html --turns work/turns.json
+callgen build --content work/content.json --turns work/turns.json \
                 --metrics work/metrics.json --diagrams out/diagrams.html \
                 --mode professional -o out/index.html
 ```
 
-`callsheet build` refuses to run on a `content.json` that does not validate, and
+`callgen build` refuses to run on a `content.json` that does not validate, and
 names the field that is wrong. It reports the number of external requests in the
 finished page, which should be zero.
 
 ### The web front end
 
-`callsheet build --web work -o out/index.html` renders the same data through a
+`callgen build --web work -o out/index.html` renders the same data through a
 React front end instead of the packaged template. It is a Vite build of
 `web/` — React, Motion and React Three Fiber compiled by `vite-plugin-singlefile`
 into one `index.html` with the JavaScript, the CSS and all four data files
 inlined, so the output is still a single file that makes no external requests.
 The build reads `content.json`, `turns.json`, `metrics.json` and the optional
-`diagrams.html` out of the directory named by `CALLSHEET_WORK`, which the CLI
+`diagrams.html` out of the directory named by `CALLGEN_WORK`, which the CLI
 sets for you; running `npm run dev` inside `web/` without it falls back to
 `examples/product-review`. Node and npm have to be on `PATH`, and the front end
 ships in the source tree rather than in the wheel, so this is a source-checkout
@@ -143,24 +145,24 @@ document. `cd web && npm test` runs its unit tests.
 
 ### Modes
 
-`callsheet modes` lists the nine output modes a build can be rendered in —
+`callgen modes` lists the nine output modes a build can be rendered in —
 `professional` (the default), `concise`, `formal`, `casual`, `interesting`,
 `summarized`, `compact`, `creative` and `diagrams-only`. A mode sets the register
 the synthesizer writes in, which sections render in what order, the prose and
 figure budgets, and the transcript setting. It never changes a fact. A project
-can add its own in `.callsheet/modes.json`, merged over the built-ins. See
+can add its own in `.callgen/modes.json`, merged over the built-ins. See
 `skills/modes/`.
 
-The word budgets are hard. `callsheet build` refuses a `content.json` whose
+The word budgets are hard. `callgen build` refuses a `content.json` whose
 abstract, act summary, thread, list item or any single paragraph runs over the
-mode's cap, and names each field with its count and its excess. `callsheet
+mode's cap, and names each field with its count and its excess. `callgen
 lint-prose work/content.json --mode concise` reports the same list without the
 failure, and additionally flags a wall of text: three consecutive prose sections
 with no figure, table or list to break them.
 
 ### Linting the figures
 
-`callsheet lint-diagrams` catches the mechanical faults a hand-authored SVG set
+`callgen lint-diagrams` catches the mechanical faults a hand-authored SVG set
 falls into: markup that does not nest, a literal hex colour or `fill="white"`
 that stops following the theme, a monospace font, a `<marker>` id reused between
 two figures so every arrowhead on the page repaints itself, a figure missing
@@ -178,16 +180,16 @@ reciprocal rank fusion "rank reciprocal factor", SQLite "SQL light", ChromaDB
 transcript, and anything summarising it downstream will explain what it thinks
 "abeam 25" means.
 
-`callsheet lexicon` profiles how one person writes — their vocabulary and their
+`callgen lexicon` profiles how one person writes — their vocabulary and their
 phrasing, from documents they wrote — and uses that profile twice: to propose
 corrections where the transcript sounds like a term the speaker uses but is not
 spelled like one, and to flag sentences whose phrasing is absent from the profile
 *and* whose register sits far from it, which is what invented text looks like.
 
 ```
-callsheet lexicon build --from docs/ notes/*.md --name ada -o profiles/ada.json
-callsheet lexicon check work/transcript.txt --profile profiles/ada.json -o work/lexicon.md
-callsheet lexicon apply work/transcript.txt --profile profiles/ada.json --write
+callgen lexicon build --from docs/ notes/*.md --name ada -o profiles/ada.json
+callgen lexicon check work/transcript.txt --profile profiles/ada.json -o work/lexicon.md
+callgen lexicon apply work/transcript.txt --profile profiles/ada.json --write
 ```
 
 `check` exits nonzero when it finds anything, so it gates a pipeline. Corrections
@@ -217,11 +219,11 @@ If someone else has written up the same call, seal their version before you
 start, so that the resemblance you measure afterwards means something:
 
 ```
-callsheet seal sealed/                     # read-only, sha256 recorded
-callsheet compare out/index.html sealed/   # verifies the seal, prints n-gram overlap
+callgen seal sealed/                     # read-only, sha256 recorded
+callgen compare out/index.html sealed/   # verifies the seal, prints n-gram overlap
 ```
 
-`callsheet.holdout.sealed_guard(path)` raises if anything under the sealed
+`callgen.holdout.sealed_guard(path)` raises if anything under the sealed
 directory is opened while it is active, so "we did not read it" is a property the
 build enforces rather than a claim.
 
@@ -232,10 +234,10 @@ pytest -q
 ruff check .
 ```
 
-The template lives at `src/callsheet/templates/page.html` and takes four markers:
+The template lives at `src/callgen/templates/page.html` and takes four markers:
 `/*__CONTENT__*/null`, `/*__TURNS__*/null`, `/*__METRICS__*/null` and
 `<!--__DIAGRAMS__-->`. Each must appear exactly once. Swap the template for your
-own with `callsheet build --template`.
+own with `callgen build --template`.
 
 The diagram fragment brings its own `<style>` block for figure internals; the
 page owns `.dg-lead` and `.dg-bridge`, the connective prose between figures.

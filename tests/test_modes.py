@@ -6,9 +6,9 @@ import json
 
 import pytest
 
-from callsheet.build import build, template_path
-from callsheet.cli import main
-from callsheet.modes import (
+from callgen.build import build, template_path
+from callgen.cli import main
+from callgen.modes import (
     MODES,
     REGISTER_RULES,
     SECTIONS,
@@ -24,7 +24,7 @@ from callsheet.modes import (
     prose_violations,
     section_order,
 )
-from callsheet.parse import metrics, parse_transcript
+from callgen.parse import metrics, parse_transcript
 
 from .conftest import FIXTURES, embedded, html_errors
 
@@ -188,8 +188,8 @@ def test_section_order_is_the_modes_order():
 
 
 def _write_project_modes(root, payload) -> None:
-    (root / ".callsheet").mkdir(parents=True, exist_ok=True)
-    (root / ".callsheet" / "modes.json").write_text(
+    (root / ".callgen").mkdir(parents=True, exist_ok=True)
+    (root / ".callgen" / "modes.json").write_text(
         payload if isinstance(payload, str) else json.dumps(payload)
     )
 

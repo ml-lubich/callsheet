@@ -30,10 +30,10 @@ it once a piloting enterprise account turns out to have an export that will neve
 ./run.sh
 ```
 
-or, if `callsheet` isn't on your `PATH`:
+or, if `callgen` isn't on your `PATH`:
 
 ```
-CALLSHEET=../../.venv/bin/callsheet ./run.sh
+CALLGEN=../../.venv/bin/callgen ./run.sh
 ```
 
 This parses `transcript.txt`, chunks it, drops in the shipped `expected/content.json` and

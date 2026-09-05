@@ -15,9 +15,9 @@ from pathlib import Path
 
 import pytest
 
-from callsheet.diagrams import check_svg_fragment, unresolved_timestamps
-from callsheet.parse import parse_transcript
-from callsheet.schema import validate
+from callgen.diagrams import check_svg_fragment, unresolved_timestamps
+from callgen.parse import parse_transcript
+from callgen.schema import validate
 
 EXAMPLES = Path(__file__).resolve().parent.parent / "examples"
 RUNNERS = sorted(EXAMPLES.glob("*/run.sh"))

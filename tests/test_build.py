@@ -2,7 +2,7 @@ import json
 
 import pytest
 
-from callsheet.build import MARKERS, BuildError, build, external_refs, template_path
+from callgen.build import MARKERS, BuildError, build, external_refs, template_path
 
 from .conftest import FIXTURES, embedded, html_errors
 
@@ -86,7 +86,7 @@ def test_external_refs_finds_what_it_should():
 
 
 def test_content_is_validated_before_injection(content):
-    from callsheet.schema import SchemaError
+    from callgen.schema import SchemaError
 
     broken = json.loads(json.dumps(content))
     del broken["meta"]["title"]

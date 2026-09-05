@@ -56,7 +56,7 @@ word share. Neither the plate nor the transcript shows a key.
 
 ## 5. `_mode` is ignored
 
-`src/callsheet/modes.py` writes `content._mode` with `sections` (the list *and*
+`src/callgen/modes.py` writes `content._mode` with `sections` (the list *and*
 the order), `transcript` (`open` / `collapsed` / `omit`) and `figures` (a cap).
 `templates/page.html` honours all three. `App.tsx` has a hard-coded section
 order, no gating, no transcript mode, no figure cap, and never renders the

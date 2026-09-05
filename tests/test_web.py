@@ -8,8 +8,8 @@ import subprocess
 
 import pytest
 
-from callsheet.build import BuildError, build_web, web_path
-from callsheet.cli import main
+from callgen.build import BuildError, build_web, web_path
+from callgen.cli import main
 
 
 class Runner:
@@ -35,7 +35,7 @@ class Runner:
 def web(tmp_path):
     directory = tmp_path / "web"
     (directory / "node_modules").mkdir(parents=True)
-    (directory / "package.json").write_text('{"name":"callsheet-web"}')
+    (directory / "package.json").write_text('{"name":"callgen-web"}')
     return directory
 
 
@@ -54,7 +54,7 @@ def test_it_runs_the_vite_build_over_the_work_dir(tmp_path, web):
     (argv, kw) = runner.calls[-1]
     assert argv[1:] == ["run", "build"]
     assert kw["cwd"] == str(web)
-    assert kw["env"]["CALLSHEET_WORK"] == str((tmp_path / "work").resolve())
+    assert kw["env"]["CALLGEN_WORK"] == str((tmp_path / "work").resolve())
 
 
 def test_dependencies_are_installed_only_when_they_are_missing(tmp_path, web):
@@ -92,7 +92,7 @@ def test_a_missing_front_end_says_so(tmp_path):
 
 
 def test_missing_npm_is_named_rather_than_a_stack_trace(tmp_path, web, monkeypatch):
-    monkeypatch.setattr("callsheet.build.shutil.which", lambda _: None)
+    monkeypatch.setattr("callgen.build.shutil.which", lambda _: None)
     with pytest.raises(BuildError, match="npm is not on PATH"):
         build_web(tmp_path / "work", tmp_path / "out.html", web=web)
 
@@ -100,8 +100,8 @@ def test_missing_npm_is_named_rather_than_a_stack_trace(tmp_path, web, monkeypat
 def test_cli_web_branch_writes_the_page(tmp_path, web, monkeypatch, capsys):
     out = tmp_path / "out" / "index.html"
     runner = Runner(web)
-    monkeypatch.setattr("callsheet.build.web_path", lambda: web)
-    monkeypatch.setattr("callsheet.build.subprocess.run", runner)
+    monkeypatch.setattr("callgen.build.web_path", lambda: web)
+    monkeypatch.setattr("callgen.build.subprocess.run", runner)
 
     assert main(["build", "--web", str(tmp_path / "work"), "-o", str(out)]) == 0
     assert out.is_file()

@@ -1,6 +1,6 @@
 ---
-name: callsheet-modes
-description: Choose and apply an output mode for a callsheet artifact — the preset that decides the register the synthesizer writes in, which sections render and in what order, the prose and figure budgets, and what the verdict optimises for. Use before step 5 (synthesize) and again at step 7 (build).
+name: callgen-modes
+description: Choose and apply an output mode for a callgen artifact — the preset that decides the register the synthesizer writes in, which sections render and in what order, the prose and figure budgets, and what the verdict optimises for. Use before step 5 (synthesize) and again at step 7 (build).
 ---
 
 # Modes
@@ -8,7 +8,7 @@ description: Choose and apply an output mode for a callsheet artifact — the pr
 A mode is a named preset over three things:
 
 1. **Register** — how the prose is written. It reaches the synthesizer as text,
-   through `callsheet.modes.prompt_guidance(name)`.
+   through `callgen.modes.prompt_guidance(name)`.
 2. **Shape** — which sections render, in what order, each section's word budget
    and the cap on the figure set. It reaches the page as a `_mode` block inside
    `content.json`, and the template obeys it.
@@ -22,7 +22,7 @@ schema gate, the same diagram lint and the same adversarial verify.
 
 ## The modes
 
-`callsheet modes` prints this list with one-line summaries.
+`callgen modes` prints this list with one-line summaries.
 
 **`professional`** *(default)* — the current behaviour. Neutral, unhurried
 register; third person where it reads naturally, first person where quoting;
@@ -86,7 +86,7 @@ carry the argument; every claim lives in a figure or in a number.
 
 ## The caps are hard
 
-Budgets are not advice. `callsheet build` refuses a `content.json` whose prose
+Budgets are not advice. `callgen build` refuses a `content.json` whose prose
 runs over, and names every field with its word count and its excess. Per mode,
 scaled from the professional defaults — `summarized` and `compact` at 0.6,
 `concise` at 0.75, `creative` at 1.3:
@@ -104,7 +104,7 @@ Quote text is never capped. Trimming a quote to a word count falsifies it.
 Check before you build, and get the same list without the failure:
 
 ```
-callsheet lint-prose work/content.json --mode concise
+callgen lint-prose work/content.json --mode concise
 ```
 
 `lint-prose` also fails on a **wall of text**: three consecutive prose sections
@@ -147,18 +147,18 @@ chosen wrong.
 Before synthesis, put the register and emphasis into the synthesizer prompt:
 
 ```
-python -c "from callsheet.modes import prompt_guidance; print(prompt_guidance('concise'))"
+python -c "from callgen.modes import prompt_guidance; print(prompt_guidance('concise'))"
 ```
 
 At build time, name the same mode:
 
 ```
-callsheet build --content work/content.json --turns work/turns.json \
+callgen build --content work/content.json --turns work/turns.json \
                 --metrics work/metrics.json --diagrams out/diagrams.html \
                 --mode concise -o out/index.html
 ```
 
-`callsheet.modes.apply(content, mode)` is what the build calls. It returns a new
+`callgen.modes.apply(content, mode)` is what the build calls. It returns a new
 content dict with the dropped sections gone and a `_mode` block added carrying
 the mode name, the section order, the budgets, the figure cap and the transcript
 setting. **Prose over budget is not truncated** — a paragraph cut to a word
@@ -171,7 +171,7 @@ change, only steps 5 and 7 rerun.
 
 ## A project's own modes
 
-A project may declare its own in `.callsheet/modes.json`, merged over the
+A project may declare its own in `.callgen/modes.json`, merged over the
 built-ins. Reusing a built-in's name overrides only the fields you state; a new
 name inherits the unstated fields from `professional`:
 

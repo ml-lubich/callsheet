@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from callsheet.diagrams import html_errors  # noqa: F401  (re-exported for the page tests)
+from callgen.diagrams import html_errors  # noqa: F401  (re-exported for the page tests)
 
 FIXTURES = Path(__file__).parent / "fixtures"
 

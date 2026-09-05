@@ -2,7 +2,7 @@ import subprocess
 
 import pytest
 
-from callsheet import transcribe as tr
+from callgen import transcribe as tr
 
 
 @pytest.fixture

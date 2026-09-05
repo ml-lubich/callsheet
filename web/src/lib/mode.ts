@@ -1,7 +1,7 @@
 import type { Content } from "../types";
 
 /**
- * The output mode, as `src/callsheet/modes.py` wrote it into content.json. A mode
+ * The output mode, as `src/callgen/modes.py` wrote it into content.json. A mode
  * decides three things and nothing else: which sections appear and in what order, how
  * the transcript is shown, and how many figures survive. It never decides what is true,
  * so nothing here edits a fact — it only drops and reorders whole sections.

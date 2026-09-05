@@ -11,7 +11,7 @@ The target is 8–12 figures for a one-hour call. That is not a decoration budge
 if something has a shape — an order, a fan-out, a comparison, a magnitude, a
 position in time — it is drawn, and prose is for what is left.
 
-Hard rules, all of them checked by `callsheet lint-diagrams`:
+Hard rules, all of them checked by `callgen lint-diagrams`:
 
 - Hand-written inline SVG. **No libraries, no `<img>`, no raster, no external
   requests.**

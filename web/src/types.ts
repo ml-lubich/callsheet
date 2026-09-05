@@ -1,4 +1,4 @@
-/** The shape of the JSON the Python pipeline writes. Mirrors src/callsheet/schema.py. */
+/** The shape of the JSON the Python pipeline writes. Mirrors src/callgen/schema.py. */
 
 export type Stamp = { ts: string; s: number };
 

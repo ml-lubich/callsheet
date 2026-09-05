@@ -1,6 +1,6 @@
 # Customer discovery
 
-A worked example for the callsheet pipeline: a two-speaker sales discovery call
+A worked example for the callgen pipeline: a two-speaker sales discovery call
 between Ines Vartanian, selling a route-planning service, and Hollis Grady, the
 operations manager at a regional delivery operation she is trying to sell into.
 Everything — both people, the depot, the "northern run," every number — is
@@ -22,8 +22,8 @@ invented for this example.
    and is not established. The annual-load figure in the diagram is drawn as an
    open-ended, hatched range rather than a point estimate, for the same reason.
 3. **The hold-out.** `other-analyst.html` is a second write-up of the same
-   call, sealed with `callsheet seal` before the build starts and only opened
-   by `callsheet compare` after `out/index.html` is final. It agrees with the
+   call, sealed with `callgen seal` before the build starts and only opened
+   by `callgen compare` after `out/index.html` is final. It agrees with the
    shipped analysis on the process and the headline number's looseness, but
    weighs the turnover admission more heavily and would have pushed harder for
    a named approver before the call ended.
@@ -32,8 +32,8 @@ invented for this example.
 
 ```
 ./run.sh
-# or, if callsheet isn't on PATH:
-CALLSHEET=../../.venv/bin/callsheet ./run.sh
+# or, if callgen isn't on PATH:
+CALLGEN=../../.venv/bin/callgen ./run.sh
 ```
 
 This parses the transcript, chunks it, seals `other-analyst.html`, copies the

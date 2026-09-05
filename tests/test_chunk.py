@@ -1,6 +1,6 @@
 import pytest
 
-from callsheet.parse import chunks, metrics, parse_transcript
+from callgen.parse import chunks, metrics, parse_transcript
 
 from .conftest import FIXTURES
 
