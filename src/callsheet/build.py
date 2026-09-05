@@ -3,7 +3,10 @@
 from __future__ import annotations
 
 import json
+import os
 import re
+import shutil
+import subprocess
 from pathlib import Path
 
 from . import modes as _modes
@@ -29,6 +32,46 @@ class BuildError(RuntimeError):
 def template_path() -> Path:
     """The page template shipped with the package."""
     return Path(__file__).parent / "templates" / "page.html"
+
+
+def web_path() -> Path:
+    """The React front end. It lives in the source tree, beside src/, not in the wheel."""
+    return Path(__file__).resolve().parents[2] / "web"
+
+
+def build_web(work: Path, out: Path, web: Path | None = None, runner=None) -> Path:
+    """Run the Vite build over `work` and copy the one file it produces to `out`.
+
+    The vanilla template stays the default; this is the other way of building the same
+    data. `runner` is the only seam — everything else here is real filesystem work.
+    """
+    web = web or web_path()
+    runner = runner or subprocess.run
+    if not (web / "package.json").is_file():
+        raise BuildError(
+            f"no web front end at {web} — it ships with the source tree, not the package"
+        )
+    npm = shutil.which("npm")
+    if not npm:
+        raise BuildError("npm is not on PATH; the web front end needs node and npm to build")
+
+    env = {**os.environ, "CALLSHEET_WORK": str(Path(work).resolve())}
+    steps = [] if (web / "node_modules").is_dir() else [[npm, "install"]]
+    steps.append([npm, "run", "build"])
+    for step in steps:
+        done = runner(step, cwd=str(web), env=env, capture_output=True, text=True)
+        if done.returncode:
+            tail = (done.stderr or done.stdout or "").strip().splitlines()[-12:]
+            raise BuildError(
+                f"{' '.join(step)} failed in {web}:\n  " + "\n  ".join(tail)
+            )
+
+    page = web / "dist" / "index.html"
+    if not page.is_file():
+        raise BuildError(f"the web build wrote no page at {page}")
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(page.read_text())
+    return out
 
 
 def build(

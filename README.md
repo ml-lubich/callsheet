@@ -116,6 +116,31 @@ callsheet build --content work/content.json --turns work/turns.json \
 names the field that is wrong. It reports the number of external requests in the
 finished page, which should be zero.
 
+### The web front end
+
+`callsheet build --web work -o out/index.html` renders the same data through a
+React front end instead of the packaged template. It is a Vite build of
+`web/` — React, Motion and React Three Fiber compiled by `vite-plugin-singlefile`
+into one `index.html` with the JavaScript, the CSS and all four data files
+inlined, so the output is still a single file that makes no external requests.
+The build reads `content.json`, `turns.json`, `metrics.json` and the optional
+`diagrams.html` out of the directory named by `CALLSHEET_WORK`, which the CLI
+sets for you; running `npm run dev` inside `web/` without it falls back to
+`examples/product-review`. Node and npm have to be on `PATH`, and the front end
+ships in the source tree rather than in the wheel, so this is a source-checkout
+feature — the CLI says so plainly rather than failing with a stack trace.
+
+What it adds over the template is motion and depth: the strip chart sweeps in and
+answers the pointer, one 3D scene renders the call as terrain when the browser
+has WebGL and is skipped entirely when it does not, the acts pin and stack as you
+scroll on a wide desktop, the figures draw themselves on, and the transcript is a
+reader rather than a list — a chapter rail, turns grouped per act, a pinned
+miniature of the strip chart that shows where you are and takes you elsewhere,
+and a search that ignores where the spaces fell. It honours `_mode` exactly as
+the template does: the same sections in the same order, the same figure cap, the
+same transcript setting. Reduced motion turns all of it off and leaves the
+document. `cd web && npm test` runs its unit tests.
+
 ### Modes
 
 `callsheet modes` lists the nine output modes a build can be rendered in —

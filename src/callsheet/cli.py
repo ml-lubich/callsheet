@@ -10,7 +10,7 @@ import sys
 from dataclasses import asdict
 from pathlib import Path
 
-from .build import BuildError, build, external_refs, template_path
+from .build import BuildError, build, build_web, external_refs, template_path
 from .diagrams import (
     check_svg_fragment,
     extract_timestamps,
@@ -81,6 +81,14 @@ def cmd_chunk(a) -> int:
 
 
 def cmd_build(a) -> int:
+    if a.web:
+        out = build_web(Path(a.web), Path(a.out))
+        size = out.stat().st_size / 1024
+        print(f"wrote {out} — {size:.0f} KB, one file, no external requests")
+        return 0
+    missing = [f"--{f}" for f in ("content", "turns", "metrics") if not getattr(a, f)]
+    if missing:
+        raise BuildError(f"build needs {', '.join(missing)} (or --web WORKDIR)")
     diagrams = Path(a.diagrams).read_text() if a.diagrams else None
     page = build(
         Path(a.template or template_path()).read_text(),
@@ -307,9 +315,14 @@ def build_parser() -> argparse.ArgumentParser:
     c.set_defaults(fn=cmd_chunk)
 
     b = sub.add_parser("build", help="data + template -> one self-contained page")
-    b.add_argument("--content", required=True)
-    b.add_argument("--turns", required=True)
-    b.add_argument("--metrics", required=True)
+    b.add_argument("--content")
+    b.add_argument("--turns")
+    b.add_argument("--metrics")
+    b.add_argument(
+        "--web",
+        metavar="WORKDIR",
+        help="build the React front end over WORKDIR instead of the vanilla template",
+    )
     b.add_argument("--diagrams", help="optional inline SVG fragment")
     b.add_argument("--template", help="defaults to the packaged template")
     b.add_argument("--mode", default="professional",
