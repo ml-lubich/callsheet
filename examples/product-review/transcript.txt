@@ -1,0 +1,248 @@
+Bulk import review — the shift-schedule CSV upload flow
+Recorded 14 August, 57 minutes. Diarized locally; the audio never left the machine.
+Timestamps are elapsed time from the start of the recording.
+==========================================================================
+
+[00:00:00] Priya Raghavan:
+    okay, recording. this is the bulk-import review — the csv upload flow for
+    putting a week of shifts in at once. tomas, wren, thanks for making time.
+    let's start with where it actually breaks today.
+
+[00:00:55] Tomas Halvorsen:
+    so today the importer reads the csv, matches columns by header name, and
+    writes rows one at a time. if a row is bad — bad date, missing id,
+    whatever — it just, uh, it skips that row and keeps going. no flag, no
+    nothing.
+
+[00:02:00] Wren Okafor:
+    right and that's basically every ticket i get about this thing. someone
+    uploads forty shifts, twenty six show up, and they have no idea two dozen
+    didn't make it until a supervisor calls asking why nobody's on the
+    schedule.
+
+[00:02:50] Priya Raghavan:
+    walk me through the failure mode a little more — is it always the same
+    kind of bad row?
+
+[00:04:15] Tomas Halvorsen:
+    mostly formatting. dates in the wrong format, an employee id that doesn't
+    match anyone in the system, a start time after the end time — someone
+    fat-fingered it. the importer just — it doesn't error, it just drops the
+    row silently and moves to the next one.
+
+[00:05:10] Wren Okafor:
+    and from where i sit that's the actual problem. it's not that rows fail,
+    it's that nobody's told. the customer thinks the whole file went in.
+
+[00:06:10] Priya Raghavan:
+    so what if we flip it — any row fails validation, we reject the entire
+    file. nothing writes until everything passes.
+
+[00:07:30] Tomas Halvorsen:
+    yeah, that's doable. we'd run a dry pass first — read the whole file,
+    validate every row against the schema, and only if it's all clean do we
+    actually commit anything.
+
+[00:08:20] Wren Okafor:
+    i like that a lot more than silent partial success. at least it's honest
+    about what happened.
+
+[00:09:30] Priya Raghavan:
+    the thing that worries me is someone uploads three thousand rows and one
+    of them has a typo. now they lose all three thousand instead of twenty
+    nine hundred and ninety nine.
+
+[00:10:45] Tomas Halvorsen:
+    sure, but a half-loaded schedule is worse than no schedule. if half your
+    shifts posted and half didn't, you don't know which half you're looking
+    at. all-or-nothing at least gives you a clean state.
+
+[00:11:40] Wren Okafor:
+    and honestly from a support script it's easier too — "your file didn't
+    pass validation, here's why, fix and re-upload" is one sentence. "twelve
+    of your rows loaded and eighteen didn't" is a whole conversation.
+
+[00:12:45] Priya Raghavan:
+    okay. let's sketch what a clean row actually needs — employee id, date,
+    start, end, role. anything else?
+
+[00:14:10] Tomas Halvorsen:
+    location if they've got more than one site, and — sorry, wait, is
+    location required or optional. i think it's optional today. so required
+    is id, date, start, end, role, five fields.
+
+[00:15:05] Wren Okafor:
+    what happens when a customer's own export doesn't use our header names? i
+    see this constantly — they've got "emp_id" instead of "employee id".
+
+[00:16:05] Priya Raghavan:
+    that's a mapping problem separate from validation, right? we should let
+    them map columns before we even look at the data.
+
+[00:17:15] Tomas Halvorsen:
+    yeah, a mapping step up front, then validate against the mapped columns.
+    we can fuzzy-match common aliases so it's not always manual.
+
+[00:18:10] Wren Okafor:
+    can support see the mapping before a customer commits? that'd save a lot
+    of back and forth.
+
+[00:19:25] Priya Raghavan:
+    sure, we can surface it in the ui. okay so — sounds like we're
+    converging. reject the whole file if anything fails validation.
+    everybody good with that as the plan?
+
+[00:20:15] Wren Okafor:
+    works for me. i'll draft the macro for the support queue — link to the
+    error, tell them to fix and re-upload.
+
+[00:21:20] Tomas Halvorsen:
+    i can have the validator built in about two weeks. mapping ui's a
+    separate ticket.
+
+[00:22:30] Priya Raghavan:
+    good. now — the other case. the enterprise accounts don't use the ui at
+    all, they push files nightly through the api from their own scheduling
+    export.
+
+[00:23:30] Wren Okafor:
+    yeah and that's the part that makes me nervous. we don't control what's
+    in those files. it's whatever their export tool spits out.
+
+[00:24:35] Tomas Halvorsen:
+    with reject-the-file, one bad row in a nightly batch means zero shifts
+    load that night. every night until someone on their side fixes the
+    export.
+
+[00:25:30] Priya Raghavan:
+    that's a real risk. that's not a validation error anymore, that's an
+    outage, and it's one we'd be causing on a paying account.
+
+[00:27:05] Wren Okafor:
+    i actually pulled up the ticket from this — a comma inside an address
+    field broke the whole parse last quarter. four hundred, no — sorry, four
+    twenty rows, none of them loaded, and nobody noticed until the morning
+    shift didn't show up in the app.
+
+[00:28:05] Tomas Halvorsen:
+    okay but reject-the-file would've at least made that loud immediately
+    instead of silently dropping rows. that's still better than today.
+
+[00:29:00] Priya Raghavan:
+    loud once is fine. loud every night for a week while their vendor fixes
+    an export script is not fine.
+
+[00:30:10] Wren Okafor:
+    and it's not fine for us either — someone on my team has to manually open
+    the csv, find the bad row, fix it, and kick off a re-upload of the whole
+    file every single time. that's forty minutes of somebody's day, minimum,
+    and the schedule's just missing until it's done.
+
+[00:31:05] Tomas Halvorsen:
+    half-joking here but neither of our plans survives contact with an actual
+    customer file.
+
+[00:32:20] Priya Raghavan:
+    let's get real numbers before we lock anything in. wren, of the import
+    tickets you get, how many are "one bad row in an otherwise fine file"
+    versus "the whole file is garbage"?
+
+[00:33:45] Wren Okafor:
+    off the top of my head, it's overwhelmingly the first kind. like, i'd
+    guess nine out of ten tickets are a single bad row somewhere in a file
+    that's otherwise totally fine.
+
+[00:34:45] Tomas Halvorsen:
+    huh. okay, wait, that actually changes the math on this quite a bit.
+
+[00:35:50] Priya Raghavan:
+    i don't want to talk ourselves into scope creep though — building both a
+    full-reject path and a partial-import path is two features, not one.
+
+[00:37:10] Wren Okafor:
+    for what it's worth, what my team does today, manually, is already the
+    partial version — we find the one bad row, fix it, and get the rest of
+    the file in. we just do it by hand instead of the system doing it. it's
+    the forty minutes i mentioned, every time, and the customer's in the dark
+    the whole time we're doing it.
+
+[00:38:20] Tomas Halvorsen:
+    if we're being honest, partial import isn't that much harder to build
+    than full-reject. we already have to validate every row before
+    committing anything. the only new part is writing the good rows and
+    collecting the bad ones into a report instead of throwing the whole thing
+    away.
+
+[00:39:20] Priya Raghavan:
+    i was leaning toward shipping reject-the-file first and revisiting
+    partial later, just to keep the first release small.
+
+[00:40:15] Wren Okafor:
+    fine. i can live with that for now, i guess.
+
+[00:41:40] Tomas Halvorsen:
+    let me walk through the validator either way, since we need it for both
+    paths — required columns, a real date-format check, and something to
+    catch duplicate shifts for the same person on the same day.
+
+[00:42:45] Priya Raghavan:
+    and the error messages need to be specific. "row 14: missing employee
+    id," not some generic "validation failed." if support's going to hand
+    these to customers they need to be readable.
+
+[00:43:45] Wren Okafor:
+    and downloadable, not just shown on screen. half my tickets get forwarded
+    by email to someone else, i need something i can attach.
+
+[00:44:40] Tomas Halvorsen:
+    sure, we can generate the error list as its own csv attached to the
+    result.
+
+[00:45:50] Priya Raghavan:
+    okay. i think that locks the spec — reject-the-file, clear per-row
+    errors, downloadable report. let's build against that.
+
+[00:46:55] Wren Okafor:
+    actually — hang on, what about the account that's already piloting the
+    nightly import? they went live on this like a month ago.
+
+[00:47:55] Tomas Halvorsen:
+    oh, right. that's already running against the old silent-skip behavior.
+    if we ship reject-the-file we'd be changing their nightly job's behavior
+    out from under them.
+
+[00:48:50] Priya Raghavan:
+    wren, can you check with them — what does their export actually look
+    like, quality-wise?
+
+[00:50:20] Wren Okafor:
+    i can pull the ticket. actually i remember this one — their own IT team
+    told us flat out, quote, 'our export is never going to be fully clean, we
+    have three regional systems feeding it and they don't agree on
+    formatting.' that was their words, not mine.
+
+[00:51:30] Tomas Halvorsen:
+    so that account alone breaks reject-the-file completely. it's not a
+    rollout hiccup we grow out of, it's a permanent property of their export.
+    they'd fail nightly, indefinitely.
+
+[00:52:45] Priya Raghavan:
+    okay — i'm reversing us. we do partial import. good rows post, bad rows
+    get quarantined, and somebody gets a report of exactly which ones and
+    why.
+
+[00:53:40] Wren Okafor:
+    honestly that's what support wanted from the start. i'm glad we're
+    landing here.
+
+[00:55:00] Tomas Halvorsen:
+    so, new spec — validate every row, write the good ones, hold the bad ones
+    in a quarantine table, generate an error report same as before, and put a
+    banner on the schedule saying something like twelve of four hundred rows
+    were skipped, with a link to the report.
+
+[00:56:25] Priya Raghavan:
+    good. i'll write up the two approaches side by side for the stakeholders
+    so it's clear why we moved. wren, update the support macro for partial
+    results instead of rejects. tomas, get me a revised timeline. let's wrap
+    there — thanks both.

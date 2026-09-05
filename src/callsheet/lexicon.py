@@ -37,6 +37,11 @@ CONTEXT_CHARS = 400
 CERTAIN = 0.92
 PHONETIC_FLOOR = 0.82  # below this the two words simply do not sound alike
 SINGLE_WORD_FLOOR = 0.95  # one intact word is only wrong if it is a near homophone
+SHORTEST_TERM = 4  # one word cannot be corrected to a 3-letter term; too many words match one
+SMALL_TARGET = 4  # at this length a term is too small a target for phonetics alone
+FILE_SUFFIXES = frozenset(
+    "json html htm md txt py js ts css yml yaml sh csv vtt srt m4a bin png svg log toml xml".split()
+)
 
 # Enough of a stopword list to keep windows off ordinary phrasing; not linguistics.
 STOPWORDS = frozenset(
@@ -77,6 +82,8 @@ class Correction:
     suggestion: str
     score: float
     reason: str
+    count: int = 1
+    offsets: tuple[tuple[int, int], ...] = ()
 
 
 @dataclass(frozen=True)
@@ -204,8 +211,25 @@ def _tokens(text: str) -> list[tuple[str, int, int]]:
     return [(m.group(0), m.start(), m.end()) for m in _TOKEN.finditer(text)]
 
 
+def _is_junk_token(word: str) -> bool:
+    """Documentation debris that passes a naive capitalisation test.
+
+    Each rejection here is junk a real corpus produced: `HH MM SS` matched "him",
+    `work/chunk` matched "working". None of it is vocabulary anyone says.
+    """
+    runs = [r for r in re.split(r"[^A-Za-z]+", word) if r]
+    return (
+        len(word) < 2
+        or not any(c.isalpha() for c in word)
+        or all(len(set(r.lower())) == 1 for r in runs)  # HH, MM, SS, YYYY-MM-DD
+        or ("/" in word and not all(p.isupper() for p in word.split("/") if p))  # a path
+        or word.rsplit(".", 1)[-1].lower() in FILE_SUFFIXES  # SKILL.md, content.json
+    )
+
+
 def _is_term_token(word: str) -> bool:
-    if len(word) < 2 or not any(c.isalpha() for c in word):
+    """Does this look like a term rather than a word?"""
+    if _is_junk_token(word):
         return False
     body = word[1:]
     return (
@@ -234,7 +258,9 @@ def _extract_terms(text: str) -> Counter:
     previous_end = -1
     for word, start, end in _tokens(text):
         plain_capital = (
-            len(word) > 1 and word[:1].isupper() and word.lower() not in STOPWORDS
+            not _is_junk_token(word)
+            and word[:1].isupper()
+            and word.lower() not in STOPWORDS
             and not _is_term_token(word)
         )
         keep = _is_term_token(word) or (plain_capital and start not in starts)
@@ -306,6 +332,19 @@ def _register(text: str) -> list[float]:
     return lengths
 
 
+def _also_written_lowercase(term: str, lowercase: set[str]) -> bool:
+    """A capitalised token the speaker also types in lower case is an ordinary word.
+
+    This is what separates Claude, which never appears lowercased, from BAND, Said,
+    Fix and Seal, which are prose the corpus happened to capitalise in a heading.
+    Mined lowercase phrases are exempt — being lowercase is the point of them.
+    """
+    if " " in term:
+        return False
+    low = term.lower().strip(".")
+    return low in lowercase or low.rstrip("s") in lowercase or low + "s" in lowercase
+
+
 def build_profile(texts, *, name: str, terms=()) -> dict:
     """Count how one person writes: their vocabulary, their phrasing, their register.
 
@@ -323,6 +362,10 @@ def build_profile(texts, *, name: str, terms=()) -> dict:
         ngrams += _extract_ngrams(doc)
         lengths += _register(doc)
         words += len(_tokens(doc))
+    lowercase = {w for doc in documents for w, _, _ in _tokens(doc) if w.islower()}
+    vocabulary = Counter(
+        {t: n for t, n in vocabulary.items() if not _also_written_lowercase(t, lowercase)}
+    )
     joined = " ".join(documents).lower()
     for seed in terms:
         seed = seed.strip()
@@ -403,8 +446,19 @@ def suggest_corrections(transcript: str, profile: dict, *, threshold: float = 0.
         if span.lower() in known or any(a < end and start < b for a, b in anchors):
             continue
         span_code = _code(span)
+        single = " " not in span.strip()
+        # A short span sounds like half the language; make it earn the correction.
+        bar = min(0.97, threshold + 0.04 * max(0, 6 - len(_flat(span))))
         best, best_score = None, 0.0
         for term, code in codes.items():
+            if single and len(_flat(term)) < SHORTEST_TERM:
+                continue
+            if (
+                single
+                and len(_flat(term)) <= SMALL_TARGET
+                and SequenceMatcher(None, _flat(span), _flat(term)).ratio() < 0.9
+            ):
+                continue  # "lower" is not LoRA; "CICD" is CI/CD
             # ponytail: quick_ratio is an upper bound on the real score, so this
             # prefilter drops nothing; an index over code prefixes is the upgrade
             # if profiles ever get big enough for the scan to show up.
@@ -415,9 +469,9 @@ def suggest_corrections(transcript: str, profile: dict, *, threshold: float = 0.
             score = _score(span, term)
             if score > best_score:
                 best, best_score = term, score
-        if best and best_score >= threshold:
+        if best and best_score >= bar:
             candidates.append((best_score, start, end, span, best))
-    kept: list[Correction] = []
+    groups: dict[tuple[str, str], list] = {}
     taken: list[tuple[int, int]] = []
     for score, start, end, span, term in sorted(candidates, key=lambda c: (-c[0], c[1])):
         if any(start < b and a < end for a, b in taken):
@@ -425,6 +479,11 @@ def suggest_corrections(transcript: str, profile: dict, *, threshold: float = 0.
         if score < CERTAIN and not _in_context(start, end, anchors):
             continue
         taken.append((start, end))
+        groups.setdefault((span.lower(), term), []).append((score, start, end, span))
+    kept = []
+    for (_, term), hits in groups.items():
+        # One term mangled the same way thirty times is one row a person can read.
+        score, start, end, span = max(hits)
         kept.append(
             Correction(
                 span=span,
@@ -434,9 +493,11 @@ def suggest_corrections(transcript: str, profile: dict, *, threshold: float = 0.
                 score=round(score, 3),
                 reason=f"sounds like {term!r}, which the speaker uses "
                 f"{terms[term]}x in their own writing",
+                count=len(hits),
+                offsets=tuple(sorted((s, e) for _, s, e, _ in hits)),
             )
         )
-    return kept
+    return sorted(kept, key=lambda c: (-c.score, c.start_char))
 
 
 def _in_context(start: int, end: int, anchors: list[tuple[int, int]]) -> bool:
@@ -449,9 +510,14 @@ def _in_context(start: int, end: int, anchors: list[tuple[int, int]]) -> bool:
 
 def apply_corrections(transcript: str, corrections) -> str:
     """Splice accepted corrections in. Callers do this on purpose, never by default."""
+    edits = [
+        (start, end, c.suggestion)
+        for c in corrections
+        for start, end in (c.offsets or [(c.start_char, c.end_char)])
+    ]
     out = transcript
-    for c in sorted(corrections, key=lambda c: -c.start_char):
-        out = out[: c.start_char] + c.suggestion + out[c.end_char :]
+    for start, end, suggestion in sorted(edits, reverse=True):
+        out = out[:start] + suggestion + out[end:]
     return out
 
 

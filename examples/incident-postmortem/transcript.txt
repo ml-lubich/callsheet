@@ -1,0 +1,283 @@
+Postmortem — an overnight queue backlog and a restart that made it worse
+Recorded 3 September, 46 minutes. Diarized locally; the audio never left the machine.
+Timestamps are elapsed time from the start of the recording.
+==========================================================================
+
+[00:00:00] Nadia Brandt:
+    okay, this is recording. it's just the two of us, so — let's just walk
+    through the whole night in order, start to finish. no polishing it.
+
+[00:00:14] Colm Ferreira:
+    Yeah. I've been dreading this a little, ngl, but let's do it. Where do
+    you want me to start?
+
+[00:00:36] Nadia Brandt:
+    start with the change. what actually went out, and when.
+
+[00:01:10] Colm Ferreira:
+    Right. So there's a setting on the config service that controls how many
+    database connections each ingest worker is allowed to hold open at
+    once — max connections per worker. I dropped that from twenty down to
+    four.
+
+[00:01:28] Nadia Brandt:
+    and that shipped when?
+
+[00:03:38] Colm Ferreira:
+    0148 UTC. I've got the deploy log open, so that one I'm sure of. The,
+    uh — the reasoning was, we'd been leaning on a different queue's
+    database pretty hard during a migration earlier in the week, and
+    someone asked me to cut connection pressure everywhere as a
+    precaution. I meant to scope it to that one queue's config key. I did
+    not do that. It went out against the shared default, which the ingest
+    workers also read from.
+
+[00:03:58] Nadia Brandt:
+    so it hit the ingest fleet by accident.
+
+[00:06:18] Colm Ferreira:
+    By accident, yeah. And on its own, four connections per worker isn't
+    obviously wrong — most of the day the ingest workers barely use two or
+    three at a time. The problem is the nightly batch. Every night around
+    two a.m. UTC-ish, volume steps up for a few hours while a batch job
+    upstream flushes, and normally the workers just open a few more
+    connections and keep pace. With the pool capped at four, they
+    couldn't. They started queuing work internally instead of pulling more
+    off the queue, so from the queue's point of view, throughput just —
+    fell off a cliff, right when volume went up.
+
+[00:07:53] Nadia Brandt:
+    which lines up with the graph. I pulled the queue depth chart before
+    this call — backlog is flat, flat, flat, and then it just starts
+    climbing at 0214 UTC. Almost to the minute where you'd expect the
+    batch ramp to start outrunning four connections.
+
+[00:08:18] Colm Ferreira:
+    Yeah, that tracks.
+
+[00:09:38] Nadia Brandt:
+    and nobody got paged for a while. our alert on that queue fires on
+    absolute depth, not on the rate of change, so it just sat there
+    climbing for almost half an hour before it crossed the threshold. Page
+    actually fired at 0241 UTC.
+
+[00:10:08] Colm Ferreira:
+    Which is on me too, probably — I know we talked about adding a
+    rate-based alert on that queue after the thing in the spring, and I
+    never got around to it. Sorry, that's — I keep meaning to circle back
+    to that and don't.
+
+[00:10:26] Nadia Brandt:
+    don't apologize, that's not what this is for. let's just get the
+    sequence right and fix it after. so — you get paged at 0241, what do
+    you actually see?
+
+[00:10:48] Colm Ferreira:
+    That was you, not me, right? I was asleep.
+
+[00:12:38] Nadia Brandt:
+    Right, sorry, yeah — 0241 was me. I grab my phone, it's the queue
+    depth alert, I open the laptop and pull up the dashboard half asleep.
+    The number is — I mean it was big, it had been climbing for almost
+    half an hour by then. I couldn't tell you the exact figure now, I
+    didn't screenshot it and I wasn't exactly taking careful notes at that
+    hour, but it was well past anything I'd normally consider fine.
+
+[00:12:58] Colm Ferreira:
+    okay. and the workers themselves?
+
+[00:14:58] Nadia Brandt:
+    That's the part that sent me down the wrong path. I check the worker
+    fleet health dashboard, and every single worker shows green — no crash
+    loops, no errors in the logs, no restarts, nothing. From where I'm
+    sitting at three in the morning, that pattern looks exactly like the
+    'workers are alive but somehow wedged' failure we've seen before,
+    where a restart is the known fix. I didn't check per-worker connection
+    counts, which in hindsight was the number that would've told me the
+    real story.
+
+[00:15:20] Colm Ferreira:
+    so you went to the restart playbook.
+
+[00:16:50] Nadia Brandt:
+    I did. And — okay, I want to get the time right here because I've told
+    this part of the story two different ways already. I want to say I
+    kicked off the fleet restart at three, roughly, but looking at the
+    runbook execution log just now, it's actually 0258 UTC. Two minutes
+    earlier than I remembered it.
+
+[00:17:10] Colm Ferreira:
+    okay, 0258. what happened right after you hit go?
+
+[00:18:50] Nadia Brandt:
+    Almost immediately, it got worse. Every worker in the fleet comes back
+    up at basically the same moment and they all try to reconnect to the
+    config service and the database at once. I'm watching the connection
+    count on the config service just spike straight up — way past
+    anything I've seen it do in a normal deploy. Some of the workers were
+    timing out just trying to read their own config on startup, so a few
+    of them looped through a couple of restart attempts before they
+    settled.
+
+[00:19:12] Colm Ferreira:
+    a connection storm.
+
+[00:21:22] Nadia Brandt:
+    Basically, yeah. And that's the part that actually created the
+    customer-visible problem, not the original backlog. When I killed the
+    workers, some of them had messages they'd already pulled off the queue
+    and started processing, but hadn't acknowledged yet — they were
+    mid-flight. Killing the process before the ack means the queue thinks
+    that message was never delivered, so it redelivers it once a worker
+    comes back. The notification service on the other end, the one that
+    sends the order confirmation emails, doesn't check whether it's
+    already sent a confirmation for a given message id. It just sends
+    again.
+
+[00:21:42] Colm Ferreira:
+    so people got a second copy of the same confirmation email.
+
+[00:23:32] Nadia Brandt:
+    Right, and I'll be honest, I didn't clock that in real time. I heard
+    about it secondhand — someone on the support side pinged our channel
+    saying customers were reporting duplicate confirmation emails, and
+    asking if we knew why. That was — I want to say around ten past three,
+    maybe a little after, I wasn't watching the clock closely at that
+    point, I was heads-down on the connection storm.
+
+[00:23:50] Colm Ferreira:
+    Okay, so that's roughly 0311-ish.
+
+[00:24:10] Nadia Brandt:
+    Roughly, yeah. That's the moment this stopped being an internal
+    metrics problem and became a customer-visible one.
+
+[00:26:30] Colm Ferreira:
+    Right, so from my side — I get looped in around then, and I start
+    going back through everything that changed recently near that queue,
+    trying to find anything that touches the ingest fleet. And I find my
+    own connection pool change sitting there, and I realize I set the
+    wrong config key. I go back and check, and it's exactly what I
+    described earlier — I scoped a change meant for one environment's
+    queue and it landed on the shared default instead. Once I see that,
+    the whole shape of the night makes sense: the pool change explains the
+    backlog, and the backlog explains why you were staring at
+    green-looking workers that were actually just starved for
+    connections.
+
+[00:26:52] Nadia Brandt:
+    when did you actually land on that as the cause?
+
+[00:28:02] Colm Ferreira:
+    0338 UTC. I'm confident on that one, I've got the terminal history and
+    the diff right in front of me, timestamped.
+
+[00:28:27] Nadia Brandt:
+    so why did it take until — what, past four, to actually revert?
+
+[00:30:37] Colm Ferreira:
+    A few things. First I wanted to make sure reverting wouldn't also undo
+    whatever protection the original change was giving the other queue,
+    so I had to go check that config key wasn't also feeding something
+    else. Then I needed you, because you were mid-triage on the connection
+    storm and I didn't want to push another config change into that
+    without you aware, in case it interacted badly with whatever you were
+    doing to calm the reconnects down. Getting both of us actually looking
+    at it together, agreeing it was safe, took longer than the fix itself.
+    Revert went out at 0402 UTC.
+
+[00:30:59] Nadia Brandt:
+    and you saw it take effect basically right away?
+
+[00:32:39] Colm Ferreira:
+    On the connection pool metric, yes, almost instantly — each worker
+    jumps back up to using ten, twelve connections within a minute or two
+    of the revert. The queue depth chart takes a bit longer to turn
+    around, since there's still a backlog to work through, but it's
+    visibly declining starting around 0417 UTC.
+
+[00:32:59] Nadia Brandt:
+    and when did it actually hit zero?
+
+[00:34:39] Colm Ferreira:
+    Honestly, I couldn't swear to the exact minute. I want to say
+    somewhere close to five, but I wasn't staring at the graph the whole
+    time by that point — I was mostly watching for the alert to clear and
+    trusting that as the signal, so my sense of exactly when the number
+    hit zero is fuzzier than everything before it.
+
+[00:35:09] Nadia Brandt:
+    I can close that one out, I've got it timestamped in the incident
+    channel — the queue depth alert cleared, backlog at zero, 0455 UTC. I
+    posted it the moment I saw it.
+
+[00:36:59] Colm Ferreira:
+    Okay, so if I'm being honest about the actual lesson here, it's the
+    one we already knew and forgot: you can't restart a fleet that has
+    unacknowledged in-flight work without expecting redelivery, and
+    redelivery without idempotency downstream turns into a
+    customer-visible mess. We hit some version of this shape once before,
+    on a completely different service, and the fix there was a dedupe
+    key. We just never went back and asked whether the notification
+    service had the same gap.
+
+[00:37:39] Nadia Brandt:
+    agreed, and I'd add — the runbook I was following doesn't actually
+    distinguish between 'the workers are stuck' and 'the workers are alive
+    but starved.' it just says if health checks are green and the queue
+    isn't draining, restart. that's a gap in the runbook, not just a gap
+    in my judgment at three in the morning.
+
+[00:39:09] Colm Ferreira:
+    That's fair. And on my end, there's no guardrail at all today that
+    stops a config change scoped to one queue from landing on a shared
+    default — it's just a string key someone can typo. I'd like some kind
+    of check that flags when a change touches a default that other
+    environments also read from.
+
+[00:39:49] Nadia Brandt:
+    I want to push on which of those two fixes actually matters more,
+    though — because a restart can happen for a dozen legitimate reasons
+    that have nothing to do with your config change. If the notification
+    service is the thing that's fragile to redelivery, that's the fix
+    that protects us the next time, whatever causes the restart.
+
+[00:40:44] Colm Ferreira:
+    I don't disagree, I just don't want this postmortem to turn into 'fix
+    everything adjacent to the incident.' Let's timebox it — pick the two
+    or three things that would have actually changed tonight, and file
+    the rest separately.
+
+[00:42:04] Nadia Brandt:
+    Fine. Then the first next step: notification service gets a dedupe
+    key off the message id, so redelivery is a no-op instead of a second
+    email. I think that's yours.
+
+[00:42:49] Colm Ferreira:
+    Yeah, I'll own that. I'll also put a floor on the connection pool
+    default so it can't be set below whatever the minimum sane value
+    actually is — that alone would have kept tonight from happening even
+    with my mistake.
+
+[00:43:34] Nadia Brandt:
+    Second one — I want to flag the connection storm itself as a separate
+    risk, independent of this incident. Any full fleet restart is going
+    to cause some version of that reconnect spike, and we got a little
+    lucky it didn't take the config service down entirely.
+
+[00:44:14] Colm Ferreira:
+    Agreed, that's worth its own line item. I can add a reconnect rate
+    limit so a restart staggers instead of everyone hitting it at once.
+
+[00:44:49] Nadia Brandt:
+    Last thing — who actually told the customers who got duplicate emails
+    what happened? Do we know what went out?
+
+[00:46:04] Colm Ferreira:
+    I believe someone on comms sent a note, but I genuinely don't know
+    what it said or exactly when — that wasn't something I was involved
+    in, I just saw a mention of it in passing. Somebody should confirm
+    that directly with whoever owns that relationship. And — thank you,
+    seriously, for owning this at three in the morning. I'll get the
+    write-up drafted before we forget the order things actually happened
+    in.

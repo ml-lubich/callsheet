@@ -55,6 +55,40 @@ tells a reader nothing the transcript did not.
 | `skills/verify/` | the adversarial fact-check, in a fresh context, grading FABRICATED / WRONG / MISATTRIBUTED / IMPRECISE |
 | `skills/holdout/` | sealing a reference answer and measuring independence afterwards |
 
+## Examples
+
+Three complete worked examples live in `examples/`, each an invented transcript
+with the intermediate files a real run produces, a `run.sh` that drives the CLI
+end to end, and a README saying what it demonstrates.
+
+| | The call | What it shows |
+|---|---|---|
+| `examples/product-review/` | a three-speaker design review, 52 turns | more than two speakers; a decision reached and then reversed; the two-column comparison figure |
+| `examples/incident-postmortem/` | a two-speaker outage retro, 48 turns | the timeline figure on the incident's real wall clock; a causal chain; evidence graded weak where a claim was asserted rather than shown |
+| `examples/customer-discovery/` | a two-speaker discovery call, 47 turns | the economics figure; quantities the speaker states loosely and the write-up refuses to sharpen; the hold-out against a second analyst's version |
+
+```
+cd examples/product-review && ./run.sh
+```
+
+Each `run.sh` runs the real CLI — parse, chunk, lint-diagrams, build, and
+seal/compare where a reference answer exists — and exits nonzero if any gate
+fails. The agent fan-out is stood in for by the shipped `expected/` files, so the
+examples run offline and produce the same page every time.
+
+### The fan-out, made concrete
+
+`examples/agents/` is that fan-out written out as a script. `fanout.sh` drives
+the Claude Code CLI directly, one `claude -p` per role, with each role's prompt
+in `prompts/` where it can be read and edited without touching the script. Four
+segment analysts and one whole-call reader run in parallel as background jobs;
+then the synthesizer, the diagram author, the build and the adversarial verifier
+run in sequence — eight agent invocations for one call. The model split is five
+variables at the top of the script: the analysts are the bulk of the token spend
+and most of what they do is careful extraction, so they run on `claude-sonnet-5`,
+while the four roles that need judgement across the whole call — the reader, the
+synthesizer, the diagram author and the verifier — run on `claude-opus-5`.
+
 ## Install
 
 ```

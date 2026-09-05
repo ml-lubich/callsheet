@@ -323,3 +323,177 @@ def test_cli_apply_writes_the_text_and_an_audit_beside_it(tmp_path, capsys):
     audit = json.loads((tmp_path / "dirty.txt.corrections.json").read_text())
     assert {c["suggestion"] for c in audit["corrections"]} <= set(EXPECTED.values())
     assert audit["profile"] == "t"
+
+
+# --- a profile is vocabulary, not documentation debris -----------------------
+
+
+def test_a_capitalised_ordinary_word_is_not_a_term():
+    p = build_profile(
+        ["Bands of colour sit above the line. We grouped bands by speaker, one band each."],
+        name="t",
+    )
+    assert not {t for t in p["terms"] if t.lower().startswith("band")}
+
+
+def test_format_placeholders_and_paths_are_not_terms():
+    p = build_profile(
+        [
+            "Stamps read [HH:MM:SS] and dates read YYYY-MM-DD. "
+            "Chunks land in work/chunk1.txt and the spec is SKILL.md. "
+            "The CI/CD job reads content.json from src/callsheet."
+        ],
+        name="t",
+    )
+    for junk in ("HH", "MM", "SS", "YYYY", "HH MM", "HH MM SS", "work/chunk1", "SKILL.md",
+                 "content.json", "src/callsheet"):
+        assert junk not in p["terms"], f"{junk!r} was kept as a term"
+    assert "CI/CD" in p["terms"]
+
+
+def test_a_short_span_never_matches_a_short_term():
+    p = build_profile([WRITING], name="t", terms=["Ada", "MIT", "FAISS", "Pinecone"])
+    text = "We add the file to Pinecone and we might ship it, and the face index is fast."
+    found = {(c.span.lower(), c.suggestion) for c in suggest_corrections(text, p)}
+    assert ("add", "Ada") not in found
+    assert ("might", "MIT") not in found
+    assert ("face", "FAISS") in found
+
+
+def test_the_same_mangling_twice_is_one_reviewable_row():
+    p = build_profile([WRITING], name="t", terms=VOCAB)
+    text = (
+        "We tried cockney first, on Pinecone. Cockney held the graph. "
+        "Later we moved off cockney entirely, back to the embeddings store."
+    )
+    found = [c for c in suggest_corrections(text, p) if c.suggestion == "Cognee"]
+    assert len(found) == 1
+    assert found[0].count == 3
+    assert len(found[0].offsets) == 3
+    out = apply_corrections(text, found)
+    assert out.count("Cognee") == 3
+    assert "ockney" not in out
+
+
+REAL = """[00:04:12] Speaker:
+    We started on pine cone for the vector store, then moved to chroma DB
+    when the bill got high. The whole thing is deployed behind cloud flare
+    and the API is fast API on FlyIO. Nothing said here is controversial.
+
+[00:11:30] Speaker:
+    The pipeline is a Graph RAC index over the docs, and we lower the
+    reranker cut when recall drops. We add a Whisper pass first. The CICD
+    job runs on every push, and the fixes land the same day.
+
+[00:19:45] Speaker:
+    Storage was Chrome IDB at first, then SQL item, then Postgres for real.
+    Cockney holds the entity graph. We were working with data bricks for
+    the batch side, and Open CV plus a bit of clawed for the vision rack.
+
+[00:27:03] Speaker:
+    Redis holds the queue, Terraform owns the infra, and I might turn the
+    short retry off. It was a sad month, but him and I got it out. The
+    embeddings never moved.
+"""
+
+REAL_RECOVERIES = {
+    "pine cone": "Pinecone",
+    "chroma DB": "ChromaDB",
+    "cloud flare": "Cloudflare",
+    "fast API": "FastAPI",
+    "FlyIO": "Fly.io",
+    "Graph RAC": "GraphRAG",
+    "CICD": "CI/CD",
+    "Chrome IDB": "ChromaDB",
+    "SQL item": "SQLite",
+    "Cockney": "Cognee",
+    "data bricks": "Databricks",
+    "Open CV": "OpenCV",
+    "clawed": "Claude",
+}
+
+ORDINARY = ["high", "said", "lower", "add", "fixes", "working", "rack", "might", "turn",
+            "short", "sad", "him", "whole", "first", "real", "bit", "day", "bill"]
+
+
+def test_a_real_transcript_recovers_terms_and_leaves_ordinary_words_alone():
+    p = load_profile(PROFILES / "example-engineer.json")
+    found = suggest_corrections(REAL, p)
+    got = {c.suggestion for c in found}
+    missing = {want for want in REAL_RECOVERIES.values() if want not in got}
+    assert not missing, f"not recovered: {sorted(missing)}"
+    touched = {c.span.lower() for c in found}
+    assert not (touched & set(ORDINARY)), f"ordinary words rewritten: {touched & set(ORDINARY)}"
+    assert len(found) <= len(set(REAL_RECOVERIES.values())) + 2, [
+        (c.span, c.suggestion, c.score) for c in found
+    ]
+
+
+def test_cli_check_caps_the_list_and_says_what_it_withheld(tmp_path, capsys):
+    prof = tmp_path / "p.json"
+    prof.write_text(json.dumps(build_profile([WRITING], name="t", terms=VOCAB)))
+    t = tmp_path / "dirty.txt"
+    t.write_text(MANGLED)
+    argv = ["lexicon", "check", str(t), "--profile", str(prof), "--max", "2"]
+    assert main(argv) == 1
+    said = capsys.readouterr().out
+    assert "withheld" in said
+    assert said.count(" -> ") == 2
+
+
+# --- precision on real-shaped input -------------------------------------
+# These came from running the shipped profile against a real 74-minute
+# transcript, where it proposed 228 corrections that were mostly noise.
+
+REAL_ISH = """
+    so we're running the whole thing on flyio, and the front end sits on vercel.
+    i coded most of it myself before the models were any good, so i don't just
+    ship slop. i said that already. we had to fix the scraper twice. support
+    tickets come in through salesforce and might get routed wrong, and then
+    somebody's add-on never shows up. he got banned from the repo for a day.
+    the sell was easy once they saw it. i'm lower on the stack than you'd think.
+    we use chroma DB for vectors, cloud flare in front, data bricks for the
+    warehouse, pine cone earlier on, fast API for the service, and open CV plus
+    SQL item for the local checks. the cockney library does graph RAC.
+"""
+
+RECOVERABLE = {
+    "chroma DB": "ChromaDB", "cloud flare": "Cloudflare", "data bricks": "Databricks",
+    "pine cone": "Pinecone", "fast API": "FastAPI", "open CV": "OpenCV",
+}
+ORDINARY_WORDS = [
+    "coded", "said", "support", "might", "add", "banned", "sell", "lower", "fix", "fixes",
+]
+
+
+def test_ordinary_english_words_are_not_mined_as_terms():
+    """A capitalised word that also appears lowercased is an ordinary word."""
+    corpus = [
+        "Bands of colour across the chart. We use grouped bands for this.",
+        "Said the reviewer. She said it twice. Code review. we review the code.",
+        "Fix the importer. We had to fix it again.",
+    ]
+    profile = build_profile(corpus, name="t")
+    for junk in ("Bands", "BAND", "Said", "Code", "Fix"):
+        assert junk not in profile["terms"], f"{junk} was mined as a term"
+
+
+def test_short_spans_need_near_exact_agreement():
+    """Three- and four-letter spans match anything phonetically; hold them higher."""
+    profile = build_profile(["We deploy with Ada and MIT licences."], name="t",
+                            terms=["Ada", "MIT"])
+    found = suggest_corrections("please add the item, it might work", profile)
+    assert [c.suggestion for c in found] == []
+
+
+def test_precision_on_a_realistic_transcript():
+    """Recover the real mangled tool names without touching ordinary speech."""
+    profile = build_profile([" ".join(RECOVERABLE.values())], name="t",
+                            terms=list(RECOVERABLE.values()))
+    found = suggest_corrections(REAL_ISH, profile)
+    suggestions = {c.suggestion for c in found}
+    for expected in RECOVERABLE.values():
+        assert expected in suggestions, f"lost a real recovery: {expected}"
+    touched = {c.span.lower() for c in found}
+    for ordinary in ORDINARY_WORDS:
+        assert ordinary not in touched, f"rewrote ordinary English: {ordinary}"

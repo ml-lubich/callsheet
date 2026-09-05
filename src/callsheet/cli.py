@@ -155,8 +155,8 @@ def cmd_lexicon_build(a) -> int:
 
 def _correction_lines(corrections) -> list[str]:
     return [
-        f"  {c.start_char}-{c.end_char}  {c.span!r} -> {c.suggestion}  "
-        f"{c.score:.2f}  {c.reason}"
+        f"  {c.start_char}-{c.end_char}  {c.span!r} -> {c.suggestion}  {c.score:.2f}"
+        f"{f'  x{c.count}' if c.count > 1 else ''}  {c.reason}"
         for c in corrections
     ]
 
@@ -175,9 +175,16 @@ def cmd_lexicon_check(a) -> int:
     if not corrections and not flags:
         print(f"{a.transcript}: no corrections, no suspicion flags against {profile['name']}")
         return 0
-    print(f"{a.transcript}: {len(corrections)} correction(s), {len(flags)} suspicion flag(s)")
-    for line in _correction_lines(corrections) + _flag_lines(flags):
+    occurrences = sum(c.count for c in corrections)
+    print(
+        f"{a.transcript}: {len(corrections)} correction(s) over {occurrences} occurrence(s), "
+        f"{len(flags)} suspicion flag(s)"
+    )
+    shown = corrections[: a.max] if a.max else corrections
+    for line in _correction_lines(shown) + _flag_lines(flags):
         print(line)
+    if len(shown) < len(corrections):
+        print(f"  … {len(corrections) - len(shown)} more withheld; raise --max to see them")
     if a.out:
         Path(a.out).parent.mkdir(parents=True, exist_ok=True)
         Path(a.out).write_text(_review(a.transcript, profile, corrections, flags))
@@ -307,6 +314,7 @@ def build_parser() -> argparse.ArgumentParser:
     xc.add_argument("transcript")
     xc.add_argument("--profile", required=True)
     xc.add_argument("--threshold", type=float, default=0.72)
+    xc.add_argument("--max", type=int, default=40, help="rows to print; 0 for all")
     xc.add_argument("-o", "--out", help="write a review file")
     xc.set_defaults(fn=cmd_lexicon_check)
 

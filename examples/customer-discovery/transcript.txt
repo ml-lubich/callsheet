@@ -1,0 +1,193 @@
+Discovery call — a route-planning pitch to a regional delivery operation
+Recorded 14 May, 48 minutes. Diarized locally; the audio never left the machine.
+Timestamps are elapsed time from the start of the recording.
+==========================================================================
+
+[00:00:00] Ines Vartanian:
+    Thanks for making time this morning. I know I said fifteen minutes and then
+    kept you twenty, so let's actually use them. Before anything else — I've got
+    this recording locally on my machine, nothing leaves this laptop. That still
+    work for you?
+
+[00:00:18] Hollis Grady:
+    Yeah, that's fine, we've done these before. Ask away.
+
+[00:00:42] Ines Vartanian:
+    Great. So walk me through a normal morning at the depot — before any of you
+    have talked to me, before any of this. What actually happens?
+
+[00:01:05] Hollis Grady:
+    Normal morning, our dispatcher's in by five, five-thirty, and he's building
+    the day's routes by hand off yesterday's addresses plus whatever came in
+    overnight. Prints them, hands them out at the gate.
+
+[00:01:30] Ines Vartanian:
+    By hand — so no software doing that assignment for him right now?
+
+[00:02:00] Hollis Grady:
+    Nothing that actually assigns stops to a route, no. He's got a spreadsheet
+    he trusts more than he trusts most people, but it's him deciding who goes
+    where.
+
+[00:02:35] Ines Vartanian:
+    Okay. And how many drivers is he doing that for, on a normal day?
+
+[00:03:10] Hollis Grady:
+    Call it thirty-something drivers, maybe thirty-two on a normal week. It
+    moves around with who's out.
+
+[00:03:50] Ines Vartanian:
+    Thirty-something — and each of them is running how many stops, roughly?
+
+[00:04:20] Hollis Grady:
+    Depends on the route, obviously, but high fifties, maybe sixty stops on a
+    good day, give or take. Northern run's usually heavier than that.
+
+[00:05:00] Ines Vartanian:
+    Got it. So he's hand-building routes for thirty-plus people covering fifty,
+    sixty stops each, every single morning.
+
+[00:05:40] Hollis Grady:
+    Every morning, yeah. And that's before anything goes wrong.
+
+[00:06:25] Ines Vartanian:
+    What goes wrong, usually?
+
+[00:07:10] Hollis Grady:
+    Traffic, a gate code that doesn't work, a customer who moved and nobody
+    updated the address, a driver calls in sick after the sheets are already
+    printed. Any one of those and somebody's re-routing on the fly.
+
+[00:08:00] Ines Vartanian:
+    And who does that re-routing — the dispatcher, or the driver?
+
+[00:08:45] Hollis Grady:
+    Depends how bad it is. Small stuff, the driver just eats it and figures it
+    out themselves. Bigger stuff, it comes back to dispatch and he's redoing
+    part of the morning on the phone.
+
+[00:09:30] Ines Vartanian:
+    If you had to put a number on it — how much time does that eat, per driver,
+    in a week?
+
+[00:10:20] Hollis Grady:
+    Oh — I mean, I'd be guessing. Somewhere north of two hours a week, I'd
+    guess, fixing a route that fell apart. Could be less on a quiet week, could
+    be a lot more on a bad one.
+
+[00:11:15] Ines Vartanian:
+    North of two hours a week, across the whole fleet — that's not nothing.
+
+[00:12:00] Hollis Grady:
+    It adds up, yeah, but it's not the thing keeping me up at night. What keeps
+    me up is when it happens on the northern run, because that's the one client
+    actually watching the clock.
+
+[00:13:00] Ines Vartanian:
+    Tell me about the northern run.
+
+[00:14:00] Hollis Grady:
+    It's our biggest single account. If they miss a window twice in a month, we
+    hear about it from someone above me, not from them.
+
+[00:15:10] Ines Vartanian:
+    So the two-hours-a-week number — is that evenly spread, or is it
+    concentrated on routes like that one?
+
+[00:16:20] Hollis Grady:
+    Concentrated, if I'm honest. The northern run has the tightest addresses
+    and the least room to improvise, so when something breaks there it breaks
+    worse.
+
+[00:17:30] Ines Vartanian:
+    Okay, that's useful. Let's talk about the dispatcher's side of this —
+    what's his morning actually look like, start to finish?
+
+[00:18:45] Hollis Grady:
+    He's in at five, printing by six, gate's loading by six-thirty. Then he's
+    basically on the phone from seven to ten fielding whatever fell apart
+    overnight or that morning.
+
+[00:20:00] Ines Vartanian:
+    Three hours a day just absorbing exceptions.
+
+[00:21:20] Hollis Grady:
+    Most days. Some days it's twenty minutes. You can't predict which kind of
+    day it's going to be, that's half the problem.
+
+[00:22:40] Ines Vartanian:
+    Has anyone left because of that unpredictability — dispatcher side, driver
+    side, either?
+
+[00:24:00] Hollis Grady:
+    We lost, I want to say twelve — no, it was more like nine drivers to
+    turnover last year. Not all of that's the routing, but some of it is.
+
+[00:25:30] Ines Vartanian:
+    Nine out of thirty-something is a real number.
+
+[00:27:00] Hollis Grady:
+    It's a real number. Whether it's our number to fix with software, I don't
+    know yet — that's kind of why you're on this call.
+
+[00:28:30] Ines Vartanian:
+    Fair. Let me ask the blunt version — if we could get that two-hours-a-week
+    down close to zero across all thirty-two drivers, every week, all year,
+    what does that actually mean for you?
+
+[00:30:00] Hollis Grady:
+    In hours, or in dollars?
+
+[00:31:40] Ines Vartanian:
+    Either, whichever you can actually stand behind.
+
+[00:33:20] Hollis Grady:
+    Hours, I can do the math out loud with you. Dollars — I'm not going to put
+    a per-hour number on that out loud, payroll owns that math, not me. Ask
+    them, not me.
+
+[00:35:00] Ines Vartanian:
+    That's fair, I'll take hours. Thirty-two drivers, call it two hours a week
+    each, fifty-two weeks — that's north of three thousand hours a year sitting
+    in re-routing.
+
+[00:36:40] Hollis Grady:
+    When you say it like that it sounds worse than it feels day to day.
+
+[00:38:20] Ines Vartanian:
+    That's usually how it goes. Who signs off on something like this, on your
+    side — is that you, or does it go above you?
+
+[00:40:00] Hollis Grady:
+    That's — let's come back to that. I want to see the numbers hold up first
+    before I put a name on who approves it.
+
+[00:41:20] Ines Vartanian:
+    Understood, we'll come back to it. What would you actually need to see, to
+    believe the two hours a week comes down?
+
+[00:42:40] Hollis Grady:
+    Show me a week where the northern run doesn't blow up, and show me the
+    dispatcher off the phone by nine instead of ten. Those two things, and I'll
+    believe the rest.
+
+[00:44:00] Ines Vartanian:
+    Those are fair, measurable things. If we ran a pilot on just the northern
+    run for a month, would that get us close enough to answer both?
+
+[00:45:10] Hollis Grady:
+    Probably, yeah. One run, one month, real drivers — that I could take
+    upstairs.
+
+[00:46:20] Ines Vartanian:
+    Okay. I'll put together a pilot scope for the northern run only, thirty-day
+    window, and send it over by end of week.
+
+[00:47:20] Hollis Grady:
+    Send it to me directly, not the group inbox, or it'll sit for two weeks
+    before anyone opens it.
+
+[00:48:10] Ines Vartanian:
+    Directly to you, understood. Thanks for being straight with me on the
+    numbers you weren't sure of — that's more useful than a clean answer
+    would've been.

@@ -1,0 +1,112 @@
+{
+  "meta": {
+    "title": "The overnight queue backlog and the restart that made it worse",
+    "subtitle": "A site reliability engineer and the platform engineer who shipped the config change walk through how a four-connection typo turned into a duplicate-email incident.",
+    "kind": "Postmortem",
+    "date": "3 September",
+    "duration_label": "46 min",
+    "duration_s": 2764,
+    "turns": 48,
+    "words": 1960,
+    "participants": [
+      {"key": "N", "name": "Nadia Brandt", "role": "Site reliability engineer"},
+      {"key": "C", "name": "Colm Ferreira", "role": "Platform engineer"}
+    ]
+  },
+  "abstract": "Nadia Brandt and Colm Ferreira reconstruct an overnight outage. A connection-pool change Colm meant to scope to one queue lands on the ingest fleet's shared default, and when nightly batch volume rises the workers cannot keep pace; backlog climbs for half an hour before an alert pages Nadia. Seeing healthy workers, she restarts the fleet, which triggers a reconnect storm and redelivers unacknowledged messages, so customers receive duplicate confirmation emails. Colm eventually traces the outage to his own change, and after coordinating a safe revert the backlog drains. The pair leave with next steps on message deduplication, a config guardrail, a reconnect limit, and confirming what customers were told.",
+  "acts": [
+    {
+      "n": 1,
+      "title": "The change and the silent climb",
+      "span": "00:00:00-00:16:50",
+      "start_s": 0,
+      "end_s": 1010,
+      "summary": "A connection-pool change meant for a different queue lands on the shared ingest default; when nightly batch volume rises the workers cannot keep pace, and the queue depth climbs for nearly half an hour before the alert pages Nadia.",
+      "turning_point": {"ts": "00:07:53", "s": 473, "text": "backlog is flat, flat, flat, and then it just starts climbing at 0214 UTC."}
+    },
+    {
+      "n": 2,
+      "title": "The restart makes it worse",
+      "span": "00:16:50-00:28:02",
+      "start_s": 1010,
+      "end_s": 1682,
+      "summary": "Seeing healthy-looking workers, Nadia restarts the ingest fleet; the simultaneous reconnect spikes the config service and redelivers unacknowledged messages, which the notification service resends as duplicate confirmation emails to customers.",
+      "turning_point": {"ts": "00:21:22", "s": 1282, "text": "Killing the process before the ack means the queue thinks that message was never delivered, so it redelivers it once a worker comes back."}
+    },
+    {
+      "n": 3,
+      "title": "Root cause, revert, and the next steps",
+      "span": "00:28:02-00:46:04",
+      "start_s": 1682,
+      "end_s": 2764,
+      "summary": "Colm traces the outage to his own misapplied config change, and after confirming it is safe to revert, the two coordinate a fix; the backlog drains and the pair sets next steps on dedupe, guardrails and comms.",
+      "turning_point": {"ts": "00:28:02", "s": 1682, "text": "0338 UTC. I'm confident on that one, I've got the terminal history and the diff right in front of me, timestamped."}
+    }
+  ],
+  "threads": [
+    {
+      "name": "The scoped config change that wasn't scoped",
+      "what": "Colm's connection-pool change was meant for one queue's config key but landed on the shared default the ingest fleet also reads.",
+      "why_it_matters": "That mistake is the root cause of the entire night, from the backlog to the duplicate emails.",
+      "marks": [{"ts": "00:03:38", "s": 218}, {"ts": "00:26:30", "s": 1590}, {"ts": "00:28:02", "s": 1682}]
+    },
+    {
+      "name": "Restart without idempotent redelivery",
+      "what": "Nadia restarted the ingest fleet while workers held unacknowledged messages, and the notification service resent confirmations on redelivery.",
+      "why_it_matters": "The restart, not the original backlog, is what made the incident customer-visible.",
+      "marks": [{"ts": "00:16:50", "s": 1010}, {"ts": "00:18:50", "s": 1130}, {"ts": "00:21:22", "s": 1282}]
+    },
+    {
+      "name": "Who told the customers",
+      "what": "Neither Nadia nor Colm can confirm what, if anything, customers who received duplicate emails were told.",
+      "why_it_matters": "It is an open item that could leave customer-facing teams caught out if a customer asks.",
+      "marks": [{"ts": "00:44:49", "s": 2689}, {"ts": "00:46:04", "s": 2764}]
+    }
+  ],
+  "evidence": [
+    {"ts": "00:03:38", "s": 218, "claim": "The connection-pool change that ultimately caused the backlog shipped at 0148 UTC.", "evidence": "Colm reads the exact time directly off the deploy log while on the call.", "strength": "strong"},
+    {"ts": "00:28:02", "s": 1682, "claim": "Colm identified his own config change as the root cause at 0338 UTC.", "evidence": "He has the terminal history and the diff open in front of him, timestamped, while speaking.", "strength": "strong"},
+    {"ts": "00:35:09", "s": 2109, "claim": "The queue backlog reached zero at 0455 UTC.", "evidence": "Nadia posted that exact timestamp to the incident channel the moment the alert cleared, and reads it back from that log.", "strength": "strong"},
+    {"ts": "00:07:53", "s": 473, "claim": "The queue depth chart shows backlog starting to climb right at 0214 UTC.", "evidence": "Nadia read this off the queue depth chart before the call, a real dashboard, but is presenting her own reading of the graph rather than a saved snapshot.", "strength": "medium"},
+    {"ts": "00:18:50", "s": 1130, "claim": "Restarting the fleet caused a connection storm against the config service.", "evidence": "Nadia watched the connection count spike live while it happened, but has no saved graph of it in front of her now.", "strength": "medium"},
+    {"ts": "00:12:38", "s": 758, "claim": "The queue depth number Nadia saw when first paged was far above anything she'd consider normal.", "evidence": "She is recalling the figure from memory at three in the morning and admits she never wrote it down.", "strength": "weak"},
+    {"ts": "00:23:32", "s": 1412, "claim": "Customers began receiving duplicate confirmation emails around 0311 UTC.", "evidence": "Nadia heard this secondhand from someone on the support team and was not watching the clock when it happened.", "strength": "weak"},
+    {"ts": "00:46:04", "s": 2764, "claim": "A note was sent to customers explaining the duplicate confirmation emails.", "evidence": "Colm says he believes someone in comms sent something but has not seen it and was not involved.", "strength": "weak"}
+  ],
+  "signals": [
+    {"ts": "00:10:08", "s": 608, "signal": "Colm apologizes for not adding a rate-based alert after a past incident; Nadia waves it off and redirects to the timeline."},
+    {"ts": "00:16:50", "s": 1010, "signal": "Nadia corrects her own memory of the restart time from roughly three o'clock down to 0258 UTC after checking the runbook log."}
+  ],
+  "numbers": [
+    {"ts": "00:01:10", "s": 70, "value": "twenty to four", "means": "Max connections per worker, before and after Colm's config change."},
+    {"ts": "00:32:39", "s": 1959, "value": "ten, twelve", "means": "Connections each worker resumes using within a minute or two of the revert, per Colm."}
+  ],
+  "quotes": [
+    {"ts": "00:00:00", "s": 0, "speaker": "N", "text": "let's just walk through the whole night in order, start to finish"},
+    {"ts": "00:03:38", "s": 218, "speaker": "C", "text": "the reasoning was, we'd been leaning on a different queue's database pretty hard during a migration earlier in the week"},
+    {"ts": "00:21:22", "s": 1282, "speaker": "N", "text": "Killing the process before the ack means the queue thinks that message was never delivered, so it redelivers it once a worker comes back."},
+    {"ts": "00:36:59", "s": 2219, "speaker": "C", "text": "you can't restart a fleet that has unacknowledged in-flight work without expecting redelivery"},
+    {"ts": "00:39:49", "s": 2389, "speaker": "N", "text": "a restart can happen for a dozen legitimate reasons that have nothing to do with your config change"}
+  ],
+  "tech": ["Config service", "Ingest workers", "Notification service", "Queue depth alert"],
+  "tensions": [
+    {"ts": "00:39:49", "s": 2389, "note": "Nadia and Colm disagree about which fix matters more, notification-service idempotency versus restart-time guardrails, and timebox rather than resolve it."}
+  ],
+  "diarization": [
+    {"ts": "00:19:12", "s": 1152, "why": "Colm's two-word reaction lands right at Nadia's pause; diarization places it as a separate turn but it could be a brief overlap."}
+  ],
+  "next_steps": [
+    {"ts": "00:42:04", "s": 2524, "commitment": "Colm to add a dedupe key to the notification service so redelivery is a no-op instead of a second email."},
+    {"ts": "00:42:49", "s": 2569, "commitment": "Colm to put a floor under the connection-pool default so it cannot be set below a safe minimum."},
+    {"ts": "00:44:14", "s": 2654, "commitment": "Colm to add a reconnect rate limit so a full fleet restart staggers instead of reconnecting all at once."},
+    {"ts": "00:44:49", "s": 2689, "commitment": "Someone to confirm with the comms owner exactly what customers who received duplicate emails were told."}
+  ],
+  "fit": {
+    "aligned_on": ["The restart, not the original backlog, is what made the incident customer-visible.", "The connection-pool change landing on the shared default is the root cause."],
+    "unresolved": ["Whether notification-service idempotency or restart-time guardrails matters more as the primary fix.", "What, if anything, customers were told about the duplicate emails."],
+    "risks": [
+      {"who": "Nadia Brandt", "note": "She is relying on memory for the exact queue depth figure and the time she first heard about the duplicate emails, both from a three a.m. shift."},
+      {"who": "Colm Ferreira", "note": "He has not confirmed the customer communication and is passing along something he only heard about in passing."}
+    ]
+  }
+}

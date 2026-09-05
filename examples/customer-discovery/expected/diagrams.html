@@ -1,0 +1,216 @@
+<style>
+  .dg{margin:0 0 3.5rem;padding:0}
+  .dg figcaption{display:block;margin:0 0 1rem;max-width:66ch}
+  .dg .dg-t{display:block;font-family:var(--display);font-size:21px;line-height:1.25;color:var(--ink)}
+  .dg .dg-w{display:block;margin-top:.4rem;font-family:var(--body);font-size:13px;color:var(--ink-soft)}
+  .dg .dg-scroll{overflow-x:auto;overflow-y:hidden}
+  .dg svg{display:block}
+  .dg .box{fill:var(--paper-2);stroke-width:1.2}
+  .dg .frame{fill:none;stroke:var(--grid);stroke-width:.5;stroke-dasharray:2 3}
+  .dg .axis{fill:none;stroke:var(--grid);stroke-width:.5}
+  .dg .edge{fill:none;stroke-width:1.2}
+  .dg .sa{stroke:var(--pen-a)} .dg .sb{stroke:var(--pen-b)}
+  .dg .fa{fill:var(--pen-a)} .dg .fb{fill:var(--pen-b)}
+  .dg .bara{fill:var(--pen-a)} .dg .barb{fill:var(--pen-b)}
+  .dg text{font-family:var(--cond)}
+  .dg .n-l{font-size:13px;font-weight:600;fill:var(--ink)}
+  .dg .n-n{font-size:11.5px;fill:var(--ink-soft)}
+  .dg .n-i{font-size:11.5px;font-weight:600;fill:var(--ink-soft)}
+  .dg .g-l{font-size:11.5px;font-weight:600;fill:var(--ink-soft);letter-spacing:.09em;text-transform:uppercase}
+  .dg .dg-key{margin:1rem 0 0;padding-left:1.4rem;max-width:66ch;font-family:var(--body);
+    font-size:13px;line-height:1.55;color:var(--ink-soft)}
+  .dg-lead{margin:0 0 2.5rem;max-width:66ch;font-family:var(--body);font-size:17px;color:var(--ink)}
+  .dg-bridge{margin:0 0 2.5rem;max-width:60ch;font-family:var(--body);font-size:15px;color:var(--ink-soft)}
+</style>
+<div class="dg-lead">Three figures, in order: the first shows why a sheet stops matching reality
+by mid-morning, the second turns two of the ops manager's own guesses into an annual figure
+without hiding that they are guesses, and the third lays today's process against the pilot
+he agreed to, dimension by dimension. One pen per speaker throughout: Hollis Grady's estimates
+and process are drawn in the first pen, Ines Vartanian's arithmetic and proposal in the second.</div>
+<figure class="dg" id="dg-morning-scramble">
+  <figcaption>
+    <span class="dg-t">Three ways the sheet stops matching reality</span>
+    <span class="dg-w">The dispatcher's printed sheet is right for exactly as long as nothing
+      changes. Three independent things routinely change it, and each one separately forces
+      the same fix: someone re-routes by hand.</span>
+  </figcaption>
+  <div class="dg-scroll">
+    <svg viewBox="0 0 880 260" role="img" preserveAspectRatio="xMidYMid meet" style="width:100%;height:auto;min-width:820px">
+      <title>Three causes of a broken route sheet, converging on one fix</title>
+      <desc>Drawn entirely in the pen for Hollis Grady, since the whole figure is his own
+        description of today's process; Ines Vartanian's pen does not appear here. On the left,
+        the dispatcher builds a sheet from yesterday's addresses plus overnight changes. Inside
+        the dashed band marked what breaks the sheet sit three independent causes named on the
+        call: a traffic or gate-code problem, a moved address, and a driver calling in sick.
+        Each has its own downward edge into a shared line, because any one of the three alone is
+        enough to force the same outcome on the right: a driver or the dispatcher re-routes on
+        the fly, by hand, with no system recording the extra time it took.</desc>
+      <defs>
+        <marker id="mk-dg-morning-scramble-a" viewBox="0 0 9 9" refX="8.2" refY="4.5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path class="fa" d="M0 0 L9 4.5 L0 9 Z"/></marker>
+      </defs>
+      <rect class="frame" x="188" y="24" width="472" height="120"/>
+      <text class="g-l" x="200" y="41">What breaks the sheet</text>
+      <path class="edge sa" d="M156,88 L204,88" marker-end="url(#mk-dg-morning-scramble-a)"/>
+      <path class="edge sa" d="M270,120 L270,152 L440,152" marker-end="none"/>
+      <path class="edge sa" d="M440,120 L440,152"/>
+      <path class="edge sa" d="M610,120 L610,152 L440,152"/>
+      <path class="edge sa" d="M440,152 L440,168 L706,168 L706,152" marker-end="url(#mk-dg-morning-scramble-a)"/>
+      <rect class="box sa" x="16" y="56" width="140" height="64"/>
+      <text class="n-i" x="148" y="72" text-anchor="end">1</text>
+      <text class="n-l" x="27" y="86">Yesterday's addresses</text>
+      <text class="n-n" x="27" y="102">plus overnight changes</text>
+      <rect class="box sa" x="204" y="56" width="132" height="64"/>
+      <text class="n-i" x="328" y="72" text-anchor="end">2</text>
+      <text class="n-l" x="215" y="86">Traffic, gate code</text>
+      <text class="n-n" x="215" y="102">doesn't work as printed</text>
+      <rect class="box sa" x="374" y="56" width="132" height="64"/>
+      <text class="n-i" x="498" y="72" text-anchor="end">3</text>
+      <text class="n-l" x="385" y="86">Address moved</text>
+      <text class="n-n" x="385" y="102">nobody updated it</text>
+      <rect class="box sa" x="544" y="56" width="132" height="64"/>
+      <text class="n-i" x="668" y="72" text-anchor="end">4</text>
+      <text class="n-l" x="555" y="86">Driver calls in sick</text>
+      <text class="n-n" x="555" y="102">after sheets are printed</text>
+      <rect class="box sa" x="706" y="136" width="158" height="64"/>
+      <text class="n-i" x="856" y="152" text-anchor="end">5</text>
+      <text class="n-l" x="717" y="166">Someone re-routes</text>
+      <text class="n-n" x="717" y="182">by hand, time uncounted</text>
+    </svg>
+  </div>
+  <ol class="dg-key">
+    <li><b>Dispatcher builds the sheet by hand</b> <span>00:01:05</span></li>
+    <li><b>Any one of three things breaks it</b> <span>00:07:10</span></li>
+    <li><b>Small stuff the driver eats, bigger stuff comes back to dispatch</b> <span>00:08:45</span></li>
+  </ol>
+</figure>
+<p class="dg-bridge">Each of those breaks costs time nobody has separately measured; the next
+figure is what happens when the ops manager's own guess at that cost gets multiplied out.</p>
+<figure class="dg" id="dg-annual-load">
+  <figcaption>
+    <span class="dg-t">A real number built from two guesses</span>
+    <span class="dg-w">Drivers and their weekly re-routing time are both estimates the ops
+      manager offered out loud as estimates. The annual figure on the right is arithmetic on
+      top of that looseness, drawn as a range rather than a point — and the per-hour cost that
+      would turn it into money was refused outright.</span>
+  </figcaption>
+  <div class="dg-scroll">
+    <svg viewBox="0 0 880 300" role="img" preserveAspectRatio="xMidYMid meet" style="width:100%;height:auto;min-width:820px">
+      <title>Two loose driver-side estimates, multiplied into an annual range, with the refused cost set apart</title>
+      <desc>Left column, in Hollis Grady's pen: his own two hedged estimates, roughly thirty
+        drivers and roughly two-plus hours a week each of re-routing time. Centre: a fixed,
+        undisputed multiplier of fifty-two weeks a year, drawn in the shared ink since neither
+        speaker contested it. Right, in Ines Vartanian's pen: the annual figure she derives by
+        multiplying those two guesses together, drawn with a hatched fill and an open-ended
+        "plus" rather than a solid bar, because a product of two guesses is not a measurement.
+        Below the main row, set apart and still in Hollis's pen but dashed because it was
+        withheld rather than stated: the per-hour dollar figure he declined to give, connected
+        by a broken line to show it was asked for and refused, not simply absent.</desc>
+      <defs>
+        <marker id="mk-dg-annual-load-a" viewBox="0 0 9 9" refX="8.2" refY="4.5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path class="fa" d="M0 0 L9 4.5 L0 9 Z"/></marker>
+        <marker id="mk-dg-annual-load-b" viewBox="0 0 9 9" refX="8.2" refY="4.5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path class="fb" d="M0 0 L9 4.5 L0 9 Z"/></marker>
+        <pattern id="mk-dg-annual-load-hatch" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+          <rect width="8" height="8" class="box"/>
+          <line x1="0" y1="0" x2="0" y2="8" class="sb" stroke-width="1.5"/>
+        </pattern>
+      </defs>
+      <text class="g-l" x="16" y="24">Drivers, Hollis's own count</text>
+      <rect class="box sa" x="16" y="40" width="200" height="64"/>
+      <text class="n-i" x="204" y="56" text-anchor="end">1</text>
+      <text class="n-l" x="27" y="70">~30 drivers</text>
+      <text class="n-n" x="27" y="86">"thirty-something," his words</text>
+      <rect class="box sa" x="16" y="140" width="200" height="64"/>
+      <text class="n-i" x="204" y="156" text-anchor="end">2</text>
+      <text class="n-l" x="27" y="170">~2+ hrs/week, each</text>
+      <text class="n-n" x="27" y="186">"north of two, I'd guess"</text>
+      <text class="g-l" x="356" y="24">Multiplier</text>
+      <rect class="box" x="356" y="90" width="160" height="64"/>
+      <text class="n-l" x="367" y="120">x 52 weeks/year</text>
+      <text class="n-n" x="367" y="136">not in dispute</text>
+      <path class="edge sa" d="M216,72 L300,72 L300,110 L356,110" marker-end="url(#mk-dg-annual-load-a)"/>
+      <path class="edge sa" d="M216,172 L300,172 L300,134 L356,134" marker-end="url(#mk-dg-annual-load-a)"/>
+      <text class="g-l" x="636" y="24">Annual load, derived</text>
+      <rect x="636" y="80" width="228" height="80" class="frame"/>
+      <rect x="644" y="88" width="212" height="64" fill="url(#mk-dg-annual-load-hatch)" stroke="var(--pen-b)" stroke-width="1.2"/>
+      <text class="n-i" x="852" y="104" text-anchor="end">3</text>
+      <text class="n-l" x="655" y="118">≈3,000+ hrs/year</text>
+      <text class="n-n" x="655" y="134">30 x 2 x 52, open-ended</text>
+      <path class="edge sb" d="M516,122 L636,122" marker-end="url(#mk-dg-annual-load-b)"/>
+      <path class="edge sa" d="M750,160 L750,196 L560,196 L560,220" stroke-dasharray="3 4" marker-end="url(#mk-dg-annual-load-a)"/>
+      <rect class="frame sa" x="420" y="220" width="220" height="64"/>
+      <text class="n-i" x="632" y="236" text-anchor="end">4</text>
+      <text class="n-l" x="432" y="250">$/hour — withheld</text>
+      <text class="n-n" x="432" y="266">"not going to put a number on that"</text>
+    </svg>
+  </div>
+  <ol class="dg-key">
+    <li><b>~30 drivers, stated as "thirty-something"</b> <span>00:03:10</span></li>
+    <li><b>~2+ hrs/week each, offered as a guess</b> <span>00:10:20</span></li>
+    <li><b>The annual figure, derived on the call</b> <span>00:35:00</span></li>
+    <li><b>The per-hour cost, refused</b> <span>00:33:20</span></li>
+  </ol>
+</figure>
+<p class="dg-bridge">An open-ended range is not something either side can act on; the last
+figure is what the ops manager actually agreed to check it against.</p>
+<figure class="dg" id="dg-pilot-scope">
+  <figcaption>
+    <span class="dg-t">What changes in the pilot, dimension by dimension</span>
+    <span class="dg-w">Today's process and the thirty-day pilot differ on three named axes, and
+      the ops manager set the last row himself: two plain conditions he'll believe without a
+      dollar figure attached.</span>
+  </figcaption>
+  <div class="dg-scroll">
+    <svg viewBox="0 0 880 300" role="img" preserveAspectRatio="xMidYMid meet" style="width:100%;height:auto;min-width:820px">
+      <title>Today's manual process against the northern-run pilot, on three dimensions</title>
+      <desc>A centre line splits the figure. The left column, in Hollis Grady's pen, is today:
+        a route built by hand, a re-routing cost he only ever estimated, and no proof condition
+        because nothing has been measured yet. The right column, in Ines Vartanian's pen, is the
+        thirty-day pilot: routes generated automatically with the dispatcher approving
+        exceptions, the same re-routing cost now actually measured on one route, and the two
+        conditions Hollis himself named for believing the result. Each row's dimension is
+        labelled in the gutter between the columns.</desc>
+      <defs>
+        <marker id="mk-dg-pilot-scope-a" viewBox="0 0 9 9" refX="8.2" refY="4.5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path class="fa" d="M0 0 L9 4.5 L0 9 Z"/></marker>
+        <marker id="mk-dg-pilot-scope-b" viewBox="0 0 9 9" refX="0.8" refY="4.5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path class="fb" d="M9 0 L0 4.5 L9 9 Z"/></marker>
+      </defs>
+      <text class="g-l" x="220" y="28" text-anchor="middle">Today</text>
+      <text class="g-l" x="660" y="28" text-anchor="middle">Pilot, northern run, 30 days</text>
+      <rect class="box sa" x="60" y="48" width="240" height="60"/>
+      <text class="n-i" x="292" y="62" text-anchor="end">1</text>
+      <text class="n-l" x="72" y="72">Dispatcher builds by hand</text>
+      <text class="n-n" x="72" y="88">printed sheet, five in the morning</text>
+      <text class="n-i" x="440" y="76" text-anchor="middle">who builds the route</text>
+      <rect class="box sb" x="580" y="48" width="240" height="60"/>
+      <text class="n-l" x="592" y="72">Generated automatically</text>
+      <text class="n-n" x="592" y="88">dispatcher approves exceptions</text>
+      <path class="edge sa" d="M300,78 L360,78" marker-end="url(#mk-dg-pilot-scope-a)"/>
+      <path class="edge sb" d="M580,78 L520,78" marker-end="url(#mk-dg-pilot-scope-b)"/>
+      <rect class="box sa" x="60" y="128" width="240" height="60"/>
+      <text class="n-i" x="292" y="142" text-anchor="end">2</text>
+      <text class="n-l" x="72" y="152">Cost: an estimate</text>
+      <text class="n-n" x="72" y="168">north of two hours, his guess</text>
+      <text class="n-i" x="440" y="156" text-anchor="middle">re-routing cost</text>
+      <rect class="box sb" x="580" y="128" width="240" height="60"/>
+      <text class="n-i" x="812" y="142" text-anchor="end">3</text>
+      <text class="n-l" x="592" y="152">Cost: measured</text>
+      <text class="n-n" x="592" y="168">on the northern run, one month</text>
+      <path class="edge sa" d="M300,158 L360,158" marker-end="url(#mk-dg-pilot-scope-a)"/>
+      <path class="edge sb" d="M580,158 L520,158" marker-end="url(#mk-dg-pilot-scope-b)"/>
+      <rect class="box sa" x="60" y="208" width="240" height="60"/>
+      <text class="n-l" x="72" y="232">No proof condition</text>
+      <text class="n-n" x="72" y="248">nothing has been measured yet</text>
+      <text class="n-i" x="440" y="236" text-anchor="middle">what would prove it</text>
+      <rect class="box sb" x="580" y="208" width="240" height="60"/>
+      <text class="n-i" x="812" y="222" text-anchor="end">4</text>
+      <text class="n-l" x="592" y="232">Two conditions, his own</text>
+      <text class="n-n" x="592" y="248">quiet northern run, dispatcher off early</text>
+      <path class="edge sa" d="M300,238 L360,238" marker-end="url(#mk-dg-pilot-scope-a)"/>
+      <path class="edge sb" d="M580,238 L520,238" marker-end="url(#mk-dg-pilot-scope-b)"/>
+      <path class="axis" d="M440,44 L440,272"/>
+    </svg>
+  </div>
+  <ol class="dg-key">
+    <li><b>Today: built by hand, cost only ever guessed</b> <span>00:01:05</span></li>
+    <li><b>Pilot: generated, measured on one route</b> <span>00:44:00</span></li>
+    <li><b>The two conditions Hollis sets himself</b> <span>00:42:40</span></li>
+  </ol>
+</figure>

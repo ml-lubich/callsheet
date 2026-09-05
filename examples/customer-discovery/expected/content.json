@@ -1,0 +1,148 @@
+{
+  "meta": {
+    "title": "The two hours a week nobody has measured",
+    "subtitle": "A route-planning pitch surfaces a real cost that its own source calls a guess.",
+    "kind": "Call record",
+    "date": "14 May",
+    "duration_label": "48 min",
+    "duration_s": 2890,
+    "turns": 47,
+    "words": 1002,
+    "extra": [["Account", "Regional delivery operation"], ["Fleet", "~30 drivers, by the ops manager's own count"]],
+    "participants": [
+      {"key": "I", "name": "Ines Vartanian", "role": "Seller, route-planning service"},
+      {"key": "H", "name": "Hollis Grady", "role": "Operations manager, prospect"}
+    ]
+  },
+  "abstract": "Ines Vartanian, selling a route-planning service, maps how Hollis Grady's depot runs: a dispatcher hand-builds routes each morning for thirty-something drivers covering high-fifties to sixty stops apiece. The number that matters has no measured basis — Hollis puts driver time lost to re-routing at 'somewhere north of two hours a week,' concentrated on the one account watching the clock. Nine drivers left last year, a figure he revises downward mid-sentence, and he will not attach a dollar value to it, leaving that to payroll. Ines converts the guess into roughly three thousand hours a year and proposes a thirty-day pilot on that one route, sent to Hollis directly, before anyone above him approves spending.",
+  "acts": [
+    {
+      "n": 1,
+      "title": "Mapping the manual morning",
+      "span": "00:00:00-00:15:00",
+      "start_s": 0,
+      "end_s": 900,
+      "summary": "Ines maps the depot's manual process: a dispatcher hand-builds routes for thirty-something drivers, and Hollis offers the ongoing repair cost as a guess — north of two hours a week — rather than a measured figure.",
+      "turning_point": {"ts": "00:10:20", "s": 620, "text": "Somewhere north of two hours a week, I'd guess, fixing a route that fell apart"}
+    },
+    {
+      "n": 2,
+      "title": "Where it concentrates, and what it costs",
+      "span": "00:15:00-00:36:40",
+      "start_s": 900,
+      "end_s": 2200,
+      "summary": "The loose weekly number turns out to concentrate on one high-value account; nine drivers left last year, and Ines converts the guess into an annual hours figure while Hollis refuses to price it in dollars.",
+      "turning_point": {"ts": "00:35:00", "s": 2100, "text": "that's north of three thousand hours a year sitting in re-routing"}
+    },
+    {
+      "n": 3,
+      "title": "Deflection, proof conditions, and a narrow pilot",
+      "span": "00:36:40-00:48:10",
+      "start_s": 2200,
+      "end_s": 2890,
+      "summary": "Hollis defers naming a purchase approver until the numbers hold up, then sets two checkable conditions for belief; they agree to scope a thirty-day pilot on the northern run alone.",
+      "turning_point": {"ts": "00:40:00", "s": 2400, "text": "let's come back to that"}
+    }
+  ],
+  "threads": [
+    {
+      "name": "The loose weekly number",
+      "what": "Hollis estimates driver time lost to re-routing at 'somewhere north of two hours a week' and never offers a firmer figure.",
+      "why_it_matters": "The whole pitch's economics end up resting on a number its own source calls a guess.",
+      "marks": [{"ts": "00:10:20", "s": 620}, {"ts": "00:35:00", "s": 2100}]
+    },
+    {
+      "name": "Who signs off",
+      "what": "Ines asks who approves a purchase like this and Hollis defers naming anyone until results are proven.",
+      "why_it_matters": "A pilot scoped before a real approver is named risks being work with no buyer at the end of it.",
+      "marks": [{"ts": "00:38:20", "s": 2300}, {"ts": "00:40:00", "s": 2400}]
+    },
+    {
+      "name": "Turnover as a second cost",
+      "what": "Nine drivers left the depot last year, a figure Hollis revises down from twelve mid-sentence, and attributes only partly to routing.",
+      "why_it_matters": "It gives the pitch a cost angle beyond the weekly hours, but one Hollis is careful not to fully claim.",
+      "marks": [{"ts": "00:24:00", "s": 1440}]
+    }
+  ],
+  "evidence": [
+    {
+      "ts": "00:10:20", "s": 620,
+      "claim": "Re-routing costs each driver roughly two-plus hours a week.",
+      "evidence": "Hollis offers it unprompted as his own guess, explicitly not a measured figure.",
+      "strength": "weak"
+    },
+    {
+      "ts": "00:16:20", "s": 980,
+      "claim": "The re-routing time is not spread evenly — it concentrates on the northern run.",
+      "evidence": "Hollis confirms directly when Ines asks whether the two hours are evenly spread.",
+      "strength": "medium"
+    },
+    {
+      "ts": "00:24:00", "s": 1440,
+      "claim": "Driver turnover last year was about nine, partly related to routing unpredictability.",
+      "evidence": "Hollis states it while revising the number downward mid-sentence, and qualifies the routing link himself.",
+      "strength": "weak"
+    }
+  ],
+  "signals": [
+    {"ts": "00:33:20", "s": 2000, "signal": "Hollis draws a hard line at translating hours into dollars, twice pointing to payroll rather than estimating a rate himself."}
+  ],
+  "numbers": [
+    {
+      "ts": "00:03:10", "s": 190,
+      "value": "~30 drivers (stated as 'thirty-something drivers, maybe thirty-two')",
+      "means": "Hollis's own headcount estimate for a normal week; no roster figure was checked or given."
+    },
+    {
+      "ts": "00:04:20", "s": 260,
+      "value": "~55-60 stops/driver/day (stated as 'high fifties, maybe sixty... give or take')",
+      "means": "A per-driver daily stop count offered as a loose range, with the northern run flagged as heavier than the average."
+    },
+    {
+      "ts": "00:10:20", "s": 620,
+      "value": "~2+ hrs/week/driver (stated as 'somewhere north of two hours a week, I'd guess')",
+      "means": "Hollis's own estimate of driver time lost to re-routing; explicitly a guess, not a measured baseline, and he says it varies week to week."
+    },
+    {
+      "ts": "00:24:00", "s": 1440,
+      "value": "9 drivers/year turnover (revised down mid-sentence from an initial 'twelve')",
+      "means": "Last year's driver turnover count, self-corrected on the call; Hollis attributes only some of it to routing, not all."
+    },
+    {
+      "ts": "00:35:00", "s": 2100,
+      "value": "~3,000+ hrs/year (Ines's arithmetic: ~30 drivers x ~2 hrs/week x 52 weeks)",
+      "means": "A derived annual figure built by multiplying two of Hollis's own loose estimates; not independently confirmed beyond his 'sounds worse than it feels' reaction."
+    }
+  ],
+  "quotes": [
+    {"ts": "00:03:10", "s": 190, "speaker": "H", "text": "Call it thirty-something drivers, maybe thirty-two on a normal week."},
+    {"ts": "00:10:20", "s": 620, "speaker": "H", "text": "Somewhere north of two hours a week, I'd guess, fixing a route that fell apart"},
+    {"ts": "00:24:00", "s": 1440, "speaker": "H", "text": "We lost, I want to say twelve — no, it was more like nine drivers to turnover last year."},
+    {"ts": "00:33:20", "s": 2000, "speaker": "H", "text": "I'm not going to put a per-hour number on that out loud, payroll owns that math, not me."},
+    {"ts": "00:40:00", "s": 2400, "speaker": "H", "text": "let's come back to that"}
+  ],
+  "tech": ["Dispatcher's manual routing spreadsheet"],
+  "tensions": [
+    {"ts": "00:40:00", "s": 2400, "note": "Sign-off ownership is deferred until the numbers hold up, leaving the pitch without a named approver for now."}
+  ],
+  "diarization": [
+    {"ts": "00:38:20", "s": 2300, "why": "Hollis's reaction to the annual-hours figure and Ines's pivot to the sign-off question land back to back; the topic change reads as Ines moving on before Hollis's point has fully landed."}
+  ],
+  "next_steps": [
+    {"ts": "00:46:20", "s": 2780, "commitment": "Ines will scope a thirty-day pilot limited to the northern run and send it to Hollis directly rather than the group inbox."}
+  ],
+  "fit": {
+    "aligned_on": [
+      "The manual process is a dispatcher hand-building routes every morning for thirty-something drivers.",
+      "The re-routing time is concentrated on the northern run, the account that matters most to Hollis."
+    ],
+    "unresolved": [
+      "Whether the two-hours-a-week figure would hold up to actual measurement.",
+      "Who signs off on a purchase like this."
+    ],
+    "risks": [
+      {"who": "Ines Vartanian", "note": "She built a roughly three-thousand-hour annual figure by multiplying two of Hollis's own guesses, not a measured baseline."},
+      {"who": "Hollis Grady", "note": "He has agreed to a pilot before knowing whether anyone above him will actually approve funding it."}
+    ]
+  }
+}
