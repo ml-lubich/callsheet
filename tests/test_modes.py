@@ -10,13 +10,18 @@ from callsheet.build import build, template_path
 from callsheet.cli import main
 from callsheet.modes import (
     MODES,
+    REGISTER_RULES,
     SECTIONS,
     TRANSCRIPT,
     ModeError,
     all_modes,
     apply,
+    caps,
+    enforce,
     get,
+    layout_violations,
     prompt_guidance,
+    prose_violations,
     section_order,
 )
 from callsheet.parse import metrics, parse_transcript
@@ -57,11 +62,18 @@ def words(value) -> int:
     return 0
 
 
+def within_budget(content, mode: str) -> dict:
+    """The fixture abstract, cut to whatever this mode allows, so shape tests test shape."""
+    cap = caps(mode)
+    room = min(cap["abstract"], cap["paragraph"])
+    return dict(content, abstract=" ".join(content["abstract"].split()[:room]))
+
+
 def page(content, mode: str) -> str:
     t = parse_transcript((FIXTURES / "bracket_hms.txt").read_text())
     return build(
         template_path().read_text(),
-        content,
+        within_budget(content, mode),
         t.turns,
         metrics(t),
         diagrams=(FIXTURES / "diagrams.html").read_text(),
@@ -298,3 +310,121 @@ def test_cli_build_rejects_an_unknown_mode(tmp_path, capsys):
     ])
     assert code == 1
     assert "punchy" in capsys.readouterr().err
+
+
+# --- hard caps -------------------------------------------------------------
+
+
+def over(content, **fields):
+    return {**content, **fields}
+
+
+def test_an_in_budget_content_passes_every_mode(content):
+    for name in NINE:
+        enforce(within_budget(content, name), name)
+
+
+def test_an_over_budget_abstract_fails_and_names_the_field(content):
+    long_abstract = " ".join(["word"] * 200)
+    with pytest.raises(ModeError) as e:
+        enforce(over(content, abstract=long_abstract), "professional")
+    assert "abstract" in str(e.value)
+    assert "200 words" in str(e.value) and "120" in str(e.value) and "80 over" in str(e.value)
+
+
+def test_a_long_paragraph_fails_even_when_the_field_fits(content):
+    body = " ".join(["word"] * 71) + "\n\n" + "tail."
+    bad = prose_violations(over(content, abstract=body), "professional")
+    assert any("paragraph 1" in v and "71 words" in v for v in bad)
+
+
+def test_each_kind_of_field_has_its_own_cap(content):
+    acts = [dict(content["acts"][0], summary=" ".join(["word"] * 61))]
+    bad = prose_violations(over(content, acts=acts), "professional")
+    assert any("acts[0].summary" in v and "60" in v for v in bad)
+
+    threads = [dict(content["threads"][0], what=" ".join(["word"] * 56))]
+    bad = prose_violations(over(content, threads=threads), "professional")
+    assert any("threads[0].what" in v and "55" in v for v in bad)
+
+    signals = [dict(content["signals"][0], signal=" ".join(["word"] * 31))]
+    bad = prose_violations(over(content, signals=signals), "professional")
+    assert any("signals[0].signal" in v and "30" in v for v in bad)
+
+
+def test_a_quote_is_never_capped(content):
+    quotes = [dict(content["quotes"][0], text=" ".join(["word"] * 200))]
+    assert prose_violations(over(content, quotes=quotes), "professional") == []
+
+
+@pytest.mark.parametrize("name", NINE)
+def test_every_mode_carries_its_own_caps(name):
+    cap = caps(name)
+    assert cap["abstract"] == get(name).budgets.get("abstract", 120)
+    for kind in ("paragraph", "act_summary", "thread_what", "list_item"):
+        assert cap[kind] > 0
+    if name in ("compact", "summarized"):
+        assert cap["list_item"] < caps("professional")["list_item"]
+    if name == "creative":
+        assert cap["list_item"] > caps("professional")["list_item"]
+
+
+def test_the_build_refuses_an_over_budget_page(content):
+    t = parse_transcript((FIXTURES / "bracket_hms.txt").read_text())
+    with pytest.raises(ModeError) as e:
+        build(
+            template_path().read_text(),
+            over(content, abstract=" ".join(["word"] * 300)),
+            t.turns,
+            metrics(t),
+            mode="professional",
+        )
+    assert "abstract" in str(e.value)
+
+
+# --- register rules and wall-of-text ---------------------------------------
+
+
+@pytest.mark.parametrize("name", NINE)
+def test_every_mode_states_the_register_rules(name):
+    text = prompt_guidance(name)
+    assert REGISTER_RULES in text
+    for rule in ("metaphors", "scare quotes", "essentially", "shapes"):
+        assert rule in text
+
+
+@pytest.mark.parametrize("name", NINE)
+def test_no_builtin_mode_stacks_three_prose_sections(content, name):
+    assert layout_violations(content, name) == []
+
+
+def test_three_prose_sections_in_a_row_are_flagged(content, tmp_path):
+    _write_project_modes(
+        tmp_path,
+        {"wall": {"sections": ["abstract", "acts", "threads", "quotes"], "transcript": "omit"}},
+    )
+    bad = layout_violations(content, "wall", tmp_path)
+    assert len(bad) == 1
+    assert "abstract, acts, threads" in bad[0] and "figure" in bad[0]
+
+
+def test_an_empty_section_does_not_count_toward_a_wall(content, tmp_path):
+    _write_project_modes(
+        tmp_path,
+        {"three": {"sections": ["abstract", "acts", "threads"], "transcript": "omit"}},
+    )
+    assert layout_violations(content, "three", tmp_path)
+    assert layout_violations({**content, "acts": []}, "three", tmp_path) == []
+
+
+def test_cli_lint_prose_passes_and_fails(tmp_path, capsys):
+    assert main(["lint-prose", str(FIXTURES / "content.json")]) == 0
+    assert "within every professional budget" in capsys.readouterr().out
+
+    bad = tmp_path / "content.json"
+    payload = json.loads((FIXTURES / "content.json").read_text())
+    payload["abstract"] = " ".join(["word"] * 300)
+    bad.write_text(json.dumps(payload))
+    assert main(["lint-prose", str(bad), "--mode", "concise"]) == 1
+    err = capsys.readouterr().err
+    assert "abstract" in err and "300 words" in err and "concise" in err

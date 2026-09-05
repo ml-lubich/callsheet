@@ -126,6 +126,13 @@ figure budgets, and the transcript setting. It never changes a fact. A project
 can add its own in `.callsheet/modes.json`, merged over the built-ins. See
 `skills/modes/`.
 
+The word budgets are hard. `callsheet build` refuses a `content.json` whose
+abstract, act summary, thread, list item or any single paragraph runs over the
+mode's cap, and names each field with its count and its excess. `callsheet
+lint-prose work/content.json --mode concise` reports the same list without the
+failure, and additionally flags a wall of text: three consecutive prose sections
+with no figure, table or list to break them.
+
 ### Linting the figures
 
 `callsheet lint-diagrams` catches the mechanical faults a hand-authored SVG set

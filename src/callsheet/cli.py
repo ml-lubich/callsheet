@@ -26,7 +26,7 @@ from .lexicon import (
     load_profile,
     suggest_corrections,
 )
-from .modes import ModeError, all_modes
+from .modes import ModeError, all_modes, layout_violations, prose_violations
 from .parse import ParseError, chunks, metrics, parse_transcript, transcript_from_turns
 from .schema import SchemaError
 from .transcribe import DEFAULT_BINARY, TranscribeError, transcribe
@@ -101,6 +101,18 @@ def cmd_build(a) -> int:
 def cmd_modes(a) -> int:
     for name, mode in all_modes().items():
         print(f"{name:<14} {mode.summary}")
+    return 0
+
+
+def cmd_lint_prose(a) -> int:
+    content = _load(a.content)
+    bad = prose_violations(content, a.mode) + layout_violations(content, a.mode)
+    for line in bad:
+        print(f"  {line}", file=sys.stderr)
+    if bad:
+        print(f"callsheet: {len(bad)} problem(s) in {a.content} for mode {a.mode}", file=sys.stderr)
+        return 1
+    print(f"{a.content}: within every {a.mode} budget")
     return 0
 
 
@@ -307,6 +319,11 @@ def build_parser() -> argparse.ArgumentParser:
 
     n = sub.add_parser("modes", help="list the output modes a build can be rendered in")
     n.set_defaults(fn=cmd_modes)
+
+    r = sub.add_parser("lint-prose", help="word caps and wall-of-text checks on content.json")
+    r.add_argument("content")
+    r.add_argument("--mode", default="professional")
+    r.set_defaults(fn=cmd_lint_prose)
 
     d = sub.add_parser("lint-diagrams", help="house-style checks on an inline SVG fragment")
     d.add_argument("fragment")

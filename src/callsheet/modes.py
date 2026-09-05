@@ -232,7 +232,7 @@ _BUILT_INS = (
             "carry the argument forward. Quotes are set large and used as beats. The verdict is a "
             "closing paragraph, not a box."
         ),
-        sections=_order("strip", "abstract", "figures", "acts", "threads", "quotes"),
+        sections=_order("strip", "abstract", "figures", "acts", "threads", "evidence", "quotes"),
         budgets={**BUDGETS, "abstract": 200, "figures": 70, "quotes": 90},
         figures=12,
         emphasis=(
@@ -367,6 +367,8 @@ def prompt_guidance(mode: str, root=None) -> str:
         f"Sections, in this order: {', '.join(m.sections)}.",
         f"Budgets: {budgets}.",
         f"Figures: at most {m.figures}. Transcript: {m.transcript}.",
+        "",
+        REGISTER_RULES,
         "A mode changes the shape and the register of the document. It never changes a fact:",
         "do not add, drop, soften or reweight a claim to fit it.",
     ])
@@ -419,3 +421,123 @@ def shape_template(template: str, block: dict) -> str:
         keep.append(((min(ranks), i), html))
     keep.sort(key=lambda pair: pair[0])
     return template[: found[0].start()] + "".join(h for _, h in keep) + template[found[-1].end() :]
+
+
+REGISTER_RULES = """Register rules, in every mode:
+- No analogies and no metaphors. Say the thing.
+- No scare quotes around ordinary words.
+- No "essentially", "basically", "simply".
+- No sentence that restates the sentence before it.
+- Every paragraph opens with the fact, not the framing.
+- Concepts over words: a sentence describing a structure — an order, a fan-out,
+  a comparison, a magnitude, a position in time — is a figure you have not drawn
+  yet. Put it in a `shapes` entry for the diagram agent instead of writing it out."""
+
+# Hard caps in words, enforced at build time. These are the professional defaults;
+# each mode scales them. The abstract's cap is the mode's own abstract budget.
+PROSE_CAPS = {"paragraph": 70, "act_summary": 60, "thread_what": 55, "list_item": 30}
+_CAP_SCALE = {"summarized": 0.6, "compact": 0.6, "concise": 0.75, "creative": 1.3}
+
+# Rows whose one prose field is a list item on the page. Quote text is verbatim
+# and is never capped — trimming a quote to a word count falsifies it.
+_LIST_FIELDS = (
+    ("evidence", "claim"),
+    ("evidence", "evidence"),
+    ("signals", "signal"),
+    ("numbers", "means"),
+    ("tensions", "note"),
+    ("diarization", "why"),
+    ("next_steps", "commitment"),
+)
+
+# Sections that render as running prose. Three in a row is a wall of text.
+_PROSE_SECTIONS = ("abstract", "acts", "threads", "quotes", "fit")
+
+
+def caps(mode: str, root=None) -> dict[str, int]:
+    """The word caps this mode enforces, keyed by the kind of field."""
+    m = get(mode, root)
+    scale = _CAP_SCALE.get(m.name, 1.0)
+    out = {kind: max(5, round(cap * scale)) for kind, cap in PROSE_CAPS.items()}
+    out["abstract"] = m.budgets.get("abstract", BUDGETS["abstract"])
+    return out
+
+
+def _prose_fields(content: dict):
+    """(where, text, cap kind) for every prose field a mode caps."""
+    yield "abstract", content.get("abstract", ""), "abstract"
+    for i, a in enumerate(content.get("acts") or []):
+        yield f"acts[{i}].summary", a.get("summary", ""), "act_summary"
+        point = a.get("turning_point") or {}
+        yield f"acts[{i}].turning_point.text", point.get("text", ""), "list_item"
+    for i, t in enumerate(content.get("threads") or []):
+        yield f"threads[{i}].what", t.get("what", ""), "thread_what"
+        yield f"threads[{i}].why_it_matters", t.get("why_it_matters", ""), "thread_what"
+    for section, field in _LIST_FIELDS:
+        for i, row in enumerate(content.get(section) or []):
+            yield f"{section}[{i}].{field}", row.get(field, ""), "list_item"
+    fit = content.get("fit") or {}
+    for key in ("aligned_on", "unresolved"):
+        for i, item in enumerate(fit.get(key) or []):
+            yield f"fit.{key}[{i}]", item, "list_item"
+    for i, risk in enumerate(fit.get("risks") or []):
+        yield f"fit.risks[{i}].note", risk.get("note", ""), "list_item"
+
+
+def prose_violations(content: dict, mode: str, root=None) -> list[str]:
+    """Every field that is over its cap, with the count and the excess."""
+    cap = caps(mode, root)
+    out = []
+    for where, text, kind in _prose_fields(content):
+        text = str(text or "")
+        if not text.strip():
+            continue
+        total = len(text.split())
+        if total > cap[kind]:
+            out.append(
+                f"{where}: {total} words, {mode} allows {cap[kind]} ({total - cap[kind]} over)"
+            )
+        paragraphs = [p for p in re.split(r"\n\s*\n", text) if p.strip()]
+        if len(paragraphs) < 2:
+            continue
+        for i, paragraph in enumerate(paragraphs, 1):
+            count = len(paragraph.split())
+            if count > cap["paragraph"]:
+                out.append(
+                    f"{where} paragraph {i}: {count} words, {mode} allows "
+                    f"{cap['paragraph']} ({count - cap['paragraph']} over)"
+                )
+    return out
+
+
+def _renders(content: dict, section: str) -> bool:
+    keys = SECTIONS[section]
+    return not keys or any(content.get(k) for k in keys)
+
+
+def layout_violations(content: dict, mode: str, root=None) -> list[str]:
+    """Runs of three prose sections with no figure, table or list to break them."""
+    out, run = [], []
+    for section in section_order(mode, root):
+        if not _renders(content, section):
+            continue
+        if section not in _PROSE_SECTIONS:
+            run = []
+            continue
+        run.append(section)
+        if len(run) == 3:
+            out.append(
+                f"layout: {', '.join(run)} run together with no figure, table or list "
+                "between them — break the run with a figure"
+            )
+            run = []
+    return out
+
+
+def enforce(content: dict, mode: str, root=None) -> None:
+    """Raise :class:`ModeError` naming every field that is over its word cap."""
+    bad = prose_violations(content, mode, root)
+    if bad:
+        raise ModeError(
+            f"content.json is over budget for mode {mode!r}:\n  - " + "\n  - ".join(bad)
+        )

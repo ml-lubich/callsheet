@@ -16,6 +16,7 @@ mkdir -p out
 cp expected/content.json work/content.json
 cp expected/diagrams.html out/diagrams.html
 
+"$CALLSHEET" lint-prose work/content.json
 "$CALLSHEET" lint-diagrams out/diagrams.html --turns work/turns.json
 "$CALLSHEET" build --content work/content.json --turns work/turns.json \
                    --metrics work/metrics.json --diagrams out/diagrams.html \

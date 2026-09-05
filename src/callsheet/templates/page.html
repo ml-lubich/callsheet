@@ -535,7 +535,9 @@ document.getElementById("legend").innerHTML = KEYS.map(function(k, i){
 })();
 
 /* ---- 3. abstract ---- */
-if (CONTENT.abstract) document.getElementById("abstract").innerHTML = "<p>" + esc(CONTENT.abstract) + "</p>";
+if (CONTENT.abstract) document.getElementById("abstract").innerHTML =
+  String(CONTENT.abstract).split(/\n\s*\n/).filter(function(p){ return p.trim(); })
+    .map(function(p){ return "<p>" + esc(p.trim()) + "</p>"; }).join("");
 document.getElementById("highlights").innerHTML = (CONTENT.highlights || []).map(function(h){ return "<li>" + esc(h) + "</li>"; }).join("");
 
 /* ---- 4. acts ---- */

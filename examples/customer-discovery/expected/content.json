@@ -14,7 +14,7 @@
       {"key": "H", "name": "Hollis Grady", "role": "Operations manager, prospect"}
     ]
   },
-  "abstract": "Ines Vartanian, selling a route-planning service, maps how Hollis Grady's depot runs: a dispatcher hand-builds routes each morning for thirty-something drivers covering high-fifties to sixty stops apiece. The number that matters has no measured basis — Hollis puts driver time lost to re-routing at 'somewhere north of two hours a week,' concentrated on the one account watching the clock. Nine drivers left last year, a figure he revises downward mid-sentence, and he will not attach a dollar value to it, leaving that to payroll. Ines converts the guess into roughly three thousand hours a year and proposes a thirty-day pilot on that one route, sent to Hollis directly, before anyone above him approves spending.",
+  "abstract": "Ines Vartanian, selling a route-planning service, maps how Hollis Grady's depot runs: a dispatcher hand-builds routes each morning for thirty-something drivers covering high-fifties to sixty stops apiece. The number that matters has no measured basis — Hollis puts driver time lost to re-routing at 'somewhere north of two hours a week,' concentrated on the one account watching the clock.\n\nNine drivers left last year, a figure he revises downward mid-sentence, and he will not attach a dollar value to it, leaving that to payroll. Ines converts the guess into roughly three thousand hours a year and proposes a thirty-day pilot on that one route, sent to Hollis directly, before anyone above him approves spending.",
   "acts": [
     {
       "n": 1,
@@ -126,7 +126,7 @@
     {"ts": "00:40:00", "s": 2400, "note": "Sign-off ownership is deferred until the numbers hold up, leaving the pitch without a named approver for now."}
   ],
   "diarization": [
-    {"ts": "00:38:20", "s": 2300, "why": "Hollis's reaction to the annual-hours figure and Ines's pivot to the sign-off question land back to back; the topic change reads as Ines moving on before Hollis's point has fully landed."}
+    {"ts": "00:38:20", "s": 2300, "why": "Hollis's reaction to the annual-hours figure and Ines's pivot to the sign-off question land back to back; the topic change reads as Ines moving on before Hollis had finished."}
   ],
   "next_steps": [
     {"ts": "00:46:20", "s": 2780, "commitment": "Ines will scope a thirty-day pilot limited to the northern run and send it to Hollis directly rather than the group inbox."}

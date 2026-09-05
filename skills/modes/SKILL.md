@@ -84,6 +84,47 @@ chart, and the numbers. No acts, threads, evidence, quotes or transcript. The
 figures *are* the document, so the bridges between consecutive figures have to
 carry the argument; every claim lives in a figure or in a number.
 
+## The caps are hard
+
+Budgets are not advice. `callsheet build` refuses a `content.json` whose prose
+runs over, and names every field with its word count and its excess. Per mode,
+scaled from the professional defaults — `summarized` and `compact` at 0.6,
+`concise` at 0.75, `creative` at 1.3:
+
+| Cap | Professional | Applies to |
+|---|---|---|
+| abstract | the mode's abstract budget | `abstract` |
+| paragraph | 70 | every paragraph of every prose field |
+| act summary | 60 | `acts[].summary` |
+| thread | 55 | `threads[].what`, `threads[].why_it_matters` |
+| list item | 30 | signals, tensions, numbers, diarization, next steps, evidence claims, fit items, turning points |
+
+Quote text is never capped. Trimming a quote to a word count falsifies it.
+
+Check before you build, and get the same list without the failure:
+
+```
+callsheet lint-prose work/content.json --mode concise
+```
+
+`lint-prose` also fails on a **wall of text**: three consecutive prose sections
+— abstract, acts, threads, quotes, fit — with no figure, table or list between
+them. Break the run with a figure. Every built-in mode's section order already
+satisfies this; a project mode that does not will be told so.
+
+## Register rules, in every mode
+
+`prompt_guidance` ends with the same block for every mode:
+
+- No analogies and no metaphors. Say the thing.
+- No scare quotes around ordinary words.
+- No "essentially", "basically", "simply".
+- No sentence that restates the sentence before it.
+- Every paragraph opens with the fact, not the framing.
+- Concepts over words: a sentence describing a structure — an order, a fan-out,
+  a comparison, a magnitude, a position in time — is a figure you have not drawn
+  yet. It goes in a `shapes` entry for the diagram agent, not into the prose.
+
 ## Choosing one
 
 | The reader | The mode |

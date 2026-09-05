@@ -43,6 +43,7 @@ def build(
     """Return the finished page. Raises if the template is not shaped as expected."""
     validate(content)
     content = _modes.apply(content, mode, root)
+    _modes.enforce(content, mode, root)
     page = _modes.shape_template(template, content["_mode"])
     for marker, payload in (
         (CONTENT_MARKER, content),

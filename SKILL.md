@@ -149,7 +149,9 @@ writes `work/content.json`. Its rules:
   drop the ones that are only a single relationship.
 
 Validate before going further (see **Required gates**) — the schema names the
-field that is wrong.
+field that is wrong. The word caps are hard: `callsheet lint-prose
+work/content.json --mode MODE` names every field that is over, and the build
+refuses the page rather than shipping it long.
 
 ## 6. Draw — the main event
 
@@ -244,6 +246,7 @@ with no data removes itself from the page rather than leaving an empty heading.
 ```
 callsheet lexicon check work/transcript.txt --profile PROFILE   # before anything reads it
 python -c "import json;from callsheet.schema import validate;validate(json.load(open('work/content.json')))"
+callsheet lint-prose work/content.json --mode MODE               # hard word caps
 callsheet lint-diagrams out/diagrams.html --turns work/turns.json
 callsheet build …    # reports external requests; that count must be zero
 ```
