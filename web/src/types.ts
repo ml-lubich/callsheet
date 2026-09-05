@@ -53,11 +53,17 @@ export interface Content {
   highlights?: string[];
   abstract?: string;
   /** Optional one-line finding, rendered above the abstract when the analysis supplies one. */
-  verdict?: string | { text: string; note?: string };
+  /** The stance the analysis commits to, with the case each way and the one open question. */
+  verdict?: {
+    position: string;
+    for: string[];
+    against: string[];
+    decides_it: string;
+  };
   acts: Act[];
   threads?: Thread[];
   /** Optional "where it lands" rows: what changed, and for whom. */
-  lands?: (Partial<Stamp> & { where: string; note?: string })[];
+  lands?: (Partial<Stamp> & { observation: string; transfers_to: string })[];
   evidence?: (Stamp & { claim: string; evidence: string; strength: Strength })[];
   signals?: (Stamp & { signal: string })[];
   numbers?: (Stamp & { value: string; means: string })[];

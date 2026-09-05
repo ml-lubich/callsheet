@@ -17,7 +17,7 @@ export function LandsSkeleton() {
   );
 }
 
-/** Where the call lands: what it changed, and for whom. Optional in content.json. */
+/** Where it lands: each practice the speaker demonstrated, and the class of work it transfers to. */
 export function Lands({
   lands,
   turns,
@@ -28,9 +28,9 @@ export function Lands({
   return (
     <div className="lands">
       {lands.map((l, i) => (
-        <Reveal as="article" className="land" key={l.where + i} delay={i * STAGGER}>
-          <h3>{l.where}</h3>
-          {l.note && <p>{l.note}</p>}
+        <Reveal as="article" className="land" key={i} delay={i * STAGGER}>
+          <h3>{l.observation}</h3>
+          <p className="land-to">{l.transfers_to}</p>
           {l.ts && <TimeLink ts={l.ts} s={l.s} turns={turns} />}
         </Reveal>
       ))}
