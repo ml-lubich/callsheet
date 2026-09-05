@@ -428,3 +428,21 @@ def test_cli_lint_prose_passes_and_fails(tmp_path, capsys):
     assert main(["lint-prose", str(bad), "--mode", "concise"]) == 1
     err = capsys.readouterr().err
     assert "abstract" in err and "300 words" in err and "concise" in err
+
+
+# --- verdict and lands travel with the sections that own them -----------------
+# The page renders the verdict as the abstract's first block and "where it lands"
+# as the acts' conclusion. apply() must not strip either when its owner survives.
+
+def test_verdict_travels_with_abstract_and_lands_with_acts(content):
+    content = dict(content)
+    content["verdict"] = {"position": "p", "for": ["a"], "against": ["b"], "decides_it": "c"}
+    content["lands"] = [{"observation": "o", "transfers_to": "t", "ts": "00:00:05", "s": 5}]
+    kept = apply(content, "professional")
+    assert kept["verdict"] == content["verdict"]
+    assert kept["lands"] == content["lands"]
+    dropped = apply(content, "diagrams-only")
+    assert "verdict" not in dropped and "lands" not in dropped
+    summarized = apply(content, "summarized")
+    assert "verdict" in summarized          # abstract survives, so its verdict does
+    assert "lands" not in summarized        # acts do not

@@ -28,10 +28,10 @@ TRANSCRIPT = ("open", "collapsed", "omit")
 # figure fragment, or turns.json (the transcript).
 SECTIONS: dict[str, tuple[str, ...]] = {
     "strip": (),
-    "abstract": ("abstract",),
+    "abstract": ("abstract", "verdict"),
     "highlights": ("highlights",),
     "figures": (),
-    "acts": ("acts",),
+    "acts": ("acts", "lands"),
     "threads": ("threads",),
     "evidence": ("evidence",),
     "signals": ("signals",),

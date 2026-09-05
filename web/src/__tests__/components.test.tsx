@@ -1,3 +1,4 @@
+import { Abstract } from "../sections/Abstract";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it } from "vitest";
@@ -83,5 +84,20 @@ describe("theme toggle", () => {
     await user.click(screen.getByRole("button", { name: /toggle light and dark/i }));
     expect(document.documentElement.getAttribute("data-theme")).toBe("light");
     expect(localStorage.getItem(THEME_KEY)).toBe("light");
+  });
+});
+
+describe("Abstract", () => {
+  it("renders each blank-line-separated paragraph as its own <p>", () => {
+    const { container } = render(
+      <Abstract text={"First paragraph.\n\nSecond paragraph.\n\nThird."} />,
+    );
+    const ps = container.querySelectorAll("p");
+    expect(ps.length).toBe(3);
+    expect(ps[1].textContent).toBe("Second paragraph.");
+  });
+  it("renders a single paragraph when there are no blank lines", () => {
+    const { container } = render(<Abstract text={"One paragraph only."} />);
+    expect(container.querySelectorAll("p").length).toBe(1);
   });
 });
