@@ -11,6 +11,11 @@
    explicit toggle, so neither can strand the other. No monospace anywhere — tabular
    numerals come from font-variant-numeric on the body face. */
 :root{
+  /* the hand-authored figure fragments name the pens by speaker role (d/m);
+     alias them to the page pens so every figure follows both themes */
+  --pen-d: var(--pen-a);
+  --pen-m: var(--pen-b);
+
   --paper:#F2F4F7;
   --paper-2:#FAFBFC;
   --grid:#D5DBE3;

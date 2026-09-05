@@ -136,3 +136,14 @@ describe("Lands", () => {
     expect(screen.getByText("00:23:27")).toBeTruthy();
   });
 });
+
+describe("theme", () => {
+  it("aliases the figure fragment's pen names to the page pens", async () => {
+    // vitest stubs CSS imports to "", so read the stylesheet off disk instead.
+    const { readFileSync } = await import("node:fs");
+    const { resolve } = await import("node:path");
+    const css = readFileSync(resolve(process.cwd(), "src/theme.css"), "utf8");
+    expect(css).toMatch(/--pen-d:\s*var\(--pen-a\)/);
+    expect(css).toMatch(/--pen-m:\s*var\(--pen-b\)/);
+  });
+});
