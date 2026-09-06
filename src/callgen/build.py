@@ -7,6 +7,7 @@ import os
 import re
 import shutil
 import subprocess
+import tempfile
 from pathlib import Path
 
 from . import modes as _modes
@@ -48,6 +49,36 @@ def web_content(work: Path) -> dict:
         if found.is_file():
             return json.loads(found.read_text())
     raise BuildError(f"no content.json under {work} (looked in {work} and {work}/work)")
+
+
+def stage_web(work: Path, mode: str = "professional", root=None) -> Path:
+    """Write the mode-applied content — carrying ``_mode`` — plus turns, metrics and the
+    diagram fragment into a fresh directory for the vite build to read.
+
+    The vanilla template runs ``apply`` before rendering; the web build reads files off
+    disk, so without this it would render the raw content.json and never see the mode's
+    section order, transcript setting, figure cap or the sections it folds.
+    """
+    work = Path(work)
+    src = work / "content.json"
+    base = work if src.is_file() else work / "work"
+    content = json.loads((base / "content.json").read_text())
+    validate(content)
+    content = _modes.apply(content, mode, root)
+    _modes.enforce(content, mode, root)
+
+    staged = Path(tempfile.mkdtemp(prefix="callgen-web-"))
+    (staged / "content.json").write_text(json.dumps(content, ensure_ascii=False))
+    for name in ("turns.json", "metrics.json", "diagrams.html"):
+        found = base / name
+        if found.is_file():
+            (staged / name).write_text(found.read_text())
+    # the fragment can also sit in a sibling out/ dir, as it does for the reference call
+    if not (staged / "diagrams.html").is_file():
+        sibling = base / ".." / "out" / "diagrams.html"
+        if sibling.is_file():
+            (staged / "diagrams.html").write_text(sibling.read_text())
+    return staged
 
 
 def build_web(

@@ -51,6 +51,22 @@ def valid_work(tmp_path):
     return work
 
 
+def _valid_min_content():
+    """The smallest content.json that clears validate() and the professional caps."""
+    return {
+        "meta": {"title": "T", "date": "2026-01-01", "duration_label": "1 min",
+                 "duration_s": 60, "turns": 1, "words": 1,
+                 "participants": [{"key": "A", "name": "A", "role": "one"},
+                                  {"key": "B", "name": "B", "role": "two"}]},
+        "abstract": "One short line.",
+        "acts": [{"n": 1, "title": "T", "span": "00:00:00-00:01:00", "start_s": 0,
+                  "end_s": 60, "summary": "One line.",
+                  "turning_point": {"ts": "00:00:05", "s": 5, "text": "x"}}],
+        "evidence": [{"ts": "00:00:05", "s": 5, "claim": "c",
+                      "evidence": "e", "strength": "strong"}],
+        "signals": [{"ts": "00:00:05", "s": 5, "signal": "s"}],
+    }
+
 def test_the_front_end_ships_beside_the_source_tree():
     assert web_path().name == "web"
     assert (web_path() / "package.json").is_file()
@@ -185,3 +201,22 @@ def test_web_content_finds_content_json_in_workdir_or_its_work_subdir(tmp_path):
 def test_cli_still_demands_the_data_when_there_is_no_web_flag(tmp_path, capsys):
     assert main(["build", "-o", str(tmp_path / "out.html")]) == 1
     assert "--content" in capsys.readouterr().err
+
+
+def test_stage_web_writes_applied_content_with_the_mode_block(tmp_path):
+    from callgen.build import stage_web
+    work = tmp_path / "work"
+    work.mkdir()
+    (work / "content.json").write_text(json.dumps(_valid_min_content()))
+    (work / "turns.json").write_text("[]")
+    (work / "metrics.json").write_text("{}")
+    (work / "diagrams.html").write_text("<figure></figure>")
+
+    staged = stage_web(work, "professional")
+    applied = json.loads((staged / "content.json").read_text())
+    assert "_mode" in applied
+    assert "collapsed" in applied["_mode"]
+    # the other inputs are carried across so vite finds them beside content.json
+    assert (staged / "turns.json").is_file()
+    assert (staged / "metrics.json").is_file()
+    assert (staged / "diagrams.html").read_text() == "<figure></figure>"

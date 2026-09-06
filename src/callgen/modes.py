@@ -511,7 +511,12 @@ def prose_violations(content: dict, mode: str, root=None) -> list[str]:
         if not text.strip():
             continue
         total = len(text.split())
-        page_total += total
+        # The page cap governs running prose — the sections that become a wall when
+        # they pile up. A list or table cell is structured data held terse by its own
+        # per-item cap, so it does not count toward the page total.
+        section = where.split("[")[0].split(".")[0]
+        if section in _PROSE_SECTIONS:
+            page_total += total
         if total > cap[kind]:
             out.append(
                 f"{where}: {total} words, {mode} allows {cap[kind]} ({total - cap[kind]} over)"

@@ -10,7 +10,14 @@ import sys
 from dataclasses import asdict
 from pathlib import Path
 
-from .build import BuildError, build, build_web, external_refs, template_path, web_content
+from .build import (
+    BuildError,
+    build,
+    build_web,
+    external_refs,
+    stage_web,
+    template_path,
+)
 from .diagrams import (
     check_svg_fragment,
     extract_timestamps,
@@ -29,13 +36,12 @@ from .lexicon import (
 from .modes import (
     ModeError,
     all_modes,
-    enforce,
     layout_violations,
     prose_violations,
     register_violations,
 )
 from .parse import ParseError, chunks, metrics, parse_transcript, transcript_from_turns
-from .schema import SchemaError, validate
+from .schema import SchemaError
 from .transcribe import DEFAULT_BINARY, TranscribeError, transcribe
 
 ERRORS = (
@@ -90,10 +96,10 @@ def cmd_chunk(a) -> int:
 def cmd_build(a) -> int:
     if a.web:
         work = Path(a.web)
-        content = web_content(work)
-        validate(content)
-        enforce(content, a.mode)
-        out = build_web(work, Path(a.out), theme=a.theme, mode=a.mode)
+        # apply the mode, enforce the caps, and hand vite the applied content so the
+        # page sees the section order, the transcript setting, and the folded sections
+        staged = stage_web(work, a.mode)
+        out = build_web(staged, Path(a.out), theme=a.theme, mode=a.mode)
         size = out.stat().st_size / 1024
         print(f"wrote {out} — {size:.0f} KB, one file, no external requests")
         return 0

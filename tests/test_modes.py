@@ -607,3 +607,25 @@ def test_collapsed_is_a_subset_of_the_modes_sections():
 def test_diagrams_only_and_summarized_collapse_nothing():
     assert MODES["diagrams-only"].collapsed == ()
     assert MODES["summarized"].collapsed == ()
+
+
+# --- the page cap governs running prose, not table cells ----------------------
+# A 26-row evidence table is structured data, not a wall of text; its cells are
+# kept terse by the per-item cap. The page cap is about running prose — the
+# sections that become a wall when they pile up (abstract, acts, threads, quotes,
+# fit) — so only those count toward it.
+
+def test_page_total_counts_running_prose_not_table_cells():
+    content = {
+        "abstract": "one two three four five",           # 5 running-prose words
+        "acts": [{"summary": "six seven eight", "turning_point": {"text": ""}}],
+        "evidence": [{"claim": " ".join(["w"] * 500), "evidence": " ".join(["w"] * 500),
+                      "ts": "00:00:01", "s": 1, "strength": "strong"}],
+        "signals": [{"signal": " ".join(["w"] * 500), "ts": "00:00:01", "s": 1}],
+    }
+    problems = prose_violations(content, "professional")
+    # 1000+ words of table cells must not trip the 900-word page cap
+    assert not any(p.startswith("page:") for p in problems), problems
+    # and a genuinely long running-prose body must still trip it
+    heavy = {"abstract": " ".join(["w"] * 950), "acts": []}
+    assert any(p.startswith("page:") for p in prose_violations(heavy, "professional"))
