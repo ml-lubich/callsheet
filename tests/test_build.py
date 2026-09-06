@@ -103,6 +103,37 @@ def test_a_pinned_theme_is_baked_into_the_html_tag_and_hides_the_toggle(content)
     assert out.count("<html") == 1, "the theme is pinned on the one existing <html> tag"
 
 
+def test_palette_matches_the_web_build(content):
+    tpl = template_path().read_text()
+    frag = (FIXTURES / "diagrams.html").read_text()
+    out = build(tpl, content, TURNS, METRICS, diagrams=frag)
+    assert "--paper:#F6F7F9" in out
+    assert "--paper:#0F1216" in out
+
+
+def test_scroll_reveal_css_and_observer_are_present(content):
+    tpl = template_path().read_text()
+    frag = (FIXTURES / "diagrams.html").read_text()
+    out = build(tpl, content, TURNS, METRICS, diagrams=frag)
+    assert ".rv-in{" in out
+    assert "IntersectionObserver" in out
+
+
+def test_transcript_turns_render_with_a_speaker_chip(content):
+    tpl = template_path().read_text()
+    frag = (FIXTURES / "diagrams.html").read_text()
+    out = build(tpl, content, TURNS, METRICS, diagrams=frag)
+    assert "chip-i" in out
+
+
+def test_wordmark_and_colophon_each_appear_once(content):
+    tpl = template_path().read_text()
+    frag = (FIXTURES / "diagrams.html").read_text()
+    out = build(tpl, content, TURNS, METRICS, diagrams=frag)
+    assert out.count('<span class="brand">Callgen</span>') == 1
+    assert out.count("one file, every timestamp links to the turn it came from") == 1
+
+
 def test_content_is_validated_before_injection(content):
     from callgen.schema import SchemaError
 
@@ -110,3 +141,12 @@ def test_content_is_validated_before_injection(content):
     del broken["meta"]["title"]
     with pytest.raises(SchemaError):
         build(MIN_TPL, broken, TURNS, METRICS)
+
+
+def test_template_fills_slots_through_sink():
+    """A mode strips sections; the script must write into a detached element for a
+    missing slot, not throw and leave every later section empty."""
+    page = template_path().read_text()
+    assert "function sink(id)" in page
+    assert 'document.getElementById("highlights").innerHTML' not in page
+    assert 'sink("highlights").innerHTML' in page

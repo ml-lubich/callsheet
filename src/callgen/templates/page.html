@@ -6,45 +6,55 @@
 <title>Call record</title>
 <style>
 :root{
-  --paper:#E9EAE3;
-  --paper-2:#F3F4EE;
-  --grid:#C9CCC0;
-  --ink:#1B1E1A;
-  --ink-soft:#5A6058;
-  --pen-a:#A6371F;
-  --pen-b:#1F4C7A;
-  --pen-n:#5A6058;
-  --hl:rgba(31,76,122,.16);
-  --band:rgba(27,30,26,.05);
+  --pen-d: var(--pen-a);
+  --pen-m: var(--pen-b);
+
+  --paper:#F6F7F9;
+  --paper-2:#FFFFFF;
+  --grid:#D9DDE3;
+  --ink:#14161A;
+  --ink-soft:#5F6670;
+  --pen-a:#BC3418;
+  --pen-b:#15529E;
+  --pen-n:#5F6670;
+  --hl:rgba(21,82,158,.15);
+  --band:rgba(20,22,26,.04);
+  --shimmer:rgba(20,22,26,.06);
+  --shimmer-hi:rgba(20,22,26,.015);
+  --radius:10px;
   --display:Superclarendon,"Bookman Old Style",Rockwell,Georgia,serif;
   --body:"Avenir Next",Avenir,"Segoe UI",system-ui,sans-serif;
   --cond:"Avenir Next Condensed","Avenir Next","Roboto Condensed",system-ui,sans-serif;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
-    --paper:#14181B;
-    --paper-2:#1B2126;
-    --grid:#2E3840;
-    --ink:#E4E9E6;
-    --ink-soft:#93A0A2;
-    --pen-a:#E8834F;
-    --pen-b:#56B9D6;
-    --pen-n:#93A0A2;
-    --hl:rgba(86,185,214,.20);
-    --band:rgba(228,233,230,.05);
+    --paper:#0F1216;
+    --paper-2:#171B21;
+    --grid:#262C35;
+    --ink:#E8EBEF;
+    --ink-soft:#98A1AD;
+    --pen-a:#FF8A6B;
+    --pen-b:#5FC8E8;
+    --pen-n:#98A1AD;
+    --hl:rgba(95,200,232,.20);
+    --band:rgba(232,235,239,.05);
+    --shimmer:rgba(232,235,239,.07);
+    --shimmer-hi:rgba(232,235,239,.02);
   }
 }
 :root[data-theme="dark"]{
-  --paper:#14181B;
-  --paper-2:#1B2126;
-  --grid:#2E3840;
-  --ink:#E4E9E6;
-  --ink-soft:#93A0A2;
-  --pen-a:#E8834F;
-  --pen-b:#56B9D6;
-  --pen-n:#93A0A2;
-  --hl:rgba(86,185,214,.20);
-  --band:rgba(228,233,230,.05);
+  --paper:#0F1216;
+  --paper-2:#171B21;
+  --grid:#262C35;
+  --ink:#E8EBEF;
+  --ink-soft:#98A1AD;
+  --pen-a:#FF8A6B;
+  --pen-b:#5FC8E8;
+  --pen-n:#98A1AD;
+  --hl:rgba(95,200,232,.20);
+  --band:rgba(232,235,239,.05);
+  --shimmer:rgba(232,235,239,.07);
+  --shimmer-hi:rgba(232,235,239,.02);
 }
 
 *,*::before,*::after{box-sizing:border-box}
@@ -183,7 +193,7 @@ a.ts:hover{color:var(--ink);border-bottom-color:currentColor}
 
 /* ---------- threads ---------- */
 .threads{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1px;background:var(--grid);border:1px solid var(--grid)}
-.thread{background:var(--paper-2);padding:22px 20px 20px;display:flex;flex-direction:column}
+.thread{background:var(--paper-2);border-radius:var(--radius);padding:22px 20px 20px;display:flex;flex-direction:column}
 .thread h3{font-family:var(--display);font-weight:400;font-size:21px;line-height:1.2}
 .thread .what{margin-top:10px;font-size:15px}
 .thread .why{margin-top:10px;font-size:15px;color:var(--ink-soft)}
@@ -262,7 +272,7 @@ th .arrow{opacity:.55}
 .bullets li::before{content:"";position:absolute;left:0;top:17px;width:7px;height:1px;background:var(--ink-soft)}
 .risks{margin-top:34px;display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--grid);border:1px solid var(--grid)}
 @media (max-width:760px){.risks{grid-template-columns:1fr}}
-.risk{background:var(--paper-2);padding:20px}
+.risk{background:var(--paper-2);border-radius:var(--radius);padding:20px}
 .risk h4{font:400 13px/1 var(--cond);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);font-weight:400}
 .risk p{margin-top:10px;font-size:16px}
 .steps li{display:grid;grid-template-columns:78px minmax(0,1fr);gap:0 14px;padding:14px 0;border-bottom:1px solid var(--grid)}
@@ -292,14 +302,48 @@ th .arrow{opacity:.55}
 .turn.p1{border-left-color:var(--pen-b)}
 .turn.pn{border-left-color:var(--pen-n)}
 .turn .head{display:flex;gap:14px;align-items:baseline;flex-wrap:wrap}
-.turn .who{font:400 13px/1 var(--cond);letter-spacing:.06em;text-transform:uppercase}
-.turn.p0 .who{color:var(--pen-a)}
-.turn.p1 .who{color:var(--pen-b)}
-.turn.pn .who{color:var(--pen-n)}
 .turn p{margin-top:8px;font-size:16px;line-height:1.6}
 .turn.flash{background:var(--hl)}
 mark{background:var(--hl);color:inherit}
 .hidden{display:none}
+
+/* ---------- speaker chip ---------- */
+.chip{display:inline-flex;align-items:center;gap:9px;min-width:0}
+.chip-i{
+  display:inline-flex;align-items:center;justify-content:center;
+  flex:0 0 auto;width:22px;height:22px;border-radius:50%;
+  font:400 11px/1 var(--cond);font-style:normal;letter-spacing:.03em;
+  color:var(--paper);background:var(--pen-n);
+}
+.chip.p0 .chip-i{background:var(--pen-a)}
+.chip.p1 .chip-i{background:var(--pen-b)}
+.chip-n{font:400 13px/1 var(--cond);letter-spacing:.06em;text-transform:uppercase;color:var(--pen-n)}
+.chip.p0 .chip-n{color:var(--pen-a)}
+.chip.p1 .chip-n{color:var(--pen-b)}
+
+/* ---------- masthead and colophon ---------- */
+.masthead{display:inline-flex;align-items:center;gap:11px}
+.brand{
+  font:500 13px/1 var(--cond);letter-spacing:.24em;text-transform:uppercase;
+  color:var(--ink-soft);
+}
+.brand-dot{flex:0 0 auto;width:3px;height:3px;border-radius:50%;background:var(--ink-soft);opacity:.55}
+.colophon{
+  max-width:1180px;margin:0 auto;padding:24px 24px 46px;
+  border-top:1px solid var(--grid);
+  font:400 13px/1.5 var(--cond);letter-spacing:.06em;text-transform:uppercase;
+  color:var(--ink-soft);
+}
+@media (max-width:600px){.colophon{padding:20px 18px 36px}}
+
+/* ---------- reveal ---------- */
+/* the entrance is a CSS animation so it cannot be starved by a host that never runs a
+   frame; `both` holds the finished state, and .rv without .rv-in only ever lasts as
+   long as it takes the observer (or its give-up timer) to fire */
+.rv{opacity:0}
+.rv-in{animation:rv-in .5s cubic-bezier(.22,.61,.36,1) var(--rv-wait,0s) both}
+@keyframes rv-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media print{.rv{opacity:1}}
 
 @media (max-width:600px){
   .wrap{padding:0 18px}
@@ -350,6 +394,11 @@ function esc(s){
   return String(s == null ? "" : s)
     .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 }
+function initials(name){
+  const words = String(name || "").trim().split(/\s+/).filter(Boolean);
+  if (!words.length) return "?";
+  return words.slice(0, 2).map(function(w){ return w.charAt(0).toUpperCase(); }).join("");
+}
 function mmss(sec){
   const m = Math.floor(sec / 60), s = Math.round(sec % 60);
   return m + ":" + (s < 10 ? "0" : "") + s;
@@ -380,9 +429,49 @@ function tsLink(ts, s){
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 let resetFilters = function(){};
 
+/* ---- scroll reveals ---- */
+/* fails open in every direction: reduced motion or no IntersectionObserver means nothing
+   is ever hidden, and a give-up timer shows everything if the observer never calls back
+   at all (a print run, a screenshot renderer, an embedded webview that never paints a
+   frame); the first callback of any kind cancels that timer and each element is then
+   trusted to reveal itself once it actually scrolls into view. */
+const REVEAL_SEL = "section > .wrap > :not(h2), .turn, .quote, .rows li, .steps li, " +
+  ".bullets li, .techlist li, .threads .thread, .risks .risk, #evbody tr";
+let revealIO = null;
+if (!reduceMotion && typeof IntersectionObserver !== "undefined") {
+  let giveUp = setTimeout(function(){
+    Array.prototype.forEach.call(document.querySelectorAll(".rv:not(.rv-in)"), function(el){
+      el.classList.add("rv-in");
+    });
+  }, 1200);
+  revealIO = new IntersectionObserver(function(entries){
+    clearTimeout(giveUp);
+    entries.forEach(function(e){
+      if (e.isIntersecting) {
+        e.target.classList.add("rv-in");
+        revealIO.unobserve(e.target);
+      }
+    });
+  }, { rootMargin: "0px 0px -10% 0px" });
+}
+function reveal(root){
+  if (!revealIO) return;
+  Array.prototype.forEach.call((root || document).querySelectorAll(REVEAL_SEL), function(el){
+    if (el.classList.contains("rv")) return;
+    el.classList.add("rv");
+    revealIO.observe(el);
+  });
+}
+
 /* =====================================================================
    render
    ===================================================================== */
+/* A mode can strip a section out of the template, so a slot the script fills may not
+   exist. Writing into a detached element is the no-op that keeps the render going.
+   ponytail: a throwaway div per missing slot; wire real "skip this section" logic
+   if the shaped template ever needs to know what it lost. */
+function sink(id){ return document.getElementById(id) || document.createElement("div"); }
+
 document.addEventListener("DOMContentLoaded", function(){
 
 document.title = meta.title || document.title;
@@ -396,7 +485,7 @@ const cells = [
   ["Words", meta.words]
 ].concat(meta.extra || []).filter(function(c){ return c[1] != null && c[1] !== ""; });
 
-document.getElementById("plate-body").innerHTML =
+sink("plate-body").innerHTML =
   "<h1>" + esc(meta.title) + "</h1>" +
   (meta.subtitle ? '<p class="sub">' + esc(meta.subtitle) + "</p>" : "") +
   '<dl class="metastrip">' + cells.map(function(c){
@@ -451,7 +540,7 @@ TL.forEach(function(t, i){
     esc(t.ts + "  " + t.spk + "  " + t.words + " words") + "</title></rect>";
 });
 
-document.getElementById("chart").innerHTML =
+sink("chart").innerHTML =
   '<svg viewBox="0 0 ' + VW + " " + VH + '" role="img" aria-label="Turn-by-turn word counts across elapsed time">' +
   '<defs><linearGradient id="trail" x1="0" y1="0" x2="0" y2="1">' +
     '<stop offset="0%" stop-color="var(--pen-a)" stop-opacity=".07"/>' +
@@ -514,7 +603,7 @@ svg.addEventListener("click", function(e){
 });
 
 /* legend */
-document.getElementById("legend").innerHTML = KEYS.map(function(k, i){
+sink("legend").innerHTML = KEYS.map(function(k, i){
   const where = i === 1 ? " below" : " above";
   return '<span><i class="swatch" style="background:' + penVar(k) + '"></i>' +
     esc(NAME[k] || k) + where + "</span>";
@@ -531,26 +620,26 @@ document.getElementById("legend").innerHTML = KEYS.map(function(k, i){
   const shares = KEYS.map(function(k){
     return esc(NAME[k] || k) + " " + Math.round(((words[k] || 0) / total) * 100) + "%";
   }).join(" / ");
-  document.getElementById("stats").innerHTML =
+  sink("stats").innerHTML =
     TL.length + " turns &nbsp;·&nbsp; " + shares + " of words &nbsp;·&nbsp; longest turn " +
     longest.words + " words at " + esc(longest.ts) + " &nbsp;·&nbsp; median turn " + med + " words" +
     (METRICS.estimated_timing ? " &nbsp;·&nbsp; timing estimated from word counts" : "");
 })();
 
 /* ---- 3. abstract ---- */
-if (CONTENT.abstract) document.getElementById("abstract").innerHTML =
+if (CONTENT.abstract) sink("abstract").innerHTML =
   String(CONTENT.abstract).split(/\n\s*\n/).filter(function(p){ return p.trim(); })
     .map(function(p){ return "<p>" + esc(p.trim()) + "</p>"; }).join("");
-document.getElementById("highlights").innerHTML = (CONTENT.highlights || []).map(function(h){ return "<li>" + esc(h) + "</li>"; }).join("");
+sink("highlights").innerHTML = (CONTENT.highlights || []).map(function(h){ return "<li>" + esc(h) + "</li>"; }).join("");
 
 /* ---- 4. acts ---- */
 const acts = CONTENT.acts || [];
-document.getElementById("actbar").innerHTML = acts.map(function(a){
+sink("actbar").innerHTML = acts.map(function(a){
   const l = (a.start_s / DUR) * 100, w = ((a.end_s - a.start_s) / DUR) * 100;
   return '<button class="seg" style="left:' + l.toFixed(3) + "%;width:" + w.toFixed(3) + '%" data-act="' + a.n +
     '" title="' + esc(a.title) + '">' + esc(a.n) + "</button>";
 }).join("");
-document.getElementById("actlist").innerHTML = acts.map(function(a){
+sink("actlist").innerHTML = acts.map(function(a){
   return '<article class="act" id="act-' + esc(a.n) + '">' +
     '<div class="n">' + esc(a.n) + "</div><div><h3>" + esc(a.title) + "</h3>" +
     '<div class="ts span">' + esc(a.span) + "</div>" +
@@ -575,7 +664,7 @@ function miniAxis(marks){
   });
   return out;
 }
-document.getElementById("threads").innerHTML = (CONTENT.threads || []).map(function(t){
+sink("threads").innerHTML = (CONTENT.threads || []).map(function(t){
   return '<article class="thread"><h3>' + esc(t.name) + "</h3>" +
     '<p class="what">' + esc(t.what) + "</p>" +
     '<p class="why">' + esc(t.why_it_matters) + "</p>" +
@@ -594,11 +683,11 @@ function pips(strength){
   return out + '<span class="lab">' + esc(strength) + "</span></span>";
 }
 function drawEvidence(){
-  document.getElementById("evbody").innerHTML = evRows.map(function(r){
+  sink("evbody").innerHTML = evRows.map(function(r){
     return "<tr><td>" + tsLink(r.ts, r.s) + "</td><td>" + esc(r.claim) + "</td><td>" +
       esc(r.evidence) + "</td><td>" + pips(r.strength) + "</td></tr>";
   }).join("");
-  document.getElementById("evsort").innerHTML =
+  sink("evsort").innerHTML =
     'Strength <span class="arrow">' + (evDir === 0 ? "" : evDir > 0 ? "↑" : "↓") + "</span>";
 }
 document.getElementById("evsort").addEventListener("click", function(){
@@ -611,26 +700,29 @@ document.getElementById("evsort").addEventListener("click", function(){
 drawEvidence();
 
 /* ---- 7. signals & numbers ---- */
-document.getElementById("signals").innerHTML = (CONTENT.signals || []).map(function(s){
+sink("signals").innerHTML = (CONTENT.signals || []).map(function(s){
   return "<li>" + tsLink(s.ts, s.s) + "<div>" + esc(s.signal) + "</div></li>";
 }).join("");
-document.getElementById("numbers").innerHTML = (CONTENT.numbers || []).map(function(n){
+sink("numbers").innerHTML = (CONTENT.numbers || []).map(function(n){
   return "<li>" + tsLink(n.ts, n.s) + '<div><div class="val">' + esc(n.value) +
     '</div><div class="means">' + esc(n.means) + "</div></div></li>";
 }).join("");
 
 /* ---- 8. friction ---- */
-document.getElementById("tensions").innerHTML = (CONTENT.tensions || []).map(function(t){
+sink("tensions").innerHTML = (CONTENT.tensions || []).map(function(t){
   return "<li>" + tsLink(t.ts, t.s) + "<div>" + esc(t.note) + "</div></li>";
 }).join("");
-document.getElementById("diarization").innerHTML = (CONTENT.diarization || []).map(function(d){
+sink("diarization").innerHTML = (CONTENT.diarization || []).map(function(d){
   return "<li>" + tsLink(d.ts, d.s) + "<div>" + esc(d.why) + "</div></li>";
 }).join("");
 
 /* ---- 9. quotes ---- */
-document.getElementById("quotes").innerHTML = (CONTENT.quotes || []).map(function(q){
-  return '<figure class="quote q' + penClass(q.speaker).slice(1) + '"><blockquote>' + esc(q.text) +
-    '</blockquote><figcaption class="attr cap">' + esc(NAME[q.speaker] || q.speaker) +
+sink("quotes").innerHTML = (CONTENT.quotes || []).map(function(q){
+  const name = NAME[q.speaker] || q.speaker;
+  const pc = penClass(q.speaker);
+  return '<figure class="quote q' + pc.slice(1) + '"><blockquote>' + esc(q.text) +
+    '</blockquote><figcaption class="attr cap"><span class="chip ' + pc + '"><i class="chip-i">' +
+    esc(initials(name)) + '</i><span class="chip-n">' + esc(name) + '</span></span>' +
     " &nbsp;·&nbsp; " + tsLink(q.ts, q.s) + "</figcaption></figure>";
 }).join("");
 
@@ -640,27 +732,31 @@ const tech = (CONTENT.tech || []).slice().sort(function(x,y){
 });
 document.getElementById("technote").textContent =
   tech.length + " named by one or more speakers. What was said, not what was endorsed.";
-document.getElementById("tech").innerHTML =
+sink("tech").innerHTML =
   tech.map(function(t){ return "<li>" + esc(t) + "</li>"; }).join("");
 
 /* ---- 11. fit ---- */
 const fit = CONTENT.fit || {};
-document.getElementById("aligned").innerHTML = (fit.aligned_on || []).map(function(x){ return "<li>" + esc(x) + "</li>"; }).join("");
-document.getElementById("unresolved").innerHTML = (fit.unresolved || []).map(function(x){ return "<li>" + esc(x) + "</li>"; }).join("");
-document.getElementById("risks").innerHTML = (fit.risks || []).map(function(r){
+sink("aligned").innerHTML = (fit.aligned_on || []).map(function(x){ return "<li>" + esc(x) + "</li>"; }).join("");
+sink("unresolved").innerHTML = (fit.unresolved || []).map(function(x){ return "<li>" + esc(x) + "</li>"; }).join("");
+sink("risks").innerHTML = (fit.risks || []).map(function(r){
   return '<div class="risk"><h4>Risk for ' + esc(r.who) + "</h4><p>" + esc(r.note) + "</p></div>";
 }).join("");
 
 /* ---- 12. next ---- */
-document.getElementById("next").innerHTML = (CONTENT.next_steps || []).map(function(n){
+sink("next").innerHTML = (CONTENT.next_steps || []).map(function(n){
   return "<li>" + tsLink(n.ts, n.s) + "<div>" + esc(n.commitment) + "</div></li>";
 }).join("");
 
 /* ---- 13. transcript ---- */
-document.getElementById("tlist").innerHTML = TURNS.map(function(t){
-  return '<article class="turn ' + penClass(t.spk) + '" id="t-' + t.i + '">' +
-    '<div class="head"><span class="ts">' + esc(t.ts) + '</span><span class="who">' +
-    esc(NAME[t.spk] || t.name || t.spk) + '</span><span class="ts">' + t.w + " words</span></div>" +
+sink("tlist").innerHTML = TURNS.map(function(t){
+  const name = NAME[t.spk] || t.name || t.spk;
+  const pc = penClass(t.spk);
+  return '<article class="turn ' + pc + '" id="t-' + t.i + '">' +
+    '<div class="head"><span class="ts">' + esc(t.ts) + '</span>' +
+    '<span class="chip ' + pc + '"><i class="chip-i">' + esc(initials(name)) + '</i>' +
+    '<span class="chip-n">' + esc(name) + '</span></span>' +
+    '<span class="ts">' + t.w + " words</span></div>" +
     "<p>" + esc(t.t) + "</p></article>";
 }).join("");
 
@@ -670,7 +766,7 @@ const searchBox = document.getElementById("search");
 const tcount = document.getElementById("tcount");
 let spkFilter = "";
 
-document.getElementById("filters").innerHTML =
+sink("filters").innerHTML =
   '<button data-k="" aria-pressed="true">All</button>' +
   KEYS.map(function(k){ return '<button data-k="' + esc(k) + '" aria-pressed="false">' + esc(NAME[k] || k) + "</button>"; }).join("");
 
@@ -739,6 +835,8 @@ Array.prototype.forEach.call(document.querySelectorAll("[data-needs]"), function
   if (!filled) el.hidden = true;
 });
 
+reveal();
+
 /* timestamp links anywhere on the page */
 document.addEventListener("click", function(e){
   const a = e.target.closest("a[data-jump]");
@@ -759,7 +857,11 @@ if (/^#t-\d+$/.test(location.hash)) setTimeout(function(){ jump(+location.hash.s
 
 <header class="wrap plate">
   <div class="plate-top">
-    <span class="rule-word" id="kind">Call record</span>
+    <span class="masthead">
+      <span class="brand">Callgen</span>
+      <span class="brand-dot" aria-hidden="true"></span>
+      <span class="rule-word" id="kind">Call record</span>
+    </span>
     <button class="tbtn" id="theme" aria-label="Toggle light and dark theme">Dark</button>
   </div>
   <div id="plate-body"></div>
@@ -910,6 +1012,8 @@ if (/^#t-\d+$/.test(location.hash)) setTimeout(function(){ jump(+location.hash.s
     <div id="tlist"></div>
   </div>
 </section>
+
+<footer class="colophon">Callgen · one file, every timestamp links to the turn it came from.</footer>
 
 </main>
 </body>
