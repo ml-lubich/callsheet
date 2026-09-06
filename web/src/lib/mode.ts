@@ -1,4 +1,4 @@
-import type { Content } from "../types";
+import type { Content, ModeBlock } from "../types";
 
 /**
  * The output mode, as `src/callgen/modes.py` wrote it into content.json. A mode
@@ -9,14 +9,7 @@ import type { Content } from "../types";
 
 export type TranscriptMode = "open" | "collapsed" | "omit";
 
-export interface ModeBlock {
-  name?: string;
-  sections?: string[];
-  figures?: number;
-  transcript?: TranscriptMode;
-  /** Sections rendered folded behind a one-line header; facts untouched. */
-  collapsed?: string[];
-}
+export type { ModeBlock };
 
 /** Every section the page can draw, in the order it draws them when no mode says otherwise. */
 export const DEFAULT_SECTIONS = [

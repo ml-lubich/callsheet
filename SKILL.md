@@ -108,7 +108,12 @@ callgen build --content work/content.json --turns work/turns.json \
 
 `--mode` drops the sections the mode leaves out, reorders the rest, caps the
 figure set and sets the transcript. Rendering the same call in a second mode
-reruns steps 5 and 7 only. Failure modes and the zero-external-requests
+reruns steps 5 and 7 only. The build refuses prose over the mode's caps or
+outside the register rules; `callgen lint-prose` names each field first.
+`--theme auto|light|dark` (default `auto`: both modes, toggle in the header,
+system preference honoured) pins one theme and drops the toggle. Pin only when
+the reader asked for it. `--web work` renders the same data through the React
+shell instead of the template; both carry the same look. Failure modes and the zero-external-requests
 guarantee: `skills/prompts.md`.
 
 ## 8. Verify — adversarial, in a fresh context

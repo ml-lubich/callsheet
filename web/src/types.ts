@@ -40,16 +40,20 @@ export interface Thread {
 
 export type Strength = "strong" | "medium" | "weak";
 
+/** The output mode, as `src/callgen/modes.py` wrote it into content.json. See lib/mode.ts. */
+export interface ModeBlock {
+  name?: string;
+  sections?: string[];
+  figures?: number;
+  transcript?: "open" | "collapsed" | "omit";
+  /** Sections rendered folded behind a one-line header; facts untouched. */
+  collapsed?: string[];
+}
+
 export interface Content {
   meta: Meta;
   /** The output mode the build was shaped by. See lib/mode.ts. */
-  _mode?: {
-    name?: string;
-    sections?: string[];
-    figures?: number;
-    transcript?: "open" | "collapsed" | "omit";
-    collapsed?: string[];
-  };
+  _mode?: ModeBlock;
   /** `summarized` mode folds threads, signals and tensions into this one short list. */
   highlights?: string[];
   abstract?: string;
